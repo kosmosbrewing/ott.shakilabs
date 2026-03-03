@@ -4,6 +4,9 @@
   "installCommand": "cd client && npm ci",
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
+  "redirects": [
+    { "source": "/favicon.ico", "destination": "/favicon.png", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/community/:postId",

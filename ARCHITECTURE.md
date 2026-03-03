@@ -224,7 +224,7 @@ ott-price-compare/
 │   │           └── main.css
 │   ├── public/
 │   │   ├── robots.txt
-│   │   ├── favicon.ico
+│   │   ├── favicon.png
 │   │   ├── og-image.png
 │   │   └── images/
 │   │       └── logos/                    # OTT 서비스 로고 SVG
