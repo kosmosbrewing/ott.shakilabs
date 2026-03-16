@@ -7,7 +7,7 @@ import { DEFAULT_SITE_URL } from "@/lib/site";
 import { Card, CardContent } from "@/components/ui/card";
 import { Share2 } from "lucide-vue-next";
 import ShareModal from "@/components/share/ShareModal.vue";
-import type { PricesResponse, CountryPrice } from "@/api";
+import type { PricesResponse } from "@/api";
 
 type ComparePriceRow = {
   countryCode: string;

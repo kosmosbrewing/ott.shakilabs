@@ -2,7 +2,7 @@
 import type { DisplayCurrency } from "@/composables/usePrices";
 import { cn } from "@/lib/utils";
 
-const props = defineProps<{
+defineProps<{
   modelValue: DisplayCurrency;
 }>();
 

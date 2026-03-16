@@ -6,7 +6,7 @@ type ContinentInfo = {
   [key: string]: unknown;
 };
 
-const props = defineProps<{
+defineProps<{
   continents: Record<string, ContinentInfo>;
   modelValue: string;
 }>();

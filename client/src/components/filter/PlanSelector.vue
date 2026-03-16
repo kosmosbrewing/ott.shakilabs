@@ -2,7 +2,7 @@
 import type { ServicePlan } from "@/api";
 import { cn } from "@/lib/utils";
 
-const props = defineProps<{
+defineProps<{
   plans: ServicePlan[];
   modelValue: string;
 }>();
