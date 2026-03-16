@@ -254,10 +254,16 @@ const seoJsonLd = computed<Record<string, unknown> | undefined>(() => {
     {
       "@type": "Dataset",
       name: `${currentServiceName} 국가별 구독 가격 데이터`,
-      description: `${currentServiceName} 국가별 ${selectedPlanLabel.value} 월 구독료와 KRW/USD 환산 데이터`,
+      description: `${currentServiceName} ${selectedPlanLabel.value} 요금제의 국가별 월 구독료를 현지 통화, 한국 원(KRW), 미국 달러(USD)로 환산하여 비교할 수 있는 데이터셋입니다. 전 세계 주요 국가의 최신 가격 정보를 포함합니다.`,
       url: `${siteUrl}/${serviceSlug.value}`,
       dateModified: priceData.value?.lastUpdated || undefined,
       variableMeasured: ["월 구독료 (현지 통화)", "월 구독료 (KRW)", "월 구독료 (USD)"],
+      creator: {
+        "@type": "Organization",
+        name: "ShakiLabs",
+        url: "https://shakilabs.com",
+      },
+      license: "https://creativecommons.org/licenses/by-nc/4.0/",
     },
   ];
 
