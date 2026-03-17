@@ -3,7 +3,6 @@ import { onMounted, ref } from "vue";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import AppFooter from "@/components/layout/AppFooter.vue";
 import AlertHost from "@/components/ui/alert/AlertHost.vue";
-import LoadingSpinner from "@/components/ui/loading/LoadingSpinner.vue";
 import MyPlanModal from "@/components/onboarding/MyPlanModal.vue";
 import { useModal } from "@/composables/useModal";
 import { useMyPlan } from "@/composables/useMyPlan";
@@ -76,19 +75,9 @@ onMounted(async () => {
   <div class="min-h-screen flex flex-col bg-background">
     <AppHeader />
     <main class="flex-1 relative">
-      <RouterView v-slot="{ Component, route }">
+      <RouterView v-slot="{ Component }">
         <Transition name="page-fade" mode="out-in">
-          <Suspense :key="route.path" timeout="0">
-            <component :is="Component" />
-            <template #fallback>
-              <div class="container py-10">
-                <LoadingSpinner
-                  variant="spinner"
-                  message="화면을 불러오는 중입니다."
-                />
-              </div>
-            </template>
-          </Suspense>
+          <component :is="Component" />
         </Transition>
       </RouterView>
     </main>
