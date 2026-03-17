@@ -4,6 +4,7 @@ import App from "./App.vue";
 import router from "./router";
 import "./assets/css/main.css";
 import { initAnalytics } from "./lib/analytics";
+import { captureSentryException, initSentry } from "./lib/sentry";
 
 function bootstrap(): void {
   const app = createApp(App);
@@ -11,6 +12,7 @@ function bootstrap(): void {
 
   app.use(router);
   app.use(head);
+  initSentry(app);
   app.mount("#app");
 
   // GA 초기화를 LCP 이후로 미룸 — 초기 네트워크 경쟁 제거
@@ -24,5 +26,6 @@ function bootstrap(): void {
 try {
   bootstrap();
 } catch (error) {
+  captureSentryException(error, "bootstrap");
   console.error("[bootstrap] failed", error);
 }
