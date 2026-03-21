@@ -19,6 +19,7 @@ import AnonymousCommunityPanel from "@/components/community/AnonymousCommunityPa
 import CountryVoteModal from "@/components/community/CountryVoteModal.vue";
 import PriceComparisonSection from "@/components/price/PriceComparisonSection.vue";
 import ServiceSEOSection from "@/components/price/ServiceSEOSection.vue";
+import RelatedServices from "@/components/common/RelatedServices.vue";
 import { Vote } from "lucide-vue-next";
 import { useMyPlan } from "@/composables/useMyPlan";
 
@@ -630,6 +631,8 @@ watch(serviceSlug, async (slug) => {
         :last-updated="priceData.lastUpdated || '최근 업데이트'"
         :base-country-code="(priceData.baseCountry || '').toUpperCase()"
       />
+
+      <RelatedServices />
     </div>
   </div>
 </template>

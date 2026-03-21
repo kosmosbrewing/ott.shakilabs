@@ -39,7 +39,13 @@ export function useSEO({
 
     return {
       title: resolvedTitle,
-      link: currentUrl ? [{ rel: "canonical", href: currentUrl }] : [],
+      link: currentUrl
+        ? [
+            { rel: "canonical", href: currentUrl },
+            { rel: "alternate", hreflang: "ko", href: currentUrl },
+            { rel: "alternate", hreflang: "x-default", href: currentUrl },
+          ]
+        : [],
       meta: [
         { name: "description", content: resolvedDescription },
         { property: "og:title", content: resolvedTitle },
