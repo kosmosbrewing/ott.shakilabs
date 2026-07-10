@@ -1,11 +1,18 @@
 import { ref, computed } from "vue";
-import { fetchPrices, type CountryPrice, type PricesResponse } from "@/api";
+import {
+  fetchPrices,
+  type CountryPrice,
+  type PricesResponse,
+} from "@/api";
+import { ensureValidSlug } from "@/api/helpers";
+import { normalizePricesResponse } from "@/api/priceTransforms";
 
 export type SortOrder = "asc" | "desc";
 export type DisplayCurrency = "krw" | "usd";
 
 // 모듈 스코프 캐시 — slug별 가격 데이터 (하루 1회 갱신이므로 5분 TTL)
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const STATIC_PRICE_TIMEOUT_MS = 5_000;
 
 type CacheEntry = { data: PricesResponse; fetchedAt: number };
 const priceCache = new Map<string, CacheEntry>();
@@ -18,6 +25,29 @@ function getCached(slug: string): PricesResponse | null {
     return null;
   }
   return entry.data;
+}
+
+async function fetchStaticPrices(serviceSlug: string): Promise<PricesResponse> {
+  ensureValidSlug(serviceSlug);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), STATIC_PRICE_TIMEOUT_MS);
+  const baseUrl = import.meta.env.BASE_URL.endsWith("/")
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+
+  try {
+    const response = await fetch(`${baseUrl}data/prices/${serviceSlug}.json`, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error("정적 가격 정보를 불러오지 못했습니다.");
+    }
+    return normalizePricesResponse(await response.json());
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export function usePrices() {
@@ -39,12 +69,35 @@ export function usePrices() {
 
     loading.value = true;
     error.value = null;
+
+    const liveResultPromise = Promise.resolve()
+      .then(() => fetchPrices(serviceSlug))
+      .then((data) => ({ data, requestError: null }))
+      .catch((requestError: unknown) => ({ data: null, requestError }));
+    let hasStaticFallback = false;
+
     try {
-      const data = await fetchPrices(serviceSlug);
-      priceCache.set(serviceSlug, { data, fetchedAt: Date.now() });
-      priceData.value = data;
-    } catch (e: unknown) {
-      error.value = e instanceof Error ? e.message : "가격 정보를 불러오지 못했습니다.";
+      try {
+        const staticData = await fetchStaticPrices(serviceSlug);
+        priceCache.set(serviceSlug, { data: staticData, fetchedAt: Date.now() });
+        priceData.value = staticData;
+        hasStaticFallback = true;
+        loading.value = false;
+      } catch {
+        // 정적 데이터가 없으면 기존 API 응답을 기다린다.
+      }
+
+      const { data, requestError } = await liveResultPromise;
+      if (data) {
+        priceCache.set(serviceSlug, { data, fetchedAt: Date.now() });
+        priceData.value = data;
+      } else if (!hasStaticFallback) {
+        throw requestError;
+      }
+    } catch (loadError: unknown) {
+      error.value = loadError instanceof Error
+        ? loadError.message
+        : "가격 정보를 불러오지 못했습니다.";
     } finally {
       loading.value = false;
     }

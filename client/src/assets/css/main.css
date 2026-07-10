@@ -115,3 +115,8 @@
   }
 
 }
+
+/* 작은 보조 가격도 본문 배경에서 WCAG AA 대비를 유지한다. */
+.text-muted-foreground\/70 {
+  color: hsl(var(--muted-foreground));
+}
