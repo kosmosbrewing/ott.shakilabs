@@ -5,7 +5,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "Home",
-    redirect: "/youtube-premium",
+    component: () => import("@/views/HomeView.vue"),
+    meta: {
+      title:
+        "OTT 구독료 국가별 가격 비교 | 유튜브 프리미엄·넷플릭스 나라별 최저가",
+    },
   },
   // 정적 라우트를 동적 라우트보다 먼저 배치
   {

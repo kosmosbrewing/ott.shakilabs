@@ -1,5 +1,6 @@
 import { useHead } from "@vueuse/head";
 import { toValue, type MaybeRefOrGetter } from "vue";
+import { getCanonicalSiteUrl } from "@/lib/site";
 
 type SEOOptions = {
   title: MaybeRefOrGetter<string>;
@@ -27,12 +28,19 @@ export function useSEO({
       typeof window !== "undefined"
         ? (() => {
             try {
-              const url = new URL(window.location.href);
-              url.search = "";
-              url.hash = "";
-              return url.toString();
+              const browserUrl = new URL(window.location.href);
+              const canonicalUrl = new URL(getCanonicalSiteUrl());
+              const basePath = canonicalUrl.pathname.replace(/\/+$/, "");
+              const browserPath = browserUrl.pathname.replace(/\/+$/, "") || "/";
+              const routePath = browserPath.startsWith(`${basePath}/`)
+                ? browserPath.slice(basePath.length)
+                : browserPath === basePath || browserPath === "/"
+                  ? ""
+                  : browserPath;
+              canonicalUrl.pathname = `${basePath}${routePath}`;
+              return canonicalUrl.toString();
             } catch {
-              return window.location.href.split("#")[0].split("?")[0];
+              return getCanonicalSiteUrl();
             }
           })()
         : undefined;

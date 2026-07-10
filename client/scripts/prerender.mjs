@@ -232,7 +232,7 @@ function buildRouteHtml(templateHtml, route, countryMap) {
   const ogImage = routeToOgImage(route);
 
   let html = templateHtml;
-  const canonicalUrl = `${SITE_URL}${route}`;
+  const canonicalUrl = route === "/" ? SITE_URL : `${SITE_URL}${route}`;
   html = updateTitle(html, meta.title);
   html = updateMetaTag(html, 'name="description"', meta.description);
   html = updateCanonicalLink(html, canonicalUrl);
