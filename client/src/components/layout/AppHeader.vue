@@ -169,16 +169,14 @@ onUnmounted(() => {
 /* 스톡 티커 느낌: 위로 스크롤되며 다음 메시지 등장 */
 .headline-fade-enter-active,
 .headline-fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .headline-fade-enter-from {
-  opacity: 0;
   transform: translateY(10px);
 }
 
 .headline-fade-leave-to {
-  opacity: 0;
   transform: translateY(-10px);
 }
 </style>

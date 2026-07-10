@@ -14,7 +14,13 @@
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
 
-    <!-- 폰트는 CSS @font-face 전략으로 로딩 -->
+    <link
+      rel="preload"
+      href="/ott/fonts/GmarketSansBold-subset-v2.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!-- OG 태그 -->
     <meta property="og:title" content="유튜브 프리미엄 글로벌 가격 비교 · 나라별 구독료 최저가 순위" />
@@ -55,7 +61,7 @@
     </script>
     <!-- Critical CSS: LCP 최적화 (CSS 변수 + 기본 스타일) -->
     <style>
-      /* 더스티 파스텔 톤 (S≈56%, L≈62%) — ShakiLabs 브랜드 밴드 */
+      /* 더스티 파스텔 톤 — ShakiLabs 브랜드 밴드 */
       :root {
         --background: 212 36% 97%;
         --foreground: 222 28% 18%;
@@ -63,7 +69,7 @@
         --muted-foreground: 220 12% 42%;
         --card: 0 0% 100%;
         --card-foreground: 222 28% 18%;
-        --primary: 234 56% 62%;
+        --primary: 234 56% 58%;
         --primary-foreground: 0 0% 100%;
         --secondary: 210 30% 92%;
         --secondary-foreground: 222 25% 20%;
@@ -75,9 +81,9 @@
         --destructive-foreground: 210 40% 98%;
         --border: 214 20% 82%;
         --input: 214 20% 74%;
-        --ring: 234 56% 62%;
+        --ring: 234 56% 58%;
         --radius: 0.4rem;
-        --savings: 142 56% 40%;
+        --savings: 142 56% 32%;
         --savings-foreground: 0 0% 100%;
       }
 
