@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
+import { ShSurface, ShText } from "@shakilabs/ui";
 import { useServices } from "@/composables/useServices";
 import { useSEO } from "@/composables/useSEO";
-import { Card, CardContent } from "@/components/ui/card";
 import { getSiteUrl } from "@/lib/site";
 
 const { services, loading, error, loadServices } = useServices();
@@ -35,92 +35,56 @@ onMounted(() => {
 
 <template>
   <div class="container py-6">
-    <div class="third-rate-board">
-      <h1 class="sr-only">OTT 서비스 국가별 가격 비교 — 나라별 구독료 최저가</h1>
-      <section class="space-y-4">
-        <Card class="retro-panel overflow-hidden">
-          <div class="retro-titlebar">
-            <h2 class="retro-title">서비스 목록</h2>
-          </div>
-          <CardContent>
-            <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div
-                v-for="i in 4"
-                :key="i"
-                class="retro-panel-muted animate-pulse p-3 sm:p-4"
-              >
-                <div class="h-5 bg-muted rounded mb-3"></div>
-                <div class="h-3 bg-muted rounded w-2/3"></div>
-              </div>
-            </div>
+    <h1 class="sr-only">OTT 서비스 국가별 가격 비교 — 나라별 구독료 최저가</h1>
+    <ShSurface as="section" variant="outlined" padding="none" class="overflow-hidden">
+      <header class="border-b border-border px-4 py-4 sm:px-6">
+        <ShText as="h2" variant="title">서비스 목록</ShText>
+        <ShText class="mt-1" variant="caption" tone="muted">
+          서비스별 국가 가격과 요금제를 같은 기준으로 확인하세요.
+        </ShText>
+      </header>
 
-            <div v-else-if="error" class="text-center py-12">
-              <p class="text-destructive text-body">{{ error }}</p>
-            </div>
+      <div class="p-4 sm:p-6">
+        <div v-if="loading" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ShSurface v-for="i in 4" :key="i" class="animate-pulse" padding="md">
+            <div class="mb-3 h-5 bg-muted"></div>
+            <div class="h-3 w-2/3 bg-muted"></div>
+          </ShSurface>
+        </div>
 
-            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <RouterLink
-                v-for="service in services"
-                :key="service.id"
-                :to="`/${service.slug}`"
-                class="block group retro-panel-muted p-3 sm:p-4 transition-colors hover:bg-accent/20"
-              >
-                <div class="flex items-center justify-between gap-3">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div
-                      class="w-10 h-10 rounded-sm flex items-center justify-center text-white font-bold text-body border border-border shrink-0"
-                      :style="{ backgroundColor: service.color }"
-                    >
-                      {{ service.name.charAt(0) }}
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-body font-semibold truncate">{{ service.name }}</p>
-                      <p class="text-caption text-muted-foreground truncate">
-                        {{ service.plans.map((p) => p.name).join(" · ") }}
-                      </p>
-                    </div>
+        <div v-else-if="error" class="py-12">
+          <ShText align="center" tone="danger">{{ error }}</ShText>
+        </div>
+
+        <div v-else class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <RouterLink
+            v-for="service in services"
+            :key="service.id"
+            :to="`/${service.slug}`"
+            class="group block"
+          >
+            <ShSurface class="h-full transition-colors group-hover:border-primary" padding="md">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center border border-border text-body font-bold text-white"
+                    :style="{ backgroundColor: service.color }"
+                  >
+                    {{ service.name.charAt(0) }}
                   </div>
-                  <span class="retro-kbd shrink-0 transition-colors group-hover:text-foreground">
-                    들어가기
-                  </span>
+                  <div class="min-w-0">
+                    <ShText as="h3" class="truncate" variant="heading">{{ service.name }}</ShText>
+                    <ShText class="truncate" variant="caption" tone="muted">
+                      {{ service.plans.map((p) => p.name).join(" · ") }}
+                    </ShText>
+                  </div>
                 </div>
-                <p class="text-[0.7rem] text-muted-foreground mt-1.5 truncate">{{ service.name }} 국가별 구독료 비교 →</p>
-              </RouterLink>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    </div>
+                <ShText class="shrink-0" variant="label" tone="primary">비교하기 →</ShText>
+              </div>
+            </ShSurface>
+          </RouterLink>
+        </div>
+      </div>
+    </ShSurface>
   </div>
 </template>
-
-<style scoped>
-.third-rate-board :deep(.retro-title) {
-  font-size: clamp(1.25rem, 2.6vw, 2rem);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  text-shadow: 1px 1px 0 rgb(203 213 225 / 0.9);
-}
-
-.third-rate-board :deep(.retro-kbd) {
-  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
-  font-weight: 800;
-  letter-spacing: 0.05em;
-}
-
-.third-rate-board :deep(.text-body) {
-  font-size: clamp(1rem, 1.65vw, 1.24rem);
-  font-weight: 700;
-}
-
-.third-rate-board :deep(.text-caption) {
-  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
-  font-weight: 700;
-}
-
-.third-rate-board :deep(.text-tiny) {
-  font-size: clamp(0.84rem, 1.08vw, 0.96rem);
-  font-weight: 700;
-}
-</style>

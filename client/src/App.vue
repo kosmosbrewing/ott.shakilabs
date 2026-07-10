@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { ShSurface } from "@shakilabs/ui";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import AppFooter from "@/components/layout/AppFooter.vue";
 import AlertHost from "@/components/ui/alert/AlertHost.vue";
@@ -72,7 +73,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-background">
+  <ShSurface
+    as="div"
+    variant="plain"
+    padding="none"
+    class="design-system-shell min-h-screen flex flex-col bg-background"
+  >
     <AppHeader />
     <main class="flex-1 relative">
       <RouterView v-slot="{ Component }">
@@ -88,7 +94,7 @@ onMounted(async () => {
       @complete="closeMyPlanModal"
       @later="postponeMyPlanModal"
     />
-  </div>
+  </ShSurface>
 </template>
 
 <style scoped>

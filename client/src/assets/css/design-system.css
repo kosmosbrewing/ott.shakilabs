@@ -1,0 +1,29 @@
+.design-system-shell {
+  --sh-radius-sm: 0.375rem;
+  --sh-radius-md: 0.5rem;
+  --sh-radius-lg: 0.625rem;
+}
+
+.design-system-theme-toggle.sh-button {
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-color: hsl(var(--border) / 0.7);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+}
+
+.design-system-theme-toggle.sh-button:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+.design-system-shell .retro-panel,
+.design-system-shell .retro-panel-muted {
+  border-radius: var(--sh-radius-md);
+  box-shadow: none;
+}
+
+.design-system-shell .retro-titlebar {
+  background: transparent;
+}

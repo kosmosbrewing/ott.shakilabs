@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { Moon, Sun } from "lucide-vue-next";
+import { ShButton } from "@shakilabs/ui";
 import { useHeadlineMessages } from "@/composables/useHeadlineMessages";
 
 const route = useRoute();
@@ -121,15 +122,17 @@ onUnmounted(() => {
                 </span>
               </Transition>
             </div>
-            <button
+            <ShButton
               type="button"
-              class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded border border-border/70 bg-transparent text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              variant="secondary"
+              size="sm"
+              class="design-system-theme-toggle shrink-0 text-muted-foreground"
               :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
               @click="toggleTheme"
             >
               <Moon v-if="theme === 'dark'" class="h-4 w-4" />
               <Sun v-else class="h-4 w-4" />
-            </button>
+            </ShButton>
           </div>
         </div>
       </div>

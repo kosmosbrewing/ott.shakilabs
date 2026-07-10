@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+import { ShText } from "@shakilabs/ui";
 </script>
 
 <template>
@@ -12,7 +13,7 @@ import { RouterLink } from "vue-router";
           <RouterLink to="/privacy" class="retro-button-subtle">개인정보 처리방침</RouterLink>
           <RouterLink to="/terms" class="retro-button-subtle">이용약관</RouterLink>
         </div>
-        <span class="text-tiny text-muted-foreground">Copyright @ shakilabs.com</span>
+        <ShText as="p" variant="label" tone="muted">Copyright © shakilabs.com</ShText>
       </div>
     </div>
   </footer>
