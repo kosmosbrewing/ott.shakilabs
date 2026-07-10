@@ -7,6 +7,7 @@ import "@shakilabs/ui/styles.css";
 import "./assets/css/design-system.css";
 import { initAnalytics } from "./lib/analytics";
 import { captureSentryException, initSentry } from "./lib/sentry";
+import { removePrerenderFallback } from "./utils/prerenderFallback";
 
 function bootstrap(): void {
   const app = createApp(App);
@@ -16,6 +17,7 @@ function bootstrap(): void {
   app.use(head);
   initSentry(app);
   app.mount("#app");
+  removePrerenderFallback();
 
   // GA 초기화를 LCP 이후로 미룸 — 초기 네트워크 경쟁 제거
   if (typeof requestIdleCallback === "function") {
