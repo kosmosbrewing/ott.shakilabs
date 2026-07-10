@@ -45,7 +45,7 @@ function main() {
       : new Date().toISOString().slice(0, 10);
 
   const nodes = [
-    makeUrlNode("/", { priority: "1.0", changefreq: "weekly", lastmod }),
+    makeUrlNode("", { priority: "1.0", changefreq: "weekly", lastmod }),
     makeUrlNode("/about", { priority: "0.5", changefreq: "monthly", lastmod }),
     makeUrlNode("/privacy", { priority: "0.4", changefreq: "monthly", lastmod }),
     makeUrlNode("/terms", { priority: "0.4", changefreq: "monthly", lastmod }),
