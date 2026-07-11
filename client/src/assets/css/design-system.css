@@ -1,7 +1,7 @@
 .design-system-shell {
-  --sh-radius-sm: 0.375rem;
-  --sh-radius-md: 0.5rem;
-  --sh-radius-lg: 0.625rem;
+  --sh-radius-sm: 0.125rem;
+  --sh-radius-md: 0.125rem;
+  --sh-radius-lg: 0.25rem;
 }
 
 .design-system-theme-toggle.sh-button {
