@@ -359,13 +359,13 @@ defineExpose({ selectedRightCountryCode });
       <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] md:items-stretch">
         <!-- 좌측 -->
         <button
-          class="group retro-panel-muted p-4 flex h-full min-h-[180px] flex-col text-left border border-border/40 hover:border-primary/60 transition-all hover:shadow-sm"
+          class="group retro-panel-muted flex h-full min-h-[180px] flex-col border border-border/40 p-[12px] text-left transition-all hover:border-primary/60 hover:shadow-sm"
           @click="showCountryModal = true"
         >
           <div v-if="selectedCompareCountry" class="w-full h-full flex flex-col justify-between gap-3">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="text-[2.8rem] leading-none shrink-0">{{ countryFlag(selectedCompareCountry.countryCode) }}</span>
+            <div class="flex flex-wrap items-start justify-between gap-[8px]">
+              <div class="flex min-w-0 items-center gap-[8px]">
+                <span class="shrink-0 text-[36px] leading-none">{{ countryFlag(selectedCompareCountry.countryCode) }}</span>
                 <div class="min-w-0">
                   <p class="text-body font-black leading-tight truncate">{{ selectedCompareCountry.country }}</p>
                   <p class="text-tiny text-muted-foreground mt-0.5">{{ selectedPlanLabel }} 요금제</p>
@@ -373,7 +373,7 @@ defineExpose({ selectedRightCountryCode });
               </div>
               <span class="retro-kbd uppercase tracking-wide group-hover:text-primary shrink-0">선택</span>
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
                 <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">현지 요금</p>
                 <p class="text-caption font-bold mt-1 tabular-nums">{{ fmtUsd(selectedCompareCountry.usd) }}</p>
@@ -400,24 +400,24 @@ defineExpose({ selectedRightCountryCode });
 
         <!-- 우측 -->
         <button
-          class="group retro-panel-muted p-4 flex h-full min-h-[180px] flex-col text-left border border-border/40 hover:border-primary/60 transition-all hover:shadow-sm"
+          class="group retro-panel-muted flex h-full min-h-[180px] flex-col border border-border/40 p-[12px] text-left transition-all hover:border-primary/60 hover:shadow-sm"
           @click="showRightCountryModal = true"
         >
           <div v-if="rightCompareRow" class="w-full h-full flex flex-col justify-between gap-3">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="text-[2.8rem] leading-none shrink-0">{{ countryFlag(rightCompareRow.countryCode) }}</span>
+            <div class="flex flex-wrap items-start justify-between gap-[8px]">
+              <div class="flex min-w-0 items-center gap-[8px]">
+                <span class="shrink-0 text-[36px] leading-none">{{ countryFlag(rightCompareRow.countryCode) }}</span>
                 <div class="min-w-0">
                   <p class="text-body font-black leading-tight truncate">{{ rightCompareRow.country }}</p>
                   <p class="text-tiny text-muted-foreground mt-0.5">{{ selectedPlanLabel }} 요금제</p>
                 </div>
               </div>
-              <div class="shrink-0 flex items-center gap-1.5">
+              <div class="flex flex-wrap items-center gap-[6px]">
                 <span class="retro-kbd tracking-wide group-hover:text-primary">내 요금</span>
                 <span class="retro-kbd uppercase tracking-wide group-hover:text-primary">선택</span>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
                 <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">현지 요금</p>
                 <p class="text-caption font-bold mt-1 tabular-nums">{{ fmtUsd(rightCompareRow.usd) }}</p>

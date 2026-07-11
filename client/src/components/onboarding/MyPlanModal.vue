@@ -119,23 +119,26 @@ onUnmounted(() => {
     <div class="fixed inset-0 z-[80] flex items-center justify-center" @click.self="handleLater">
       <div class="absolute inset-0 bg-black/60" @click="handleLater" />
       <div
-        class="relative z-10 w-full max-w-md sm:max-w-lg mx-4 max-h-[80vh] overflow-hidden retro-panel border border-border"
+        class="plan-modal relative z-10 mx-4 max-h-[80vh] w-full max-w-md overflow-hidden border border-border sm:max-w-lg retro-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="my-plan-modal-title"
       >
         <!-- 헤더 -->
         <div class="retro-titlebar flex items-center justify-between">
-          <h2 class="retro-title !text-[1rem]">내 요금제 설정</h2>
-          <button class="retro-kbd text-xs" @click="handleLater">ESC</button>
+          <h2 id="my-plan-modal-title" class="retro-title !text-[1rem]">내 요금제 설정</h2>
+          <button class="retro-kbd text-xs" aria-label="내 요금제 설정 닫기" @click="handleLater">ESC</button>
         </div>
 
         <!-- 스텝 인디케이터 -->
-        <div class="flex items-center gap-0 px-5 pt-4 pb-2">
+        <div class="plan-modal__steps flex items-center gap-0 px-5 pb-2 pt-4">
           <button
             class="flex items-center gap-1.5 text-xs font-semibold transition-colors"
             :class="step === 1 ? 'text-primary' : 'text-muted-foreground'"
             @click="goToStep1"
           >
             <span
-              class="flex items-center justify-center w-5 h-5 rounded-full text-[0.65rem] font-bold leading-none border transition-colors"
+              class="plan-modal__step-number flex h-5 w-5 items-center justify-center rounded-full border text-[0.65rem] font-bold leading-none transition-colors"
               :class="step === 1 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40 bg-muted/30 text-muted-foreground'"
             >1</span>
             <span>요금제</span>
@@ -143,18 +146,18 @@ onUnmounted(() => {
           <div class="flex-1 h-px mx-3" :class="step >= 2 ? 'bg-primary/50' : 'bg-border'" />
           <span
             class="flex items-center gap-1.5 text-xs font-semibold"
-            :class="step === 2 ? 'text-primary' : 'text-muted-foreground/50'"
+            :class="step === 2 ? 'text-primary' : 'text-muted-foreground'"
           >
             <span
-              class="flex items-center justify-center w-5 h-5 rounded-full text-[0.65rem] font-bold leading-none border transition-colors"
-              :class="step === 2 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30 bg-muted/20 text-muted-foreground/50'"
+              class="plan-modal__step-number flex h-5 w-5 items-center justify-center rounded-full border text-[0.65rem] font-bold leading-none transition-colors"
+              :class="step === 2 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/50 bg-muted/20 text-muted-foreground'"
             >2</span>
             <span>국가</span>
           </span>
         </div>
 
         <!-- 본문 -->
-        <div class="p-4 overflow-y-auto max-h-[calc(80vh-8rem)]">
+        <div class="plan-modal__body max-h-[calc(80vh-8rem)] overflow-y-auto p-4">
           <LoadingSpinner v-if="loading" message="서비스 목록을 불러오는 중..." />
 
           <div v-else-if="error" class="rounded border border-destructive/40 bg-destructive/5 p-4">
@@ -178,7 +181,7 @@ onUnmounted(() => {
                 @click="handleSelectPlan(plan.id)"
               >
                 <p class="text-xs font-semibold">{{ plan.name }}</p>
-                <p v-if="plan.nameEn" class="mt-0.5 text-[0.65rem] text-muted-foreground">
+                <p v-if="plan.nameEn" class="mt-0.5 text-xs text-muted-foreground">
                   {{ plan.nameEn }}
                 </p>
               </button>
@@ -188,7 +191,7 @@ onUnmounted(() => {
           <!-- Step 2: 국가 선택 -->
           <div v-else-if="step === 2">
             <p class="text-sm text-muted-foreground mb-4">구독 중인 국가를 선택해 주세요.</p>
-            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+            <div class="plan-modal__countries grid grid-cols-3 gap-2.5 sm:grid-cols-5">
               <button
                 v-for="c in COUNTRIES"
                 :key="c.code"
@@ -207,7 +210,7 @@ onUnmounted(() => {
         </div>
 
         <!-- 하단 버튼 -->
-        <div class="flex items-center justify-between border-t border-border/60 px-4 py-3">
+        <div class="plan-modal__footer flex items-center justify-between border-t border-border/60 px-4 py-3">
           <p v-if="submitError" class="text-xs text-destructive">{{ submitError }}</p>
           <span v-else />
           <div class="flex items-center gap-2">

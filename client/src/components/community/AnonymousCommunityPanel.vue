@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, useId, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { fetchCommunityPosts, fetchPopularPosts, submitCommunityPost, type CommunityPost } from "@/api";
 import { LoadingSpinner } from "@/components/ui/loading";
@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const COMMUNITY_SERVICE_SLUG =
   import.meta.env.VITE_COMMUNITY_SERVICE_SLUG || "global-community";
+const communityEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_COMMUNITY_API === "true";
 
 type TabType = "latest" | "popular";
 const activeTab = ref<TabType>("latest");
@@ -46,6 +47,8 @@ function toPreviewTitle(post: CommunityPost): string {
 }
 
 async function loadLatest(): Promise<void> {
+  if (!communityEnabled) return;
+
   latestLoading.value = true;
   error.value = "";
   try {
@@ -59,6 +62,8 @@ async function loadLatest(): Promise<void> {
 }
 
 async function loadPopular(): Promise<void> {
+  if (!communityEnabled) return;
+
   popularLoading.value = true;
   try {
     const res = await fetchPopularPosts(COMMUNITY_SERVICE_SLUG, 10);
@@ -85,10 +90,14 @@ const MAX_LENGTH = 300;
 const postContent = ref("");
 const postSubmitting = ref(false);
 const postError = ref("");
+const postContentId = useId();
+const postFeedbackId = useId();
 
 const contentLength = computed(() => postContent.value.length);
 
 async function submitPost(): Promise<void> {
+  if (!communityEnabled) return;
+
   const content = postContent.value.trim();
   if (!content || postSubmitting.value) return;
   postSubmitting.value = true;
@@ -144,8 +153,12 @@ watch(
 
     <!-- 목록 -->
     <div class="relative">
+      <p v-if="!communityEnabled" class="retro-panel-content !text-xs text-muted-foreground">
+        로컬 단독 실행에서는 커뮤니티를 불러오지 않습니다.
+      </p>
+
       <!-- 초기 로딩 (글이 아직 없을 때) -->
-      <LoadingSpinner v-if="loading && displayedPosts.length === 0 && !error" class="py-10" variant="dots" size="sm" />
+      <LoadingSpinner v-else-if="loading && displayedPosts.length === 0 && !error" class="py-10" variant="dots" size="sm" />
 
       <p v-else-if="error" class="retro-panel-content !text-xs text-destructive">{{ error }}</p>
 
@@ -183,13 +196,16 @@ watch(
 
     <!-- 글쓰기 -->
     <div class="border-t border-border/60 px-4 pt-3 pb-3">
-      <p class="!text-[11px] font-semibold text-muted-foreground mb-1.5">익명 글쓰기</p>
+      <label :for="postContentId" class="block !text-[11px] font-semibold text-muted-foreground mb-1.5">익명 글쓰기</label>
       <div class="border border-border rounded">
         <textarea
-          aria-label="익명 글 내용"
+          :id="postContentId"
           v-model="postContent"
           :maxlength="MAX_LENGTH"
           rows="3"
+          :disabled="!communityEnabled"
+          :aria-describedby="postFeedbackId"
+          :aria-invalid="Boolean(postError)"
           placeholder="가격 체감, 요금제 후기, 변경 제보 등을 익명으로 남겨주세요."
           class="w-full resize-none bg-transparent px-2.5 py-2 !text-xs outline-none placeholder:text-muted-foreground/60"
         />
@@ -197,7 +213,7 @@ watch(
           <span class="!text-[11px] text-muted-foreground tabular-nums">{{ contentLength }}/{{ MAX_LENGTH }}</span>
           <button
             type="button"
-            :disabled="contentLength === 0 || postSubmitting"
+            :disabled="!communityEnabled || contentLength === 0 || postSubmitting"
             class="!text-[11px] font-semibold text-primary disabled:opacity-40 hover:underline"
             @click="submitPost"
           >
@@ -205,7 +221,9 @@ watch(
           </button>
         </div>
       </div>
-      <p v-if="postError" class="!text-[11px] text-destructive mt-1">{{ postError }}</p>
+      <p :id="postFeedbackId" class="!text-[11px] mt-1" :class="postError ? 'text-destructive' : 'text-muted-foreground'">
+        {{ postError || "익명으로 등록됩니다." }}
+      </p>
     </div>
 
     <!-- 전체보기 -->

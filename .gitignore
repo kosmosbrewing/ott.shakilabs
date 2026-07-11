@@ -10,3 +10,8 @@ client/.env.*.local
 .DS_Store
 *.pem
 *.key
+
+# UI audit generated evidence; keep only review documents
+/artifacts/ui-audit/*
+!/artifacts/ui-audit/report.md
+!/artifacts/ui-audit/issues.json

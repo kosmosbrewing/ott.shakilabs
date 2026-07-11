@@ -120,3 +120,131 @@
 .text-muted-foreground\/70 {
   color: hsl(var(--muted-foreground));
 }
+
+@media (max-width: 400px) {
+  .text-caption,
+  .text-tiny,
+  .text-xs,
+  [class*="text-[0.6"],
+  [class*="text-[0.7"],
+  [class*="text-[10px]"],
+  [class*="text-[11px]"],
+  [class~="!text-xs"] {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .sh-text--label {
+    font-size: 12px !important;
+  }
+
+  nav[aria-label="섹션 이동"] :is(a, button) {
+    min-height: 44px;
+  }
+
+  main button,
+  main a[target="_blank"],
+  main a.underline,
+  main summary,
+  footer a {
+    min-height: 24px;
+  }
+
+  main a[target="_blank"],
+  main a.underline,
+  main summary,
+  footer a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  main a[class*="!text-xs"] {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+  }
+
+  main button,
+  footer a {
+    min-width: 24px;
+  }
+
+  .container {
+    padding-inline: 12px;
+  }
+
+  .text-resize-layout .retro-panel-content,
+  .text-resize-layout .retro-titlebar {
+    padding-inline: 12px;
+  }
+
+  .text-resize-layout :is(h1, h2, h3, p, a, button, span) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .text-resize-layout section > .retro-panel-content > .grid > a {
+    padding: 12px;
+  }
+
+  .text-resize-layout section > .retro-panel-content > .grid > a > div {
+    gap: 8px;
+  }
+
+  .text-resize-layout section > .retro-panel-content > .grid > a > div > span {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .plan-modal {
+    max-height: calc(100dvh - 24px);
+    margin-inline: 12px;
+  }
+
+  .plan-modal__steps {
+    padding: 12px 12px 8px;
+  }
+
+  .plan-modal__steps > div {
+    margin-inline: 8px;
+  }
+
+  .plan-modal__step-number {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .plan-modal__body {
+    max-height: calc(100dvh - 152px);
+    padding: 12px;
+  }
+
+  .plan-modal__body button {
+    min-width: 0;
+    padding: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .plan-modal__countries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .plan-modal__countries button > span:first-child {
+    font-size: 28px;
+  }
+
+  .plan-modal__countries button > span:last-child {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .plan-modal__footer {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+}

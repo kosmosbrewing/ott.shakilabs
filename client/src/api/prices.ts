@@ -1,4 +1,5 @@
-import { API_BASE, ensureValidSlug, extractApiErrorMessage } from "./helpers";
+import youtubePremiumPriceSeed from "../../../data/prices/youtube-premium.json";
+import { API_BASE, clone, ensureValidSlug, extractApiErrorMessage } from "./helpers";
 import { normalizePricesResponse } from "./priceTransforms";
 import type { PricesResponse } from "./types";
 
@@ -41,6 +42,11 @@ async function doFetch(serviceSlug: string): Promise<PricesResponse> {
 
 export function fetchPrices(serviceSlug: string): Promise<PricesResponse> {
   ensureValidSlug(serviceSlug);
+
+  const remotePricesEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_REMOTE_PRICES === "true";
+  if (!remotePricesEnabled && serviceSlug === "youtube-premium") {
+    return Promise.resolve(normalizePricesResponse(clone(youtubePremiumPriceSeed)));
+  }
 
   const existing = inflightRequests.get(serviceSlug);
   if (existing) return existing;

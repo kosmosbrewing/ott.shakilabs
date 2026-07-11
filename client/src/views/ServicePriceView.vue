@@ -402,7 +402,7 @@ watch(serviceSlug, async (slug) => {
 </script>
 
 <template>
-  <div class="container py-6">
+  <div class="text-resize-layout container py-6">
     <!-- 로딩 -->
     <div
       v-if="loading || (!priceData && !error)"
@@ -519,7 +519,7 @@ watch(serviceSlug, async (slug) => {
                 :base-country-price="dynamicBaseCountryPrice"
                 :service-slug="serviceSlug"
               />
-              <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-[0.72rem] font-normal text-muted-foreground leading-tight">
+              <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-caption font-normal text-muted-foreground leading-tight">
                 <span>총 {{ filteredPrices.length }}개국</span>
                 <span>· 업데이트 {{ priceData.lastUpdated }}</span>
                 <span>· 환율 기준 {{ priceData.exchangeRateDate }}</span>
@@ -597,7 +597,7 @@ watch(serviceSlug, async (slug) => {
                 <Vote class="h-5 w-5 shrink-0 text-primary" />
                 <div>
                   <p class="!text-xs font-bold text-foreground">YouTube Premium 최적 국가 투표</p>
-                  <p class="!text-[11px] text-muted-foreground">어떤 나라에서 구독하는 게 가장 좋을까요?</p>
+                  <p class="text-caption text-muted-foreground">어떤 나라에서 구독하는 게 가장 좋을까요?</p>
                 </div>
               </button>
             </div>

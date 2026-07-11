@@ -9,6 +9,7 @@ import { LoadingSpinner } from "@/components/ui/loading";
 
 const COMMUNITY_SERVICE_SLUG =
   import.meta.env.VITE_COMMUNITY_SERVICE_SLUG || "global-community";
+const communityEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_COMMUNITY_API === "true";
 
 const router = useRouter();
 const { posts, loading, error, hasMore, refresh, loadMore } = useCommunityList(20);
@@ -48,6 +49,8 @@ function toPreviewTitle(postTitle: string | undefined, contentText: string | und
 }
 
 async function loadPopular(): Promise<void> {
+  if (!communityEnabled) return;
+
   popularLoading.value = true;
   try {
     const res = await fetchPopularPosts(COMMUNITY_SERVICE_SLUG, 30);
@@ -71,6 +74,8 @@ function switchTab(tab: TabType): void {
 }
 
 async function submitPost(): Promise<void> {
+  if (!communityEnabled) return;
+
   formError.value = "";
   const normalizedTitle = title.value.trim();
   const normalizedContent = content.value.trim();
@@ -108,6 +113,7 @@ async function submitPost(): Promise<void> {
 }
 
 onMounted(() => {
+  if (!communityEnabled) return;
   void refresh();
 });
 </script>
@@ -133,6 +139,7 @@ onMounted(() => {
         </button>
       </div>
       <button
+        v-if="communityEnabled"
         type="button"
         class="!text-xs font-semibold text-primary hover:underline"
         @click="scrollToCompose"
@@ -143,8 +150,12 @@ onMounted(() => {
 
     <!-- 게시글 목록 -->
     <section class="retro-panel overflow-hidden">
+      <p v-if="!communityEnabled" class="px-4 py-4 !text-sm text-muted-foreground">
+        로컬 단독 실행에서는 커뮤니티를 불러오지 않습니다. 백엔드 연결 후 다시 확인해 주세요.
+      </p>
+
       <!-- 최신글 -->
-      <template v-if="activeTab === 'latest'">
+      <template v-else-if="activeTab === 'latest'">
         <LoadingSpinner v-if="loading && posts.length === 0" class="p-4" message="게시글을 불러오는 중..." />
         <div v-else-if="error" class="px-4 py-4 space-y-2">
           <p class="!text-sm text-destructive">{{ error }}</p>
@@ -217,30 +228,38 @@ onMounted(() => {
     </section>
 
     <!-- 글쓰기 폼 -->
-    <section id="community-compose" class="retro-panel overflow-hidden">
+    <section v-if="communityEnabled" id="community-compose" class="retro-panel overflow-hidden">
       <div class="retro-panel-content space-y-2">
         <div class="flex items-center justify-between">
           <span class="!text-xs font-semibold text-foreground">글쓰기</span>
           <span class="retro-kbd">{{ content.length }}/2000</span>
         </div>
         <form class="space-y-2" @submit.prevent="submitPost">
+          <label for="community-post-title" class="sr-only">게시글 제목</label>
           <input
+            id="community-post-title"
             v-model="title"
             type="text"
             maxlength="100"
+            aria-describedby="community-form-feedback"
+            :aria-invalid="Boolean(formError)"
             class="w-full rounded-none border border-border/70 bg-transparent px-2.5 py-1.5 !text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-0"
             placeholder="제목 (2~100자)"
           />
+          <label for="community-post-content" class="sr-only">게시글 본문</label>
           <textarea
+            id="community-post-content"
             v-model="content"
             rows="5"
             maxlength="2000"
+            aria-describedby="community-form-feedback"
+            :aria-invalid="Boolean(formError)"
             class="w-full rounded-none border border-border/70 bg-transparent px-2.5 py-1.5 !text-sm leading-relaxed placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-0"
             placeholder="본문을 입력해 주세요."
           />
           <div class="flex items-center justify-between">
-            <p v-if="formError" class="!text-xs text-destructive">{{ formError }}</p>
-            <span v-else class="!text-xs text-muted-foreground">익명으로 등록됩니다.</span>
+            <p v-if="formError" id="community-form-feedback" class="!text-xs text-destructive">{{ formError }}</p>
+            <span v-else id="community-form-feedback" class="!text-xs text-muted-foreground">익명으로 등록됩니다.</span>
             <button type="submit" class="retro-button-subtle !px-2 !py-1 !text-xs" :disabled="submitting">
               {{ submitting ? "등록 중..." : "등록" }}
             </button>
