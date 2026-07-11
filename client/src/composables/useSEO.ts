@@ -1,4 +1,4 @@
-import { useHead } from "@vueuse/head";
+import { useHead } from "@unhead/vue";
 import { toValue, type MaybeRefOrGetter } from "vue";
 import { getCanonicalSiteUrl } from "@/lib/site";
 
