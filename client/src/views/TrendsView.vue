@@ -95,9 +95,13 @@ watch(serviceSlug, async () => {
 
 <template>
   <div class="container py-6">
-    <LoadingSpinner v-if="loading" message="트렌드 데이터를 불러오는 중..." />
+    <div v-if="loading">
+      <h1 class="sr-only">{{ trendHeading }}</h1>
+      <LoadingSpinner message="트렌드 데이터를 불러오는 중..." />
+    </div>
 
     <div v-else-if="error" class="text-center py-20">
+      <h1 class="sr-only">{{ trendHeading }}</h1>
       <p class="text-destructive text-body">{{ error }}</p>
     </div>
 

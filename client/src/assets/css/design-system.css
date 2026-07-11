@@ -28,6 +28,7 @@
 .design-system-shell .retro-board-list,
 .design-system-shell .retro-chart,
 .design-system-shell .seo-rich-guide {
+  border-width: 1px;
   border-radius: var(--sh-card-radius);
   box-shadow: none;
 }
@@ -49,10 +50,6 @@
   background: transparent;
 }
 
-.design-system-shell .rounded-2xl,
-.design-system-shell .rounded-xl,
-.design-system-shell .rounded,
-.design-system-shell [class*="rounded-[1.6rem]"],
 .design-system-shell .retro-input,
 .design-system-shell .retro-button,
 .design-system-shell .retro-button-subtle,
@@ -63,6 +60,20 @@
   border-radius: var(--sh-radius-sm);
 }
 
+.design-system-shell
+  :is(div, section, article, aside, details, dl, ul, ol, li, table, a):is(
+    .rounded,
+    .rounded-lg,
+    .rounded-xl,
+    .rounded-2xl
+  ):is(.border, .border-2),
+.design-system-shell [class*="rounded-[1.6rem]"][class*="border"],
+.design-system-shell [class*="rounded-[2rem]"][class*="border"] {
+  border-width: 1px;
+  border-radius: var(--sh-card-radius);
+  box-shadow: none;
+}
+
 .design-system-shell [class*="hover:scale-"]:hover,
 .design-system-shell [class*="hover:-translate-"]:hover {
   transform: none;
@@ -70,4 +81,19 @@
 
 .design-system-shell button:not(.rounded-full):not(.retro-panel):not(.retro-panel-muted) {
   border-radius: var(--sh-radius-sm);
+}
+
+.design-system-shell :is(input, select, textarea):not(.rounded-full),
+.design-system-shell label:is(.rounded, .rounded-lg, .rounded-xl, .rounded-2xl),
+.design-system-shell a.touch-target:is(.rounded, .rounded-lg, .rounded-xl, .rounded-2xl),
+.design-system-shell a[role="button"]:not(.rounded-full) {
+  border-radius: var(--sh-radius-sm);
+}
+
+body [role="dialog"]:is(.rounded, .rounded-lg, .rounded-xl, .rounded-2xl),
+body > .fixed:is(.rounded, .rounded-lg, .rounded-xl, .rounded-2xl).shadow-lg,
+body [role="alert"]:is(.rounded, .rounded-lg, .rounded-xl, .rounded-2xl):is(.shadow-lg, .shadow-2xl) {
+  border-width: 1px;
+  border-radius: 0.25rem;
+  box-shadow: var(--sh-shadow-overlay);
 }
