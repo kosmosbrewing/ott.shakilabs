@@ -1,4 +1,6 @@
 .design-system-shell {
+  --sh-card-radius: 0px;
+  --sh-color-card-border: hsl(var(--border) / 0.7);
   --sh-radius-sm: 0.125rem;
   --sh-radius-md: 0.125rem;
   --sh-radius-lg: 0.25rem;
@@ -19,11 +21,53 @@
 }
 
 .design-system-shell .retro-panel,
-.design-system-shell .retro-panel-muted {
-  border-radius: var(--sh-radius-md);
+.design-system-shell .retro-panel-muted,
+.design-system-shell .retro-stat,
+.design-system-shell .retro-step,
+.design-system-shell .retro-details,
+.design-system-shell .retro-board-list,
+.design-system-shell .retro-chart,
+.design-system-shell .seo-rich-guide {
+  border-radius: var(--sh-card-radius);
   box-shadow: none;
 }
 
+.design-system-shell .retro-panel {
+  border: 1px solid var(--sh-color-card-border);
+  background: hsl(var(--card));
+}
+
+.design-system-shell .retro-panel-muted,
+.design-system-shell .retro-stat {
+  border: 1px solid hsl(var(--border) / 0.62);
+  background: hsl(var(--muted) / 0.18);
+}
+
 .design-system-shell .retro-titlebar {
+  border-radius: 0;
+  border-bottom-color: var(--sh-color-card-border);
   background: transparent;
+}
+
+.design-system-shell .rounded-2xl,
+.design-system-shell .rounded-xl,
+.design-system-shell .rounded,
+.design-system-shell [class*="rounded-[1.6rem]"],
+.design-system-shell .retro-input,
+.design-system-shell .retro-button,
+.design-system-shell .retro-button-subtle,
+.design-system-shell .retro-choice-button,
+.design-system-shell .retro-stepper,
+.design-system-shell .retro-titlebar-button,
+.design-system-shell .retro-chart-bar {
+  border-radius: var(--sh-radius-sm);
+}
+
+.design-system-shell [class*="hover:scale-"]:hover,
+.design-system-shell [class*="hover:-translate-"]:hover {
+  transform: none;
+}
+
+.design-system-shell button:not(.rounded-full):not(.retro-panel):not(.retro-panel-muted) {
+  border-radius: var(--sh-radius-sm);
 }
