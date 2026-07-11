@@ -23,7 +23,12 @@ const baseKrw = computed<number | null>(() => {
 
 <template>
   <div>
-    <Table wrapper-class="max-h-[82vh] overflow-auto">
+    <Table
+      class="min-w-[620px]"
+      wrapper-class="max-h-[82vh] overflow-auto"
+      aria-label="국가별 구독 가격 비교"
+      tabindex="0"
+    >
       <caption class="sr-only">국가별 구독 요금 가격표</caption>
       <TableHeader class="[&_th]:sticky [&_th]:top-0 [&_th]:z-20 [&_th]:bg-background/95 [&_th]:backdrop-blur-sm">
         <TableRow>

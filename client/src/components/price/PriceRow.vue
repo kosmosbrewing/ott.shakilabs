@@ -65,15 +65,15 @@ const flag = computed(() => countryFlag(props.item.countryCode));
     <TableCell>
       <RouterLink
         :to="`/${serviceSlug}/${item.countryCode.toLowerCase()}`"
-        class="inline-flex items-center gap-2 transition-colors font-semibold group-hover/price-row:text-primary"
+        class="inline-flex flex-wrap items-center gap-[6px] transition-colors font-semibold group-hover/price-row:text-primary"
       >
         <!-- 순번: asc 1~3위는 메달, 나머지는 숫자 -->
-        <span v-if="sortOrder === 'asc' && rank === 1" class="text-body shrink-0 mr-1" title="1위">🥇</span>
-        <span v-else-if="sortOrder === 'asc' && rank === 2" class="text-body shrink-0 mr-1" title="2위">🥈</span>
-        <span v-else-if="sortOrder === 'asc' && rank === 3" class="text-body shrink-0 mr-1" title="3위">🥉</span>
-        <span v-else class="text-tiny text-muted-foreground tabular-nums shrink-0 w-5 text-right mr-1">#{{ rank }}</span>
+        <span v-if="sortOrder === 'asc' && rank === 1" class="mr-[4px] shrink-0 text-[18px]" title="1위">🥇</span>
+        <span v-else-if="sortOrder === 'asc' && rank === 2" class="mr-[4px] shrink-0 text-[18px]" title="2위">🥈</span>
+        <span v-else-if="sortOrder === 'asc' && rank === 3" class="mr-[4px] shrink-0 text-[18px]" title="3위">🥉</span>
+        <span v-else class="mr-[4px] w-[20px] shrink-0 text-right text-tiny tabular-nums text-muted-foreground">#{{ rank }}</span>
         <!-- 국기는 항상 표시 -->
-        <span class="text-body">{{ flag }}</span>
+        <span class="text-[18px]">{{ flag }}</span>
         <span class="text-caption">{{ item.country }}</span>
         <span v-if="isBase" class="text-[0.62rem] font-bold text-muted-foreground border border-border/60 px-1 py-0.5 leading-none">내 요금</span>
       </RouterLink>

@@ -1,5 +1,12 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import { trackPageView } from "@/lib/analytics";
+import servicesSeed from "../../../data/services.json";
+
+const activeServiceSlugPattern = servicesSeed.services
+  .filter((service) => service.active)
+  .map((service) => service.slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  .join("|");
+const serviceSlugRoute = activeServiceSlugPattern || "__no-active-service__";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -52,21 +59,20 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/views/CommunityPostView.vue"),
     meta: { title: "댓글 보기" },
   },
-  // 동적 라우트
   {
-    path: "/:serviceSlug/trends",
+    path: `/:serviceSlug(${serviceSlugRoute})/trends`,
     name: "ServiceTrends",
     component: () => import("@/views/TrendsView.vue"),
     meta: { title: "유튜브 프리미엄 가격 변동 트렌드 · 국가별 구독료 변화" },
   },
   {
-    path: "/:serviceSlug",
+    path: `/:serviceSlug(${serviceSlugRoute})`,
     name: "ServicePrice",
     component: () => import("@/views/ServicePriceView.vue"),
     meta: { title: "유튜브 프리미엄 글로벌 가격 비교 · 나라별 구독료 최저가" },
   },
   {
-    path: "/:serviceSlug/:countryCode",
+    path: `/:serviceSlug(${serviceSlugRoute})/:countryCode([A-Za-z]{2})`,
     name: "CountryDetail",
     component: () => import("@/views/CountryDetailView.vue"),
     meta: { title: "국가별 가격 상세 | OTT 가격 비교" },

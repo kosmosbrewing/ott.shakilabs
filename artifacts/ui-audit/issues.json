@@ -1,0 +1,37 @@
+[
+  {
+    "id": "OTT-AUD-007",
+    "severity": "P2",
+    "category": "code quality / file responsibility",
+    "confidence": "confirmed",
+    "route": [
+      "repository"
+    ],
+    "viewport": [
+      "not applicable"
+    ],
+    "state": "post-remediation static audit",
+    "summary": "제품 소스 4개가 300줄 기준을 초과합니다.",
+    "userImpact": "변경 영향 범위가 넓어 회귀 원인과 책임 경계를 추적하기 어렵습니다.",
+    "evidence": {
+      "screenshots": [],
+      "artifacts": [
+        "static-observations.json"
+      ],
+      "reproduction": "제품 src에서 Vue·TypeScript·CSS 파일 줄 수를 다시 측정합니다.",
+      "actual": "client/src/views/ServicePriceView.vue 680줄, client/src/api/community.ts 527줄, client/src/components/price/PriceComparisonSection.vue 514줄, client/src/views/CountryDetailView.vue 336줄",
+      "expected": "제품 소스 파일은 300줄 이하이고 계산·표현·데이터 책임이 의미 경계로 분리돼야 합니다.",
+      "selector": "client/src/views/ServicePriceView.vue:1"
+    },
+    "relatedFiles": [
+      "client/src/views/ServicePriceView.vue:1",
+      "client/src/api/community.ts:1",
+      "client/src/components/price/PriceComparisonSection.vue:1",
+      "client/src/views/CountryDetailView.vue:1"
+    ],
+    "rootCause": "기능 확장 과정에서 계산, 데이터, 화면 표현 또는 전역 스타일 책임이 단일 파일에 누적됐습니다.",
+    "suggestedFix": "동작 변경 없이 테스트 가능한 도메인 경계부터 별도 계획으로 분리하고 각 단계에서 visual·unit 회귀 검증을 수행합니다.",
+    "regressionRisk": "high",
+    "verification": "파일 줄 수 재측정, typecheck, test, build와 대표 화면 visual 비교"
+  }
+]

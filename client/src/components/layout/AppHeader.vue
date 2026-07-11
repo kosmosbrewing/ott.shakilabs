@@ -5,6 +5,10 @@ import { Moon, Sun } from "lucide-vue-next";
 import { ShButton } from "@shakilabs/ui";
 import { useHeadlineMessages } from "@/composables/useHeadlineMessages";
 
+const emit = defineEmits<{
+  (event: "openMyPlan"): void;
+}>();
+
 const route = useRoute();
 const router = useRouter();
 
@@ -163,6 +167,14 @@ onUnmounted(() => {
         >
           커뮤니티
         </RouterLink>
+        <button
+          type="button"
+          class="shrink-0 text-caption font-bold text-primary-foreground/95 transition-colors hover:text-primary-foreground"
+          aria-haspopup="dialog"
+          @click="emit('openMyPlan')"
+        >
+          내 기준 설정
+        </button>
       </div>
     </div>
   </nav>
