@@ -540,12 +540,13 @@ watch(serviceSlug, async (slug) => {
               <LoadingSpinner v-if="trendLoading" variant="dots" size="sm" :center="false" />
               <div v-else-if="trendData?.biggestDrops?.length">
                 <Table>
+                  <caption class="sr-only">최근 국가별 구독 요금 변동</caption>
                   <TableHeader class="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead class="text-body text-muted-foreground">국가</TableHead>
-                      <TableHead class="text-body text-muted-foreground text-right">이전</TableHead>
-                      <TableHead class="text-body text-muted-foreground text-right">현재</TableHead>
-                      <TableHead class="text-body text-muted-foreground text-right">변동</TableHead>
+                      <TableHead scope="col" class="text-body text-muted-foreground">국가</TableHead>
+                      <TableHead scope="col" class="text-body text-muted-foreground text-right">이전</TableHead>
+                      <TableHead scope="col" class="text-body text-muted-foreground text-right">현재</TableHead>
+                      <TableHead scope="col" class="text-body text-muted-foreground text-right">변동</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

@@ -1,9 +1,10 @@
 # ShakiLabs UI artifact
 
-`shakilabs-ui-0.1.0.tgz` is the exact deployable artifact for `@shakilabs/ui` 0.1.0.
+`shakilabs-ui-0.2.7.tgz` is the active exact artifact for `@shakilabs/ui` 0.2.7.
 
 - Source repository: `00.root-shakilabs`
-- Source commit: `daf97e5`
-- SHA-256: `0f9f0a4b1729f0f89075c4288d4c8a0e15018c0248ca5c4d157f7a231ffccad2`
+- Source commit: `42c5339`
+- SHA-256: `222684f646495a7f66cd5ba73d2e7618587163367e42cda7558e0cc04fdc83f6`
+- Rollback artifacts: `shakilabs-ui-0.2.6.tgz`, `shakilabs-ui-0.2.5.tgz`, `shakilabs-ui-0.2.4.tgz`, `shakilabs-ui-0.2.3.tgz`, `shakilabs-ui-0.2.2.tgz`, `shakilabs-ui-0.2.1.tgz`, `shakilabs-ui-0.1.0.tgz`
 
-The artifact is committed so an isolated Vercel checkout can run `npm ci` without a private registry token. Replace it with an exact registry or Git version when the shared package distribution channel is approved.
+All artifacts are committed so an isolated Vercel checkout can run `npm ci` without a private registry token.

@@ -95,9 +95,13 @@ watch(serviceSlug, async () => {
 
 <template>
   <div class="container py-6">
-    <LoadingSpinner v-if="loading" message="트렌드 데이터를 불러오는 중..." />
+    <div v-if="loading">
+      <h1 class="sr-only">{{ trendHeading }}</h1>
+      <LoadingSpinner message="트렌드 데이터를 불러오는 중..." />
+    </div>
 
     <div v-else-if="error" class="text-center py-20">
+      <h1 class="sr-only">{{ trendHeading }}</h1>
       <p class="text-destructive text-body">{{ error }}</p>
     </div>
 
@@ -124,12 +128,13 @@ watch(serviceSlug, async () => {
           </div>
           <CardContent>
             <Table>
+              <caption class="sr-only">개인 요금제 최저가 상위 10개 국가</caption>
               <TableHeader class="sticky top-0 z-10 bg-background">
                 <TableRow>
-                  <TableHead class="text-body text-muted-foreground">#</TableHead>
-                  <TableHead class="text-body text-muted-foreground">국가</TableHead>
-                  <TableHead class="text-body text-muted-foreground text-right">현지 가격</TableHead>
-                  <TableHead class="text-body text-muted-foreground text-right">KRW</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground">#</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground">국가</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground text-right">현지 가격</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground text-right">KRW</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -158,12 +163,13 @@ watch(serviceSlug, async () => {
           </div>
           <CardContent>
             <Table>
+              <caption class="sr-only">한국 대비 절약률 상위 10개 국가</caption>
               <TableHeader class="sticky top-0 z-10 bg-background">
                 <TableRow>
-                  <TableHead class="text-body text-muted-foreground">#</TableHead>
-                  <TableHead class="text-body text-muted-foreground">국가</TableHead>
-                  <TableHead class="text-body text-muted-foreground text-right">절약률</TableHead>
-                  <TableHead class="text-body text-muted-foreground text-right">KRW</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground">#</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground">국가</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground text-right">절약률</TableHead>
+                  <TableHead scope="col" class="text-body text-muted-foreground text-right">KRW</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -193,14 +199,15 @@ watch(serviceSlug, async () => {
         </div>
         <CardContent>
           <Table>
+            <caption class="sr-only">최근 개인 요금제 가격 변동 상위 10개 국가</caption>
             <TableHeader class="sticky top-0 z-10 bg-background">
               <TableRow>
-                <TableHead class="text-body text-muted-foreground">#</TableHead>
-                <TableHead class="text-body text-muted-foreground">국가</TableHead>
-                <TableHead class="text-body text-muted-foreground text-right">이전</TableHead>
-                <TableHead class="text-body text-muted-foreground text-right">현재</TableHead>
-                <TableHead class="text-body text-muted-foreground text-right">변동</TableHead>
-                <TableHead class="text-body text-muted-foreground text-right">변동률</TableHead>
+                <TableHead scope="col" class="text-body text-muted-foreground">#</TableHead>
+                <TableHead scope="col" class="text-body text-muted-foreground">국가</TableHead>
+                <TableHead scope="col" class="text-body text-muted-foreground text-right">이전</TableHead>
+                <TableHead scope="col" class="text-body text-muted-foreground text-right">현재</TableHead>
+                <TableHead scope="col" class="text-body text-muted-foreground text-right">변동</TableHead>
+                <TableHead scope="col" class="text-body text-muted-foreground text-right">변동률</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

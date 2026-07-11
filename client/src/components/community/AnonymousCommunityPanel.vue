@@ -186,6 +186,7 @@ watch(
       <p class="!text-[11px] font-semibold text-muted-foreground mb-1.5">익명 글쓰기</p>
       <div class="border border-border rounded">
         <textarea
+          aria-label="익명 글 내용"
           v-model="postContent"
           :maxlength="MAX_LENGTH"
           rows="3"
