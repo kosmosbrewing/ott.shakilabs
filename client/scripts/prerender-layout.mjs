@@ -8,7 +8,7 @@ export function buildPrerenderHeader() {
   return `
     <header data-seo-prerender="header" style="max-width:1120px;margin:0 auto;padding:14px 16px;border-bottom:1px solid #e2e8f0;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <a href="/ott/" style="font-weight:700;font-size:18px;color:#0f172a;text-decoration:none;">OTT Watcher · 구독료 비교</a>
+        <a href="/ott" style="font-weight:700;font-size:18px;color:#0f172a;text-decoration:none;">OTT Watcher · 구독료 비교</a>
         <nav aria-label="주요 메뉴" style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
           <a href="/ott/youtube-premium" style="color:#334155;text-decoration:none;">유튜브 프리미엄</a>
           <a href="/ott/youtube-premium/trends" style="color:#334155;text-decoration:none;">가격 트렌드</a>

@@ -97,8 +97,8 @@ onUnmounted(() => {
       <div class="overflow-hidden">
         <div class="retro-titlebar h-11 border-b-0 px-2 bg-transparent">
           <div class="flex h-full w-full items-center gap-4">
-            <RouterLink
-              to="/"
+            <a
+              href="/ott"
               aria-label="ShakiLabs 홈"
               class="inline-flex h-8 w-8 sm:w-auto shrink-0 items-center justify-center sm:justify-start gap-1.5 px-0.5 text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -111,7 +111,7 @@ onUnmounted(() => {
               <span class="hidden sm:inline font-title text-tiny tracking-wide text-foreground/90">
                 ShakiLabs
               </span>
-            </RouterLink>
+            </a>
             <div class="flex h-full flex-1 items-center justify-center text-center font-title text-caption sm:text-body overflow-hidden">
               <Transition name="headline-fade" mode="out-in">
                 <span
