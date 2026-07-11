@@ -24,12 +24,13 @@ const baseKrw = computed<number | null>(() => {
 <template>
   <div>
     <Table wrapper-class="max-h-[82vh] overflow-auto">
+      <caption class="sr-only">국가별 구독 요금 가격표</caption>
       <TableHeader class="[&_th]:sticky [&_th]:top-0 [&_th]:z-20 [&_th]:bg-background/95 [&_th]:backdrop-blur-sm">
         <TableRow>
-          <TableHead class="min-w-0">국가</TableHead>
-          <TableHead class="text-right w-[116px] hidden sm:table-cell text-muted-foreground">현지 가격</TableHead>
-          <TableHead class="text-right w-[64px] hidden sm:table-cell text-muted-foreground">달러</TableHead>
-          <TableHead class="text-right w-[112px]">
+          <TableHead scope="col" class="min-w-0">국가</TableHead>
+          <TableHead scope="col" class="text-right w-[116px] hidden sm:table-cell text-muted-foreground">현지 가격</TableHead>
+          <TableHead scope="col" class="text-right w-[64px] hidden sm:table-cell text-muted-foreground">달러</TableHead>
+          <TableHead scope="col" class="text-right w-[112px]">
             <span class="inline-flex items-center justify-end gap-1">
               원화
               <ArrowUp
@@ -44,7 +45,7 @@ const baseKrw = computed<number | null>(() => {
               />
             </span>
           </TableHead>
-          <TableHead class="text-right w-[64px]">절약률</TableHead>
+          <TableHead scope="col" class="text-right w-[64px]">절약률</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

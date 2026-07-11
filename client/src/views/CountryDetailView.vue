@@ -292,11 +292,12 @@ watch(
           <span class="text-tiny text-muted-foreground">개인 요금제 · 가격순 상위 5개</span>
         </div>
         <Table>
+          <caption class="sr-only">같은 대륙 국가의 개인 요금제 가격 비교</caption>
           <TableHeader class="[&_th]:bg-background/95">
             <TableRow>
-              <TableHead>국가</TableHead>
-              <TableHead class="text-right w-[100px]">원화</TableHead>
-              <TableHead class="text-right w-[64px]">절약률</TableHead>
+              <TableHead scope="col">국가</TableHead>
+              <TableHead scope="col" class="text-right w-[100px]">원화</TableHead>
+              <TableHead scope="col" class="text-right w-[64px]">절약률</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
