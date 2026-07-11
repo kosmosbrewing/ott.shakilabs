@@ -151,7 +151,7 @@ function buildCountryContent(countryCode) {
   return `
     <article data-seo-prerender="country" style="${ARTICLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/ott/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/ott" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/ott/youtube-premium" style="color:#64748b;text-decoration:none;">유튜브 프리미엄</a> ›
         ${countryName}
       </nav>
@@ -459,7 +459,7 @@ function buildTrendsContent() {
   return `
     <article data-seo-prerender="trends" style="${ARTICLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/ott/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/ott" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/ott/youtube-premium" style="color:#64748b;text-decoration:none;">유튜브 프리미엄</a> ›
         가격 트렌드
       </nav>
