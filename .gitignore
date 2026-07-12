@@ -15,3 +15,8 @@ client/.env.*.local
 /artifacts/ui-audit/*
 !/artifacts/ui-audit/report.md
 !/artifacts/ui-audit/issues.json
+
+# Text layout audit evidence; keep only review documents
+/artifacts/text-layout-audit/*
+!/artifacts/text-layout-audit/report.md
+!/artifacts/text-layout-audit/issues.json

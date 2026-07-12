@@ -71,7 +71,7 @@ const flag = computed(() => countryFlag(props.item.countryCode));
         <span v-if="sortOrder === 'asc' && rank === 1" class="mr-[4px] shrink-0 text-[18px]" title="1위">🥇</span>
         <span v-else-if="sortOrder === 'asc' && rank === 2" class="mr-[4px] shrink-0 text-[18px]" title="2위">🥈</span>
         <span v-else-if="sortOrder === 'asc' && rank === 3" class="mr-[4px] shrink-0 text-[18px]" title="3위">🥉</span>
-        <span v-else class="mr-[4px] w-[20px] shrink-0 text-right text-tiny tabular-nums text-muted-foreground">#{{ rank }}</span>
+        <span v-else class="mr-[4px] min-w-[3ch] shrink-0 text-right text-tiny tabular-nums text-muted-foreground">#{{ rank }}</span>
         <!-- 국기는 항상 표시 -->
         <span class="text-[18px]">{{ flag }}</span>
         <span class="text-caption">{{ item.country }}</span>

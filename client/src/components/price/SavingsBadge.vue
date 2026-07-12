@@ -27,7 +27,7 @@ const variant = computed<"savings" | "destructive" | "neutral">(() => {
 </script>
 
 <template>
-  <Badge :variant="variant" class="h-5 w-[50px] justify-center px-0 py-0 text-tiny font-bold tabular-nums leading-none !text-white">
+  <Badge :variant="variant" class="h-5 min-w-[5ch] justify-center px-1.5 py-0 text-tiny font-bold tabular-nums leading-none !text-white">
     {{ label }}
   </Badge>
 </template>
