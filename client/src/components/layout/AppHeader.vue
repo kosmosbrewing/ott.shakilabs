@@ -2,7 +2,11 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { Moon, Sun } from "lucide-vue-next";
-import { ShButton } from "@shakilabs/ui";
+import {
+  ShButton,
+  ShPrimaryNavigation,
+  type PrimaryNavigationItem,
+} from "@shakilabs/ui";
 import { useHeadlineMessages } from "@/composables/useHeadlineMessages";
 
 const emit = defineEmits<{
@@ -14,14 +18,35 @@ const router = useRouter();
 
 const SERVICE_SLUG = "youtube-premium";
 
-const anchorLinks = [
-  { hash: "#compare", label: "글로벌 가격 비교" },
-  { hash: "#ranking", label: "글로벌 랭킹" },
-  { hash: "#faq",     label: "자주 묻는 질문" },
-] as const;
+const sectionHashes = {
+  compare: "#compare",
+  ranking: "#ranking",
+  faq: "#faq",
+} as const;
 
-// anchorLinks에 정의된 해시만 허용 — CSS 선택자 인젝션 방지
-const ALLOWED_HASHES = new Set<string>(anchorLinks.map((l) => l.hash));
+const navigationItems: readonly PrimaryNavigationItem[] = [
+  { key: "compare", label: "글로벌 가격 비교", to: "#compare", action: true },
+  { key: "ranking", label: "글로벌 랭킹", to: "#ranking", action: true },
+  { key: "faq", label: "자주 묻는 질문", to: "#faq", action: true },
+  { key: "community", label: "커뮤니티", to: "/community" },
+  {
+    key: "plan",
+    label: "내 기준 설정",
+    to: "#plan",
+    action: true,
+    ariaHaspopup: "dialog",
+  },
+];
+
+const selectedSection = ref<keyof typeof sectionHashes>("compare");
+const activeNavigationKey = computed(() => {
+  if (route.path.startsWith("/community")) return "community";
+  if (route.path === `/${SERVICE_SLUG}`) return selectedSection.value;
+  return "";
+});
+
+// 사전에 정의된 해시만 querySelector에 전달한다.
+const ALLOWED_HASHES = new Set<string>(Object.values(sectionHashes));
 
 function scrollToHash(hash: string): void {
   if (!ALLOWED_HASHES.has(hash)) return;
@@ -37,6 +62,20 @@ async function handleAnchorClick(hash: string): Promise<void> {
     await nextTick();
     setTimeout(() => scrollToHash(hash), 150);
   }
+}
+
+async function handlePrimaryNavigation(item: PrimaryNavigationItem): Promise<void> {
+  if (item.key === "plan") {
+    emit("openMyPlan");
+    return;
+  }
+
+  const sectionKey = item.key as keyof typeof sectionHashes;
+  const hash = sectionHashes[sectionKey];
+  if (!hash) return;
+
+  selectedSection.value = sectionKey;
+  await handleAnchorClick(hash);
 }
 
 // 가격 데이터가 없을 때 보여줄 정적 fallback 메시지
@@ -143,41 +182,13 @@ onUnmounted(() => {
     </div>
   </header>
 
-  <nav
-    class="sticky top-0 z-50 h-12 w-full bg-primary"
+  <ShPrimaryNavigation
+    :items="navigationItems"
+    :active-key="activeNavigationKey"
+    :link-component="RouterLink"
     aria-label="섹션 이동"
-  >
-    <div class="container h-full">
-      <div
-        class="flex h-full items-center gap-4 overflow-x-auto"
-        style="scrollbar-width: none"
-      >
-        <button
-          v-for="anchor in anchorLinks"
-          :key="anchor.hash"
-          type="button"
-          class="shrink-0 text-caption font-bold text-primary-foreground/95 transition-colors hover:text-primary-foreground"
-          @click="handleAnchorClick(anchor.hash)"
-        >
-          {{ anchor.label }}
-        </button>
-        <RouterLink
-          to="/community"
-          class="shrink-0 text-caption font-bold text-primary-foreground/95 transition-colors hover:text-primary-foreground"
-        >
-          커뮤니티
-        </RouterLink>
-        <button
-          type="button"
-          class="shrink-0 text-caption font-bold text-primary-foreground/95 transition-colors hover:text-primary-foreground"
-          aria-haspopup="dialog"
-          @click="emit('openMyPlan')"
-        >
-          내 기준 설정
-        </button>
-      </div>
-    </div>
-  </nav>
+    @select="handlePrimaryNavigation"
+  />
 </template>
 
 <style scoped>
