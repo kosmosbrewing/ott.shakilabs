@@ -13,8 +13,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@shakilabs/ui": "file:vendor/shakilabs-ui-0.2.7.tgz",
     "@sentry/vue": "^10.43.0",
+    "@shakilabs/ui": "file:vendor/shakilabs-ui-0.3.1.tgz",
     "@unhead/vue": "^2.1.12",
     "autoprefixer": "^10.4.24",
     "class-variance-authority": "^0.7.1",
