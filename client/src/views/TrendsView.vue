@@ -127,7 +127,7 @@ watch(serviceSlug, async () => {
             <h2 class="retro-title">최저가 TOP 10 (개인)</h2>
           </div>
           <CardContent>
-            <Table>
+            <Table class="w-max min-w-full whitespace-nowrap">
               <caption class="sr-only">개인 요금제 최저가 상위 10개 국가</caption>
               <TableHeader class="sticky top-0 z-10 bg-background">
                 <TableRow>
@@ -162,7 +162,7 @@ watch(serviceSlug, async () => {
             <h2 class="retro-title">한국 대비 절약률 TOP 10</h2>
           </div>
           <CardContent>
-            <Table>
+            <Table class="w-max min-w-full whitespace-nowrap">
               <caption class="sr-only">한국 대비 절약률 상위 10개 국가</caption>
               <TableHeader class="sticky top-0 z-10 bg-background">
                 <TableRow>
@@ -198,7 +198,7 @@ watch(serviceSlug, async () => {
           <h2 class="retro-title">최근 가격 변동 TOP 10 (개인 · KRW)</h2>
         </div>
         <CardContent>
-          <Table>
+          <Table class="w-max min-w-full whitespace-nowrap">
             <caption class="sr-only">최근 개인 요금제 가격 변동 상위 10개 국가</caption>
             <TableHeader class="sticky top-0 z-10 bg-background">
               <TableRow>

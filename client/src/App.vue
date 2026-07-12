@@ -71,7 +71,7 @@ onMounted(async () => {
     class="design-system-shell min-h-screen flex flex-col bg-background"
   >
     <AppHeader @open-my-plan="openMyPlanModal" />
-    <main class="flex-1 relative">
+    <main class="text-resize-layout flex-1 relative">
       <RouterView v-slot="{ Component }">
         <Transition name="page-fade" mode="out-in">
           <component :is="Component" />

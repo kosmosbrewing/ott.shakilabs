@@ -36,6 +36,11 @@
 @tailwind components;
 @tailwind utilities;
 
+.tabular-nums {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -178,9 +183,17 @@
     padding-inline: 12px;
   }
 
-  .text-resize-layout :is(h1, h2, h3, p, a, button, span) {
+  .text-resize-layout :is(h1, h2, h3, h4) {
+    min-width: 0;
+    overflow-wrap: break-word;
+    text-wrap-style: balance;
+    word-break: keep-all;
+  }
+
+  .text-resize-layout :is(p, li, dt, dd) {
     min-width: 0;
     overflow-wrap: anywhere;
+    text-wrap-style: pretty;
   }
 
   .text-resize-layout section > .retro-panel-content > .grid > a {
