@@ -25,6 +25,7 @@ const sectionHashes = {
 } as const;
 
 const navigationItems: readonly PrimaryNavigationItem[] = [
+  { key: "home", label: "OTT 홈", to: "/" },
   { key: "compare", label: "글로벌 가격 비교", to: "#compare", action: true },
   { key: "ranking", label: "글로벌 랭킹", to: "#ranking", action: true },
   { key: "faq", label: "자주 묻는 질문", to: "#faq", action: true },
@@ -40,12 +41,12 @@ const navigationItems: readonly PrimaryNavigationItem[] = [
 
 const selectedSection = ref<keyof typeof sectionHashes>("compare");
 const activeNavigationKey = computed(() => {
+  if (route.path === "/") return "home";
   if (route.path.startsWith("/community")) return "community";
   if (route.path === `/${SERVICE_SLUG}`) return selectedSection.value;
   return "";
 });
 
-// 사전에 정의된 해시만 querySelector에 전달한다.
 const ALLOWED_HASHES = new Set<string>(Object.values(sectionHashes));
 
 function scrollToHash(hash: string): void {
@@ -78,7 +79,6 @@ async function handlePrimaryNavigation(item: PrimaryNavigationItem): Promise<voi
   await handleAnchorClick(hash);
 }
 
-// 가격 데이터가 없을 때 보여줄 정적 fallback 메시지
 const FALLBACK_MESSAGES = [
   "국가별 구독료를 한눈에 비교하세요",
   "현재 환율 기준 최저가 국가 랭킹",
@@ -89,22 +89,16 @@ const { messages: dynamicMessages } = useHeadlineMessages();
 const currentHeadlineIndex = ref(0);
 let headlineTicker: ReturnType<typeof setInterval> | null = null;
 
-// 동적 메시지가 있으면 사용, 없으면 fallback
-const activeMessages = computed(() =>
-  dynamicMessages.value.length > 0 ? dynamicMessages.value : FALLBACK_MESSAGES
-);
+const activeMessages = computed(() => dynamicMessages.value.length > 0 ? dynamicMessages.value : FALLBACK_MESSAGES);
 
-const currentHeadline = computed(
-  () => activeMessages.value[currentHeadlineIndex.value % activeMessages.value.length]
-);
+const currentHeadline = computed(() => activeMessages.value[currentHeadlineIndex.value % activeMessages.value.length]);
 
 const THEME_STORAGE_KEY = "ottwatcher:theme:v1";
 type ThemeMode = "light" | "dark";
 const theme = ref<ThemeMode>("light");
 
 function rotateHeadline(): void {
-  currentHeadlineIndex.value =
-    (currentHeadlineIndex.value + 1) % activeMessages.value.length;
+  currentHeadlineIndex.value = (currentHeadlineIndex.value + 1) % activeMessages.value.length;
 }
 
 function applyTheme(next: ThemeMode): void {
@@ -123,7 +117,6 @@ onMounted(() => {
     ? "dark"
     : "light";
 
-  // 4000ms: transition 300ms×2 = 600ms 제외 시 실독 시간 ≈ 3.4s
   headlineTicker = setInterval(rotateHeadline, 4000);
 });
 
@@ -192,7 +185,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* 스톡 티커 느낌: 위로 스크롤되며 다음 메시지 등장 */
 .headline-fade-enter-active,
 .headline-fade-leave-active {
   transition: transform 0.3s ease;
