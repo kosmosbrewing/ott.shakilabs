@@ -9,7 +9,7 @@
 - sitemap: 50 indexable URLs
 - 공통 UI: `@shakilabs/ui` `0.3.7` exact artifact
 - 데이터: 정적 가격 snapshot 우선, API 성공 시 검증된 최신 데이터로 보강
-- current main: `2405055` (2026-07-14 점검)
+- 코드 기준: 2026-07-14 `main` 및 production audit 통과
 
 ## 개발
 
