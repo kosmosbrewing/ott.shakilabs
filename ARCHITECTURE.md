@@ -1,5 +1,7 @@
 # OTT 구독 서비스 국가별 가격 비교 사이트 — MVP 프롬프트
 
+> 문서 성격: 최초 MVP 설계 입력을 보존한 historical snapshot. 현재 구현·실행 방법은 `client/README.md`, 현재 전체 운영 수치는 `../docs/OPERATIONS_STATUS.md`를 따른다.
+
 ## 프롬프트 (복사용)
 
 ```
