@@ -8,7 +8,7 @@ import {
   getCountryEntries,
 } from "./seo-routes.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
-import { buildRichContent } from "./prerender-content.mjs";
+import { buildRichContent, getFaqItems } from "./prerender-content.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,6 +51,31 @@ function injectJsonLd(html, jsonLd) {
   const safeJson = JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>");
   const script = `<script type="application/ld+json">${safeJson}<\/script>`;
   return html.replace("</head>", `  ${script}\n  </head>`);
+}
+
+// FAQ 화면 HTML(<strong> 등)을 스키마용 순수 텍스트로 변환 — 보이는 문구와 동일해야 함
+function toPlainText(html) {
+  return String(html)
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// 화면에 FAQ가 보이는 페이지에만 FAQPage JSON-LD를 정확히 1개 생성.
+// body의 data-seo-prerender 요소로 주입되므로 앱 마운트 시 removePrerenderFallback()이
+// 본문 FAQ와 함께 제거해 런타임(useSEO) FAQPage와 중복되지 않는다.
+function buildFaqJsonLdScript(faqItems) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: toPlainText(item.q),
+      acceptedAnswer: { "@type": "Answer", text: toPlainText(item.a) },
+    })),
+  };
+  const safeJson = JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>");
+  return `<script data-seo-prerender="faq-jsonld" type="application/ld+json">${safeJson}<\/script>`;
 }
 
 function buildFallbackHtml(meta) {
@@ -257,6 +282,7 @@ function buildRouteHtml(templateHtml, route, countryMap) {
   html = html.replace(/\n?\s*<article data-seo-prerender[\s\S]*?<\/article>/i, "");
   html = html.replace(/\n?\s*<footer data-seo-prerender[\s\S]*?<\/footer>/i, "");
   html = html.replace(/\n?\s*<div data-seo-prerender[\s\S]*?<\/div>/i, "");
+  html = html.replace(/\n?\s*<script data-seo-prerender[\s\S]*?<\/script>/i, "");
 
   // 리치 콘텐츠 우선 시도 → 없으면 기본 fallback
   const rich = buildRichContent(route);
@@ -264,7 +290,11 @@ function buildRouteHtml(templateHtml, route, countryMap) {
   const headerHtml = buildPrerenderHeader();
   const footerHtml = buildPrerenderFooter();
 
-  const injection = `${headerHtml}${mainContent}${footerHtml}`;
+  // FAQ가 화면에 보이는 라우트에만 FAQPage 스키마 1개 — Q&A 없는 페이지는 주입 금지
+  const faqItems = getFaqItems(route);
+  const faqJsonLdHtml = faqItems.length > 0 ? buildFaqJsonLdScript(faqItems) : "";
+
+  const injection = `${headerHtml}${mainContent}${faqJsonLdHtml}${footerHtml}`;
 
   if (html.includes('<div id="app"></div>')) {
     html = html.replace(

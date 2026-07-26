@@ -61,6 +61,100 @@ function getContinentLabel(c) {
 }
 
 // =========================
+// FAQ 데이터 — 화면 HTML과 FAQPage JSON-LD가 같은 소스를 공유해
+// "스키마 텍스트 = 화면 텍스트" 불일치를 원천 차단한다
+// =========================
+
+function getHomeFaqItems() {
+  const data = loadData();
+  return [
+    {
+      q: "한국에서 가장 저렴하게 구독하는 방법은 무엇인가요?",
+      a: `합법적인 방법으로는 한국 정상 가격(₩14,900) 또는 "가족 플랜 공유"(최대 5인 한도)가 가장 현실적입니다. 가족 플랜은 월 22,900원으로 5명이 나누면 1인당 약 4,580원입니다. 이는 개인 플랜보다 약 70% 저렴한 수준입니다. 학생이라면 학생 할인 플랜(월 8,690원)도 이용할 수 있습니다.`,
+    },
+    {
+      q: "데이터는 얼마나 자주 업데이트되나요?",
+      a: `가격 정보는 주기적으로 수집해 갱신하며, 환율은 자동 갱신됩니다. 최종 업데이트: <strong>${data.lastUpdated}</strong>. Google의 가격 정책 변경 공지가 있을 때마다 수동 확인 후 반영하며, 환율은 공개 환율 API를 통해 매일 자동 업데이트됩니다.`,
+    },
+    {
+      q: "광고 제거 외에 유튜브 프리미엄의 혜택은?",
+      a: `광고 제거, 백그라운드 재생, 오프라인 저장, YouTube Music Premium 포함, 고품질 오디오(최대 256kbps)가 포함됩니다. YouTube Music 단독 구독(월 8,690원)보다 약 6천원만 추가하면 유튜브 광고까지 제거되어 사실상 묶음 할인 혜택이 있습니다.`,
+    },
+    {
+      q: "VPN으로 다른 국가 가격으로 구독이 가능한가요?",
+      a: `원칙적으로 불가능합니다. 가격은 VPN 위치가 아니라 Google 계정의 <strong>청구 국가</strong>와 <strong>결제 수단 발행 국가</strong>로 결정됩니다. VPN만 사용해서는 다른 국가의 가격을 볼 수 없으며, 강제로 변경하려 해도 결제가 거부되거나 향후 자동으로 재변경됩니다.`,
+    },
+    {
+      q: "가족 플랜은 어떻게 공유하나요?",
+      a: `가족 플랜은 한 가구 내 최대 5명(가구주 1명 + 가족 구성원 4명)까지 공유할 수 있습니다. Google 계정의 "가족 그룹" 기능을 통해 초대하며, 모든 구성원은 동일 가구 주소에 거주해야 합니다. 정책상 주소가 다른 친구·지인과의 공유는 금지되며, 감지 시 일부 계정이 제거될 수 있습니다.`,
+    },
+    {
+      q: "유튜브 프리미엄 라이트(Lite) 플랜이 뭔가요?",
+      a: `Lite 플랜은 일부 국가에서만 제공되는 저가 요금제로, YouTube Music이 제외된 "광고 제거 전용" 플랜입니다. 가격은 일반 개인 플랜의 약 50~60% 수준이며, 한국에서도 월 8,500원에 이용할 수 있습니다.`,
+    },
+  ];
+}
+
+function getCountryFaqItems(countryCode) {
+  const data = loadData();
+  const row = data.prices.find(
+    (p) => String(p.countryCode || "").toLowerCase() === countryCode.toLowerCase()
+  );
+  if (!row) return [];
+
+  const countryName = row.country;
+  const lastUpdated = data.lastUpdated || "";
+  return [
+    {
+      q: `${countryName} 가격으로 구독하려면 어떻게 해야 하나요?`,
+      a: `Google 계정의 청구 국가를 ${countryName}으로 변경하고 해당 국가의 결제 수단을 등록해야 합니다. 단, 청구 국가 변경은 Google 정책상 1년에 1회만 가능하며, 변경 전 기존 구독을 취소하고 잔여 기간이 종료되어야 합니다.`,
+    },
+    {
+      q: `VPN만 사용하면 ${countryName} 가격이 되나요?`,
+      a: `아니오. 가격은 VPN이 아닌 "결제 수단 발행 국가"와 "Google 계정 청구 주소"로 결정됩니다. 한국 카드·주소로는 VPN을 사용해도 ${countryName} 가격을 볼 수 없습니다.`,
+    },
+    {
+      q: `${countryName}에서 구독 후 한국에서도 이용 가능한가요?`,
+      a: `유튜브 프리미엄은 전 세계 대부분의 국가에서 스트리밍 가능합니다. 다만 일부 국가에 영상 시청 지역 제한이 있을 수 있으며, 장기간 한국 IP에서 접속할 경우 Google이 실제 거주지를 재확인할 수 있습니다.`,
+    },
+    {
+      q: `한국 신용카드로 ${countryName} 구독 결제가 가능한가요?`,
+      a: `원칙적으로 Google 청구 국가와 카드 발행 국가가 일치해야 합니다. 한국 카드로 ${countryName} 가격 구독을 시도하면 결제 거부 또는 향후 청구 국가 자동 재변경이 발생할 수 있습니다.`,
+    },
+    {
+      q: `${countryName} 가격은 자주 바뀌나요?`,
+      a: `국가별 가격은 환율·물가·부가세 변동에 따라 조정되며, Google이 주기적으로 가격 정책을 재검토합니다. 본 페이지의 가격은 ${lastUpdated} 기준이며, 실제 결제 시점에 따라 다를 수 있으므로 Google Play·YouTube 공식 페이지에서 최종 확인하세요.`,
+    },
+  ];
+}
+
+// 화면용 FAQ 섹션 HTML (Qn. 접두어는 시각적 번호일 뿐, 스키마에는 질문 원문만 사용)
+function buildFaqSectionHtml(items) {
+  return items
+    .map(
+      (item, i) => `
+      <h3 style="${H3}">Q${i + 1}. ${item.q}</h3>
+      <p style="${P}">${item.a}</p>`
+    )
+    .join("");
+}
+
+// prerender.mjs가 FAQPage JSON-LD를 만들 때 사용하는 라우트별 FAQ 데이터.
+// 반환이 빈 배열이면 해당 페이지에는 화면 FAQ가 없다는 뜻 → 스키마 주입 금지.
+export function getFaqItems(route) {
+  if (route === "/" || route === "/youtube-premium") {
+    return getHomeFaqItems();
+  }
+  if (route.startsWith("/youtube-premium/")) {
+    const code = route.split("/").at(-1);
+    if (code && /^[a-z]{2}$/.test(code)) {
+      return getCountryFaqItems(code);
+    }
+  }
+  return [];
+}
+
+// =========================
 // 국가별 페이지 (/youtube-premium/:code)
 // =========================
 function buildCountryContent(countryCode) {
@@ -255,36 +349,7 @@ function buildCountryContent(countryCode) {
       </ul>
 
       <h2 style="${H2}">5. 자주 묻는 질문 (FAQ)</h2>
-
-      <h3 style="${H3}">Q1. ${countryName} 가격으로 구독하려면 어떻게 해야 하나요?</h3>
-      <p style="${P}">
-        Google 계정의 청구 국가를 ${countryName}으로 변경하고 해당 국가의 결제 수단을 등록해야 합니다.
-        단, 청구 국가 변경은 Google 정책상 1년에 1회만 가능하며, 변경 전 기존 구독을 취소하고 잔여 기간이 종료되어야 합니다.
-      </p>
-
-      <h3 style="${H3}">Q2. VPN만 사용하면 ${countryName} 가격이 되나요?</h3>
-      <p style="${P}">
-        아니오. 가격은 VPN이 아닌 "결제 수단 발행 국가"와 "Google 계정 청구 주소"로 결정됩니다.
-        한국 카드·주소로는 VPN을 사용해도 ${countryName} 가격을 볼 수 없습니다.
-      </p>
-
-      <h3 style="${H3}">Q3. ${countryName}에서 구독 후 한국에서도 이용 가능한가요?</h3>
-      <p style="${P}">
-        유튜브 프리미엄은 전 세계 대부분의 국가에서 스트리밍 가능합니다. 다만 일부 국가에 영상 시청 지역 제한이 있을 수 있으며,
-        장기간 한국 IP에서 접속할 경우 Google이 실제 거주지를 재확인할 수 있습니다.
-      </p>
-
-      <h3 style="${H3}">Q4. 한국 신용카드로 ${countryName} 구독 결제가 가능한가요?</h3>
-      <p style="${P}">
-        원칙적으로 Google 청구 국가와 카드 발행 국가가 일치해야 합니다.
-        한국 카드로 ${countryName} 가격 구독을 시도하면 결제 거부 또는 향후 청구 국가 자동 재변경이 발생할 수 있습니다.
-      </p>
-
-      <h3 style="${H3}">Q5. ${countryName} 가격은 자주 바뀌나요?</h3>
-      <p style="${P}">
-        국가별 가격은 환율·물가·부가세 변동에 따라 조정되며, Google이 주기적으로 가격 정책을 재검토합니다.
-        본 페이지의 가격은 ${lastUpdated} 기준이며, 실제 결제 시점에 따라 다를 수 있으므로 Google Play·YouTube 공식 페이지에서 최종 확인하세요.
-      </p>
+      ${buildFaqSectionHtml(getCountryFaqItems(countryCode))}
 
       <h2 style="${H2}">6. 다른 저렴한 국가 비교</h2>
       <ul style="${UL}">
@@ -394,44 +459,7 @@ function buildHomeContent() {
       </div>
 
       <h2 style="${H2}">자주 묻는 질문 (FAQ)</h2>
-
-      <h3 style="${H3}">Q1. 한국에서 가장 저렴하게 구독하는 방법은 무엇인가요?</h3>
-      <p style="${P}">
-        합법적인 방법으로는 한국 정상 가격(₩14,900) 또는 "가족 플랜 공유"(최대 5인 한도)가 가장 현실적입니다.
-        가족 플랜은 월 22,900원으로 5명이 나누면 1인당 약 4,580원입니다. 이는 개인 플랜보다 약 70% 저렴한 수준입니다.
-        학생이라면 학생 할인 플랜(월 8,690원)도 이용할 수 있습니다.
-      </p>
-
-      <h3 style="${H3}">Q2. 데이터는 얼마나 자주 업데이트되나요?</h3>
-      <p style="${P}">
-        가격 정보는 주기적으로 수집해 갱신하며, 환율은 자동 갱신됩니다. 최종 업데이트: <strong>${data.lastUpdated}</strong>.
-        Google의 가격 정책 변경 공지가 있을 때마다 수동 확인 후 반영하며, 환율은 공개 환율 API를 통해 매일 자동 업데이트됩니다.
-      </p>
-
-      <h3 style="${H3}">Q3. 광고 제거 외에 유튜브 프리미엄의 혜택은?</h3>
-      <p style="${P}">
-        광고 제거, 백그라운드 재생, 오프라인 저장, YouTube Music Premium 포함, 고품질 오디오(최대 256kbps)가 포함됩니다.
-        YouTube Music 단독 구독(월 8,690원)보다 약 6천원만 추가하면 유튜브 광고까지 제거되어 사실상 묶음 할인 혜택이 있습니다.
-      </p>
-
-      <h3 style="${H3}">Q4. VPN으로 다른 국가 가격으로 구독이 가능한가요?</h3>
-      <p style="${P}">
-        원칙적으로 불가능합니다. 가격은 VPN 위치가 아니라 Google 계정의 <strong>청구 국가</strong>와 <strong>결제 수단 발행 국가</strong>로 결정됩니다.
-        VPN만 사용해서는 다른 국가의 가격을 볼 수 없으며, 강제로 변경하려 해도 결제가 거부되거나 향후 자동으로 재변경됩니다.
-      </p>
-
-      <h3 style="${H3}">Q5. 가족 플랜은 어떻게 공유하나요?</h3>
-      <p style="${P}">
-        가족 플랜은 한 가구 내 최대 5명(가구주 1명 + 가족 구성원 4명)까지 공유할 수 있습니다.
-        Google 계정의 "가족 그룹" 기능을 통해 초대하며, 모든 구성원은 동일 가구 주소에 거주해야 합니다.
-        정책상 주소가 다른 친구·지인과의 공유는 금지되며, 감지 시 일부 계정이 제거될 수 있습니다.
-      </p>
-
-      <h3 style="${H3}">Q6. 유튜브 프리미엄 라이트(Lite) 플랜이 뭔가요?</h3>
-      <p style="${P}">
-        Lite 플랜은 일부 국가에서만 제공되는 저가 요금제로, YouTube Music이 제외된 "광고 제거 전용" 플랜입니다.
-        가격은 일반 개인 플랜의 약 50~60% 수준이며, 한국에서도 월 8,500원에 이용할 수 있습니다.
-      </p>
+      ${buildFaqSectionHtml(getHomeFaqItems())}
 
       <h2 style="${H2}">관련 페이지</h2>
       <ul style="${UL}">
