@@ -22,6 +22,7 @@ import ServiceSEOSection from "@/components/price/ServiceSEOSection.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import { Vote } from "lucide-vue-next";
 import { useMyPlan } from "@/composables/useMyPlan";
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 
 const route = useRoute();
 const { services, loadServices } = useServices();
@@ -476,31 +477,41 @@ watch(serviceSlug, async (slug) => {
       <h1 class="sr-only">YouTube Premium 글로벌 가격 비교 — 나라별 구독료 최저가 순위</h1>
 
       <!-- VS 비교 + 공유 -->
-      <PriceComparisonSection
-        ref="comparisonRef"
-        :price-data="priceData"
-        :selected-plan="selectedPlan"
-        :selected-plan-label="selectedPlanLabel"
-        :service-name="serviceName"
-        :service-slug="serviceSlug"
-        :compare-price-rows="comparePriceRows"
-      />
+      <CalculatorInteractionTracker
+        calculator-id="youtube_premium_compare"
+        :page-path="'/ott/' + serviceSlug"
+      >
+        <PriceComparisonSection
+          ref="comparisonRef"
+          :price-data="priceData"
+          :selected-plan="selectedPlan"
+          :selected-plan-label="selectedPlanLabel"
+          :service-name="serviceName"
+          :service-slug="serviceSlug"
+          :compare-price-rows="comparePriceRows"
+        />
+      </CalculatorInteractionTracker>
 
       <AdSlot position="top" :preview="showAdPreview" />
 
       <!-- 필터 영역 -->
       <Card class="mb-4 retro-panel">
         <CardContent class="space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <PlanSelector
-              v-if="currentService"
-              :plans="currentService.plans"
-              v-model="selectedPlan"
-            />
-            <div class="flex items-center gap-2">
-              <SortToggle v-model="sortOrder" />
+          <CalculatorInteractionTracker
+            calculator-id="youtube_premium_filter"
+            :page-path="'/ott/' + serviceSlug"
+          >
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <PlanSelector
+                v-if="currentService"
+                :plans="currentService.plans"
+                v-model="selectedPlan"
+              />
+              <div class="flex items-center gap-2">
+                <SortToggle v-model="sortOrder" />
+              </div>
             </div>
-          </div>
+          </CalculatorInteractionTracker>
         </CardContent>
       </Card>
 
