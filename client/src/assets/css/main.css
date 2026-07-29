@@ -47,6 +47,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* 한국어는 기본값(word-break: normal)에서 어절 중간이 잘려 개행이 어색해진다.
+       keep-all로 공백 단위 줄바꿈을 강제하고, 긴 숫자·URL만 break-word로 예외 처리한다. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
 }
 
