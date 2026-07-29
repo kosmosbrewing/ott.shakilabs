@@ -51,6 +51,8 @@
        keep-all로 공백 단위 줄바꿈을 강제하고, 긴 숫자·URL만 break-word로 예외 처리한다. */
     word-break: keep-all;
     overflow-wrap: break-word;
+    /* 마지막 줄에 한두 글자만 남는 고아줄을 줄인다 (미지원 브라우저는 무시) */
+    text-wrap: pretty;
   }
 }
 
