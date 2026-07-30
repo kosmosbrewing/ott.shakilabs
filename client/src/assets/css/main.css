@@ -293,3 +293,26 @@
     background: currentColor;
   }
 }
+
+/* ui 0.3.9 follow-up: unify the active-underline grammar on desktop too.
+   The stock indicator spans the link width (last item includes the 2.5rem fade
+   padding), so it overshoots the text. Replace with a label-width ::after,
+   same as the mobile override above. Remove once the next ui version ships. */
+.sh-primary-navigation__link--desktop .sh-primary-navigation__indicator {
+  display: none;
+}
+
+.sh-primary-navigation__link--desktop.sh-primary-navigation__link--active .sh-primary-navigation__label {
+  position: relative;
+}
+
+.sh-primary-navigation__link--desktop.sh-primary-navigation__link--active .sh-primary-navigation__label::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -0.375rem;
+  left: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
