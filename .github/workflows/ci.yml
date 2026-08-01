@@ -36,3 +36,17 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Generate production SBOM
+        run: npm run sbom:prod
+
+      # 재생성 후 diff가 아니라 신원만 본다(타임스탬프·UUID·npm 버전 때문에 diff는 상시 red).
+      # 네트워크 불필요, 1초 미만, 완전 결정적.
+      - name: Verify vendored artifacts
+        run: npm run verify:supply-chain
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-sbom
+          path: client/artifacts/sbom/*.json

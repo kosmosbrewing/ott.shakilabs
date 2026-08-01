@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "ott-watcher-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,8 @@
     "build": "vite build && node scripts/generate-og-images.mjs && node scripts/prerender.mjs",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "sbom:prod": "node scripts/sbom.mjs",
+    "verify:supply-chain": "node scripts/verify-vendor.mjs && node scripts/verify-sbom-identity.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

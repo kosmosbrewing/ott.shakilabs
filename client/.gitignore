@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# 빌드 산출물(SBOM 등)은 저장소에 남기지 않는다 — 워크플로 아티팩트로만 보관.
+# 스캐폴딩 복사 때 남의 앱 SBOM이 함께 커밋된 사고가 있었다.
+artifacts/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
