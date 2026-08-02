@@ -113,48 +113,13 @@ const pageDescription = computed(() => {
   return `${svc} ${country} 구독 요금 상세 정보. 개인/가족/학생 요금제별 나라별 가격 비교.`;
 });
 
-const countryDetailJsonLd = computed<Record<string, unknown> | undefined>(() => {
-  if (!countryData.value) return undefined;
-
-  const normalizedCountryCode = countryData.value.countryCode.toLowerCase();
-  const serviceName = currentService.value?.name || "유튜브 프리미엄";
-  const countryName = countryData.value.country || normalizedCountryCode.toUpperCase();
-
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "홈",
-            item: `${siteUrl}/`,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: serviceName,
-            item: `${siteUrl}/${serviceSlug.value}`,
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: countryName,
-            item: `${siteUrl}/${serviceSlug.value}/${normalizedCountryCode}`,
-          },
-        ],
-      },
-    ],
-  };
-});
-
+// BreadcrumbList는 prerender(scripts/prerender.mjs)가 국가 라우트마다 <head>에 이미 주입하고,
+// 그 스크립트는 하이드레이션 후에도 남는다. 여기서 같은 그래프를 다시 내면 한 페이지에
+// BreadcrumbList가 2개 생기므로 런타임에서는 내지 않는다.
 useSEO({
   title: pageTitle,
   description: pageDescription,
   ogImage: `${siteUrl}/og/v2/youtube-premium/${countryCode.value}.png`,
-  jsonLd: countryDetailJsonLd,
 });
 
 // 통화 포맷 헬퍼

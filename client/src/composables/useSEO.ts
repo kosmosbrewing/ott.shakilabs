@@ -69,12 +69,16 @@ export function useSEO({
             ]
           : []),
       ],
+      // @unhead/vue v2는 스크립트 본문을 innerHTML/textContent로만 렌더한다.
+      // v1의 children은 v2에서 스키마 키가 아니라 일반 prop이라, 기본 플러그인 구성
+      // (DeprecationsPlugin 미등록)에서는 본문 대신 children="..." HTML 속성으로 새어나가
+      // 본문이 빈 ld+json 블록이 만들어진다.
       script: resolvedJsonLd
         ? [
             {
               key: "json-ld",
               type: "application/ld+json",
-              children: JSON.stringify(resolvedJsonLd),
+              innerHTML: JSON.stringify(resolvedJsonLd),
             },
           ]
         : [],
