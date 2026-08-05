@@ -55,7 +55,10 @@ function ensureAdsenseScript(): Promise<void> {
   if (adsenseScriptPromise) return adsenseScriptPromise;
 
   adsenseScriptPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>('script[data-adsense-loader="true"]');
+    // index.html의 정적 로더(data-adsense)도 인식해야 이중 주입을 막는다
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[data-adsense-loader="true"], script[data-adsense="true"]'
+    );
     if (existing) {
       existing.addEventListener("load", () => resolve(), { once: true });
       existing.addEventListener("error", () => reject(new Error("AdSense script load failed")), { once: true });

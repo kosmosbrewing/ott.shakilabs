@@ -75,6 +75,24 @@ useSEO({
       <CardContent>
         <ul class="list-disc list-inside text-body text-muted-foreground space-y-1">
           <li>본 서비스는 Google AdSense 등의 광고 프로그램을 통해 광고를 게재할 수 있습니다.</li>
+          <li>Google을 포함한 제3자 광고 사업자는 광고 쿠키를 사용하여 이용자의 방문 기록 기반 맞춤 광고를 게재할 수 있습니다.</li>
+          <li>
+            맞춤 광고는
+            <a
+              href="https://adssettings.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary hover:underline"
+            >Google 광고 설정</a>
+            또는
+            <a
+              href="https://www.aboutads.info/choices"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary hover:underline"
+            >www.aboutads.info/choices</a>
+            에서 거부할 수 있습니다.
+          </li>
           <li>광고 콘텐츠는 광고주가 제공하며, 서비스는 광고 내용에 대해 책임을 지지 않습니다.</li>
           <li>광고 쿠키 사용에 관한 자세한 내용은 <a href="/privacy" class="text-primary hover:underline">개인정보처리방침</a>을 참고하세요.</li>
         </ul>

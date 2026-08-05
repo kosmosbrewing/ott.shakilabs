@@ -36,6 +36,11 @@ useSEO({
         <p class="text-body text-muted-foreground mt-2">
           커뮤니티에 수집된 IP 및 User-Agent는 어뷰징·스팸 방지 목적으로만 사용되며, 외부에 공개되지 않습니다.
         </p>
+        <p class="text-body text-muted-foreground mt-2">
+          본 서비스는 회원가입·뉴스레터·가격 알림 등 이메일 주소를 수집하는 기능을 운영하지 않으며,
+          이용자가 문의 목적으로 직접 발송한 이메일 외에 이메일 주소를 수집·보관하지 않습니다.
+          테마 등 화면 설정 값은 이용자의 브라우저(localStorage)에만 저장되며 서버로 전송되지 않습니다.
+        </p>
       </section>
 
       <section>
@@ -53,7 +58,23 @@ useSEO({
             에서 설정할 수 있습니다.
           </li>
           <li>
-            Google AdSense: 맞춤 광고 제공을 위해 쿠키를 사용할 수 있습니다.
+            Google AdSense: Google을 포함한 제3자 광고 사업자는 광고 쿠키를 사용하여
+            이용자의 본 사이트 및 다른 웹사이트 방문 기록을 기반으로 맞춤 광고를 게재할 수 있습니다.
+            맞춤 광고(개인 맞춤 광고)는
+            <a
+              href="https://adssettings.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="underline"
+            >Google 광고 설정</a>
+            또는
+            <a
+              href="https://www.aboutads.info/choices"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="underline"
+            >www.aboutads.info/choices</a>
+            에서 언제든지 사용 중지(opt-out)할 수 있습니다.
           </li>
         </ul>
       </section>
@@ -101,7 +122,7 @@ useSEO({
 
       <section>
         <h2 class="text-h2 mb-3">6. 개인정보 보호책임자 및 문의</h2>
-        <p class="text-body leading-relaxed">운영: Shakilabs</p>
+        <p class="text-body leading-relaxed">운영: ShakiLabs</p>
         <p class="text-body leading-relaxed">
           이메일:
           <a href="mailto:skdba1313@gmail.com" class="underline">skdba1313@gmail.com</a>

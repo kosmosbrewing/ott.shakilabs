@@ -40,6 +40,34 @@ useSEO({
 
     <Card class="mb-6 retro-panel">
       <CardHeader>
+        <CardTitle>데이터 출처와 검증 방법</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-body text-muted-foreground mb-2">
+          모든 가격 데이터는
+          <a
+            href="https://www.youtube.com/premium"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary hover:underline"
+          >YouTube Premium 공식 페이지</a>
+          등 각국 공식 요금 페이지와 직접 대조해 검증한 뒤 게재하며, 정기적으로 재검증·갱신합니다.
+        </p>
+        <p class="text-body text-muted-foreground">
+          요금제·결제 관련 공식 안내는
+          <a
+            href="https://support.google.com/youtube"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary hover:underline"
+          >YouTube 고객센터</a>
+          에서 확인할 수 있습니다.
+        </p>
+      </CardContent>
+    </Card>
+
+    <Card class="mb-6 retro-panel">
+      <CardHeader>
         <CardTitle>면책 조항</CardTitle>
       </CardHeader>
       <CardContent>
@@ -53,13 +81,16 @@ useSEO({
 
     <Card class="retro-panel">
       <CardHeader>
-        <CardTitle>문의 · 오류 제보</CardTitle>
+        <CardTitle>운영자 정보 · 문의</CardTitle>
       </CardHeader>
       <CardContent>
-        <p class="text-body text-muted-foreground mb-2">잘못된 가격 정보 제보 및 기타 문의:</p>
-        <a href="mailto:skdba1313@gmail.com" class="text-body font-semibold hover:underline">
-          skdba1313@gmail.com
-        </a>
+        <p class="text-body font-semibold mb-2">
+          운영: ShakiLabs · 문의:
+          <a href="mailto:skdba1313@gmail.com" class="hover:underline">skdba1313@gmail.com</a>
+        </p>
+        <p class="text-body text-muted-foreground">
+          잘못된 가격 정보 제보 및 기타 문의를 이메일로 받고 있습니다.
+        </p>
       </CardContent>
     </Card>
   </div>

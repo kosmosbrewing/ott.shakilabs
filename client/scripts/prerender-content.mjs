@@ -620,13 +620,16 @@ function buildAboutContent() {
         <li style="${LI}"><strong>법적 주의사항</strong> — 약관 위반 리스크와 합법 이용 범위 명시</li>
       </ul>
 
-      <h2 style="${H2}">2. 데이터 출처 및 갱신</h2>
+      <h2 style="${H2}">3. 데이터 출처 및 검증 방법</h2>
       <p style="${P}">
         가격 데이터는 공개된 Google/YouTube 공식 페이지와 각 국가의 공식 요금표를 수집해 정기적으로 갱신합니다.
+        모든 가격은 <a href="https://www.youtube.com/premium" target="_blank" rel="noopener noreferrer">YouTube Premium 공식 페이지</a> 등
+        각국 공식 요금 페이지와 직접 대조해 검증한 뒤 게재하며,
+        요금제·결제 관련 공식 안내는 <a href="https://support.google.com/youtube" target="_blank" rel="noopener noreferrer">YouTube 고객센터</a>에서 확인할 수 있습니다.
         환율은 공개 환율 API를 통해 자동 갱신되며, 본 사이트는 자체 원화 환산 로직을 적용합니다.
       </p>
 
-      <h2 style="${H2}">3. 이용 시 주의사항</h2>
+      <h2 style="${H2}">4. 이용 시 주의사항</h2>
       <div style="${CALLOUT}">
         <strong>⚠️ 약관 위반 위험 안내</strong><br>
         Google/YouTube 이용약관에 따르면, 구독자는 "실제 거주지 국가"의 가격을 지불해야 합니다.
@@ -643,12 +646,15 @@ function buildAboutContent() {
         실제로 해외 거주·체류 중인 사용자만 해당 국가의 가격으로 합법적으로 구독할 수 있습니다.
       </p>
 
-      <h2 style="${H2}">4. 운영자 정보</h2>
+      <h2 style="${H2}">5. 운영자 정보</h2>
+      <p style="${P}">
+        운영: ShakiLabs · 문의: <a href="mailto:skdba1313@gmail.com">skdba1313@gmail.com</a>
+      </p>
       <table style="${TABLE}">
         <tbody>
           <tr>
             <td style="${TD}">운영</td>
-            <td style="${TD}">Shakilabs</td>
+            <td style="${TD}">ShakiLabs</td>
           </tr>
           <tr>
             <td style="${TD}">서비스 URL</td>
@@ -669,13 +675,13 @@ function buildAboutContent() {
         </tbody>
       </table>
 
-      <h2 style="${H2}">5. 수익 구조</h2>
+      <h2 style="${H2}">6. 수익 구조</h2>
       <p style="${P}">
         본 서비스는 광고(Google AdSense)를 통해 운영비를 충당하며, 사용자에게 이용료를 받지 않습니다.
         광고 수익은 서버·환율 API·데이터 수집 비용에 사용되며, 사용자 개인정보를 판매하지 않습니다.
       </p>
 
-      <h2 style="${H2}">6. 면책 조항</h2>
+      <h2 style="${H2}">7. 면책 조항</h2>
       <p style="${P}">
         본 서비스에서 제공하는 모든 가격 정보는 참고용이며, 법적 효력이 없습니다.
         실제 결제 가격은 Google Play·YouTube 공식 페이지에서 최종 확인해야 하며,
@@ -708,6 +714,11 @@ function buildPrivacyContent() {
         <li style="${LI}"><strong>자동 수집</strong>: 접속 IP, 브라우저 종류, 접속 시간, 방문 페이지</li>
         <li style="${LI}"><strong>쿠키</strong>: 선호 국가 저장, Google Analytics 측정 쿠키, Google AdSense 광고 쿠키</li>
       </ul>
+      <p style="${P}">
+        본 서비스는 회원가입·뉴스레터·가격 알림 등 이메일 주소를 수집하는 기능을 운영하지 않으며,
+        이용자가 문의 목적으로 직접 발송한 이메일 외에 이메일 주소를 수집·보관하지 않습니다.
+        테마 등 화면 설정 값은 이용자의 브라우저(localStorage)에만 저장되며 서버로 전송되지 않습니다.
+      </p>
 
       <h2 style="${H2}">2. 이용 목적</h2>
       <ul style="${UL}">
@@ -719,13 +730,17 @@ function buildPrivacyContent() {
       <h2 style="${H2}">3. 제3자 서비스</h2>
       <ul style="${UL}">
         <li style="${LI}"><strong>Google Analytics 4</strong> — 익명 방문 통계</li>
-        <li style="${LI}"><strong>Google AdSense</strong> — 맞춤 광고 (쿠키 사용)</li>
+        <li style="${LI}"><strong>Google AdSense</strong> — Google을 포함한 제3자 광고 사업자는 광고 쿠키를 사용하여
+          이용자의 본 사이트 및 다른 웹사이트 방문 기록을 기반으로 맞춤 광고를 게재할 수 있습니다.</li>
       </ul>
 
       <h2 style="${H2}">4. 쿠키 관리</h2>
       <p style="${P}">
         브라우저 설정에서 쿠키 저장을 거부할 수 있으나 일부 기능이 제한될 수 있습니다.
         Google Analytics 수집 거부는 <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Add-on</a>을 이용하세요.
+        맞춤 광고(개인 맞춤 광고)는 <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google 광고 설정</a>
+        또는 <a href="https://www.aboutads.info/choices" target="_blank" rel="noopener noreferrer">www.aboutads.info/choices</a>에서
+        언제든지 사용 중지(opt-out)할 수 있습니다.
       </p>
 
       <h2 style="${H2}">5. 보관 및 파기</h2>
@@ -742,7 +757,7 @@ function buildPrivacyContent() {
 
       <h2 style="${H2}">7. 문의</h2>
       <ul style="${UL}">
-        <li style="${LI}">운영사: Shakilabs</li>
+        <li style="${LI}">운영: ShakiLabs</li>
         <li style="${LI}">이메일: <a href="mailto:skdba1313@gmail.com">skdba1313@gmail.com</a></li>
       </ul>
 
@@ -790,7 +805,11 @@ function buildTermsContent() {
 
       <h2 style="${H2}">5. 광고</h2>
       <p style="${P}">
-        본 서비스는 Google AdSense를 통해 광고를 게재합니다. 광고 클릭으로 발생하는 거래·계약은 광고주와 이용자 간에 이루어지며,
+        본 서비스는 Google AdSense를 통해 광고를 게재합니다. Google을 포함한 제3자 광고 사업자는 광고 쿠키를 사용하여
+        이용자의 방문 기록 기반 맞춤 광고를 게재할 수 있으며, 맞춤 광고는
+        <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google 광고 설정</a>
+        또는 <a href="https://www.aboutads.info/choices" target="_blank" rel="noopener noreferrer">www.aboutads.info/choices</a>에서
+        거부할 수 있습니다. 광고 클릭으로 발생하는 거래·계약은 광고주와 이용자 간에 이루어지며,
         본 서비스는 이에 관여하지 않습니다.
       </p>
 
