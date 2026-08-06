@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normalizePricesResponse } from "./priceTransforms";
 import {
   buildCountryChanges,
+  buildTimelineRows,
   buildTrendRows,
   buildTrendSummary,
   getPreviousSnapshot,
@@ -135,5 +136,59 @@ describe("trendCalculations", () => {
     expect(summary.highestSavings?.[0]?.countryCode).toBe("TR");
     expect(summary.biggestDrops?.[0]?.countryCode).toBe("US");
     expect(summary.previousSnapshotDate).toBe("2026-03-08");
+  });
+
+  it("타임라인은 기준국을 맨 앞에 두고 나머지는 변동률 오름차순으로 정렬한다", () => {
+    const rows = buildTrendRows(basePriceData);
+    const changes = buildCountryChanges(rows, snapshots, "2026-03-15");
+    const timeline = buildTimelineRows(rows, changes, "KR");
+
+    expect(timeline[0]?.countryCode).toBe("KR");
+    // KR: 15500 → 15000 = -3.2%
+    expect(timeline[0]?.changePercent).toBe(-3.2);
+    // 나머지: US(12500→11000, -12%) < TR(4800→4500, -6.2%)
+    expect(timeline.slice(1).map((row) => row.countryCode)).toEqual(["US", "TR"]);
+    expect(timeline[1]?.changePercent).toBe(-12);
+    // 시계열은 스냅샷 2개 + 현재 시점까지 날짜순으로 담는다
+    expect(timeline[0]?.points.map((p) => p.date)).toEqual([
+      "2026-03-01",
+      "2026-03-08",
+      "2026-03-15",
+    ]);
+  });
+
+  it("타임라인에서 방향별 상위 개수를 제한한다", () => {
+    const priceData: PricesResponse = {
+      baseCountry: "KR",
+      lastUpdated: "2026-03-15",
+      prices: ["KR", "AA", "BB", "CC", "DD"].map((code, index) => ({
+        country: code,
+        countryCode: code,
+        currency: "USD",
+        plans: { individual: { monthly: 10 } },
+        converted: { individual: { krw: 10000 + index * 1000 } },
+      })),
+    };
+    const history: HistorySnapshot[] = [
+      {
+        date: "2026-03-08",
+        // AA/BB/CC/DD 모두 하락 (현재값이 스냅샷보다 낮음), KR은 동일
+        prices: [
+          { countryCode: "KR", krw: 10000 },
+          { countryCode: "AA", krw: 20000 },
+          { countryCode: "BB", krw: 20000 },
+          { countryCode: "CC", krw: 20000 },
+          { countryCode: "DD", krw: 20000 },
+        ],
+      },
+    ];
+    const rows = buildTrendRows(priceData);
+    const changes = buildCountryChanges(rows, history, "2026-03-15");
+    const timeline = buildTimelineRows(rows, changes, "KR", 2);
+
+    // 기준국 1 + 하락 상위 2 (상승 국가 없음)
+    expect(timeline).toHaveLength(3);
+    expect(timeline[0]?.countryCode).toBe("KR");
+    expect(timeline[0]?.changePercent).toBe(0);
   });
 });

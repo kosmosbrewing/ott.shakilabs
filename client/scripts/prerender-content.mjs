@@ -10,12 +10,107 @@ const PRICE_DATA_PATH = path.resolve(
   __dirname,
   "../../data/prices/youtube-premium.json"
 );
+const HISTORY_DATA_PATH = path.resolve(
+  __dirname,
+  "../../data/history/youtube-premium.json"
+);
+const CHANGELOG_DATA_PATH = path.resolve(
+  __dirname,
+  "../../data/reports/changelog.json"
+);
 
 let _data = null;
 function loadData() {
   if (_data) return _data;
   _data = JSON.parse(fs.readFileSync(PRICE_DATA_PATH, "utf-8"));
   return _data;
+}
+
+let _history = null;
+function loadHistory() {
+  if (_history) return _history;
+  _history = JSON.parse(fs.readFileSync(HISTORY_DATA_PATH, "utf-8"));
+  return _history;
+}
+
+let _changelog = null;
+function loadChangelog() {
+  if (_changelog) return _changelog;
+  _changelog = JSON.parse(fs.readFileSync(CHANGELOG_DATA_PATH, "utf-8"));
+  return _changelog;
+}
+
+// 트렌드 페이지 공용 통계 — 스냅샷·현재가에서 도출 가능한 사실만 계산한다.
+// 런타임 buildTimelineRows(trendCalculations.ts)와 같은 선정 규칙(기준국 + 하락/상승 각 5).
+function computeTrendStats() {
+  const data = loadData();
+  const history = loadHistory();
+  const snapshots = (history.snapshots || [])
+    .filter((s) => s && typeof s.date === "string" && Array.isArray(s.prices))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const currentByCode = new Map();
+  const nameByCode = new Map();
+  for (const p of data.prices) {
+    const code = String(p.countryCode || "").toUpperCase();
+    if (!code) continue;
+    nameByCode.set(code, p.country || code);
+    const krw = p.converted?.individual?.krw;
+    if (typeof krw === "number") currentByCode.set(code, krw);
+  }
+
+  const lastSnapshot = snapshots[snapshots.length - 1] || null;
+  const movers = [];
+  for (const item of lastSnapshot?.prices || []) {
+    const code = String(item.countryCode || "").toUpperCase();
+    const prevKrw = item.krw;
+    const currentKrw = currentByCode.get(code);
+    if (!code || typeof prevKrw !== "number" || prevKrw <= 0 || typeof currentKrw !== "number") continue;
+    movers.push({
+      code,
+      prevKrw,
+      currentKrw,
+      changePercent: Math.round(((currentKrw - prevKrw) / prevKrw) * 1000) / 10,
+    });
+  }
+  movers.sort((a, b) => a.changePercent - b.changePercent);
+
+  const falls = movers.filter((m) => m.changePercent < 0);
+  const rises = movers.filter((m) => m.changePercent > 0);
+  const percents = movers.map((m) => m.changePercent);
+  const median = percents.length
+    ? percents.length % 2
+      ? percents[(percents.length - 1) / 2]
+      : Math.round(((percents[percents.length / 2 - 1] + percents[percents.length / 2]) / 2) * 10) / 10
+    : null;
+
+  const sample = [...falls.slice(0, 5), ...rises.slice(-5)].filter((m) => m.code !== "KR");
+  sample.sort((a, b) => a.changePercent - b.changePercent);
+  const baseMover = movers.find((m) => m.code === "KR") || null;
+
+  const timelineDates = [...snapshots.map((s) => s.date), data.lastUpdated].filter(Boolean);
+  const krwBySnapshotDate = new Map(
+    snapshots.map((s) => [
+      s.date,
+      new Map(s.prices.map((i) => [String(i.countryCode || "").toUpperCase(), i.krw])),
+    ])
+  );
+
+  return {
+    data,
+    snapshots,
+    currentByCode,
+    nameByCode,
+    lastSnapshot,
+    movers,
+    falls,
+    rises,
+    median,
+    sample,
+    baseMover,
+    timelineDates,
+    krwBySnapshotDate,
+  };
 }
 
 // --- 공통 스타일 ---
@@ -128,6 +223,32 @@ function getCountryFaqItems(countryCode) {
   ];
 }
 
+// 트렌드 페이지 FAQ — 런타임 TrendsView.vue의 faqItems와 동일 문구를 유지한다
+function getTrendsFaqItems() {
+  const { data, timelineDates } = computeTrendStats();
+  const fxDate = data.exchangeRateDate || data.lastUpdated || "-";
+  const dates = timelineDates.length > 0 ? timelineDates.join(" · ") : "-";
+
+  return [
+    {
+      q: "이 페이지의 가격 변동은 실제 요금 인상·인하인가요?",
+      a: "반드시 그렇지는 않습니다. 표의 값은 수집 시점의 원화(KRW) 환산 가격이어서 현지 통화 요금 개편, 원화 환율 변동, 데이터 보정이 함께 반영됩니다. 짧은 기간의 등락 상당수는 환율 요인일 수 있으므로, 공식 요금 변경 여부는 YouTube 공식 안내에서 별도로 확인해야 합니다.",
+    },
+    {
+      q: "가격 데이터는 어떻게, 얼마나 자주 수집되나요?",
+      a: `실시간 시계열이 아니라 수집 시점별 스냅샷 방식입니다. 현재 비교에 사용된 시점은 ${dates}이며, 환율은 공개 환율 API 기준(${fxDate})으로 갱신됩니다. 스냅샷 사이의 일별 가격은 제공하지 않습니다.`,
+    },
+    {
+      q: "과거 특정 시점의 공식 요금도 확인할 수 있나요?",
+      a: "아니요. 본 페이지는 자체 수집 스냅샷만 제공하며, Google/YouTube의 공식 가격 변경 이력 아카이브가 아닙니다. 특정 시점의 공식 요금이나 인상 공지는 YouTube 고객센터 등 공식 채널에서 확인해야 정확합니다.",
+    },
+    {
+      q: "환율이 바뀌면 순위도 바뀌나요?",
+      a: "네. 원화 환산 최저가 순위는 환율에 따라 달라질 수 있습니다. 현지 요금이 그대로여도 해당 통화가 원화 대비 강세면 환산 가격이 올라 순위가 밀리고, 약세면 내려갑니다. 순위와 함께 현지 통화 가격을 같이 확인하는 것이 안전합니다.",
+    },
+  ];
+}
+
 // 화면용 FAQ 섹션 HTML (Qn. 접두어는 시각적 번호일 뿐, 스키마에는 질문 원문만 사용)
 function buildFaqSectionHtml(items) {
   return items
@@ -144,6 +265,9 @@ function buildFaqSectionHtml(items) {
 export function getFaqItems(route) {
   if (route === "/" || route === "/youtube-premium") {
     return getHomeFaqItems();
+  }
+  if (route === "/youtube-premium/trends") {
+    return getTrendsFaqItems();
   }
   if (route.startsWith("/youtube-premium/")) {
     const code = route.split("/").at(-1);
@@ -476,13 +600,77 @@ function buildHomeContent() {
 }
 
 function buildTrendsContent() {
-  const data = loadData();
+  const stats = computeTrendStats();
+  const data = stats.data;
   const prices = data.prices
     .filter((p) => p.converted?.individual?.krw)
     .map((p) => ({ ...p, krw: p.converted.individual.krw }))
     .sort((a, b) => a.krw - b.krw);
   const kr = data.prices.find((p) => p.countryCode === "KR");
   const krKrw = kr?.converted?.individual?.krw || 14897;
+
+  const fmtSignedPercent = (value) =>
+    value == null ? "-" : `${value > 0 ? "+" : ""}${value}%`;
+  const percentColor = (value) => (value < 0 ? "#047857" : value > 0 ? "#dc2626" : "#64748b");
+
+  // 수집 시점별 타임라인 표: 기준국(KR) + 직전 스냅샷 대비 하락/상승 상위 5개국
+  const timelineRowsData = [
+    ...(stats.baseMover ? [stats.baseMover] : []),
+    ...stats.sample,
+  ];
+  const timelineHeadHtml = stats.timelineDates
+    .map((date) => `<th style="${TH}">${date}</th>`)
+    .join("");
+  const timelineRowsHtml = timelineRowsData
+    .map((mover) => {
+      const name = stats.nameByCode.get(mover.code) || mover.code;
+      const cells = stats.timelineDates
+        .map((date) => {
+          const krw =
+            date === data.lastUpdated
+              ? stats.currentByCode.get(mover.code)
+              : stats.krwBySnapshotDate.get(date)?.get(mover.code);
+          return `<td style="${TD}">${typeof krw === "number" ? formatKrw(krw) : "-"}</td>`;
+        })
+        .join("");
+      return `<tr>
+          <td style="${TD}"><a href="/ott/youtube-premium/${mover.code.toLowerCase()}">${name}</a></td>
+          ${cells}
+          <td style="${TD}"><strong style="color:${percentColor(mover.changePercent)};">${fmtSignedPercent(mover.changePercent)}</strong></td>
+        </tr>`;
+    })
+    .join("");
+
+  const biggestFall = stats.movers[0] || null;
+  const biggestRise = stats.movers[stats.movers.length - 1] || null;
+  const moverExample =
+    biggestFall && biggestRise && biggestFall.changePercent < 0 && biggestRise.changePercent > 0
+      ? `이 기간 환산 표시값이 가장 크게 내린 곳은 ${stats.nameByCode.get(biggestFall.code) || biggestFall.code}(${fmtSignedPercent(biggestFall.changePercent)}), 가장 크게 오른 곳은 ${stats.nameByCode.get(biggestRise.code) || biggestRise.code}(${fmtSignedPercent(biggestRise.changePercent)})입니다.
+        몇 주 사이의 이런 큰 폭 변동은 현지 정가 개편만으로 보기 어렵고, 환율과 데이터 보정 영향이 섞여 있을 수 있습니다.`
+      : "";
+
+  // 가격 데이터 갱신·보정 기록 (data/reports/changelog.json)
+  const changelogUpdates = (loadChangelog().updates || [])
+    .filter((entry) => !entry.serviceSlug || entry.serviceSlug === "youtube-premium")
+    .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+  const changelogRowsHtml = changelogUpdates
+    .map((entry) => {
+      const code = String(entry.countryCode || "").toUpperCase();
+      const name = stats.nameByCode.get(code) || code || "-";
+      const date = String(entry.updatedAt || "").slice(0, 10) || "-";
+      return `<tr>
+          <td style="${TD}">${date}</td>
+          <td style="${TD}">${name}</td>
+          <td style="${TD}">${typeof entry.previousKrw === "number" ? formatKrw(entry.previousKrw) : "-"}</td>
+          <td style="${TD}">${typeof entry.currentKrw === "number" ? formatKrw(entry.currentKrw) : "-"}</td>
+          <td style="${TD}">${entry.note || "-"}</td>
+        </tr>`;
+    })
+    .join("");
+
+  // 가격 격차 문장에 쓰는 수치 — 하드코딩 대신 데이터에서 도출
+  const expensiveRank = prices.length - prices.findIndex((p) => p.countryCode === "KR");
+  const over20kCount = prices.filter((p) => p.krw >= 20000).length;
 
   return `
     <article data-seo-prerender="trends" style="${ARTICLE}">
@@ -495,8 +683,51 @@ function buildTrendsContent() {
       <h1 style="${H1}">유튜브 프리미엄 가격 변동 트렌드 (${data.lastUpdated})</h1>
 
       <p style="${P}">
-        유튜브 프리미엄은 2018년 국내 출시 이후 몇 차례 가격 인상이 있었으며, 전 세계적으로도 평균 30~40% 상승하는 추세입니다.
-        본 페이지는 국가별 가격 분포, 지역별 평균 가격, 환율 변동 영향을 종합해 트렌드를 정리합니다.
+        이 페이지는 유튜브 프리미엄 개인 플랜의 국가별 가격을 <strong>수집 시점별 스냅샷</strong>으로 비교합니다.
+        현재 비교에 사용된 시점은 ${stats.timelineDates.join(" · ")}이며, 모든 값은 원화(KRW) 환산 기준입니다.
+        어떤 국가의 표시 가격이 오르내렸는지와 함께, 그 변동을 요금 개편·환율·데이터 보정 중 무엇으로 읽어야 하는지 안내합니다.
+      </p>
+      <div style="${INFO}">
+        <strong>데이터 범위 안내</strong> — 본 페이지는 실시간·일 단위 가격 시계열을 제공하지 않으며,
+        Google/YouTube의 공식 가격 변경 이력 아카이브가 아닙니다.
+        자체 수집 스냅샷 ${stats.snapshots.length}회(${stats.snapshots.map((s) => s.date).join(", ")} · ${stats.movers.length}개국 추적)와
+        최신 가격표(${data.lastUpdated} 기준 ${prices.length}개국)에서 도출할 수 있는 사실만 제공합니다.
+      </div>
+
+      <h2 style="${H2}">수집 시점별 원화 환산 가격 (기준국 + 변동 상위)</h2>
+      <p style="${P}">
+        직전 스냅샷(${stats.lastSnapshot?.date || "-"}) 대비 최신 가격표(${data.lastUpdated}) 기준으로
+        환산 가격이 가장 크게 내린 5개국과 가장 크게 오른 5개국, 그리고 기준국인 한국을 함께 보여줍니다.
+      </p>
+      <table style="${TABLE}">
+        <thead>
+          <tr>
+            <th style="${TH}">국가</th>
+            ${timelineHeadHtml}
+            <th style="${TH}">직전 대비</th>
+          </tr>
+        </thead>
+        <tbody>${timelineRowsHtml}</tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:-8px;">
+        ※ 원화 환산 기준이라 현지 요금이 그대로여도 환율에 따라 표시값이 달라질 수 있습니다.
+      </p>
+
+      <h2 style="${H2}">이 변동을 어떻게 읽어야 하나</h2>
+      <p style="${P}">
+        표의 변동에는 세 가지 요인이 섞여 있습니다.
+        ① <strong>현지 통화 요금 개편</strong>(실제 인상·인하)
+        ② <strong>원화 환율 변동</strong>(현지 요금이 같아도 환산값이 변함)
+        ③ <strong>수집 데이터 보정</strong>(수집 경로·검수에 따른 수치 재확인)입니다.
+      </p>
+      <p style="${P}">
+        직전 스냅샷(${stats.lastSnapshot?.date || "-"}) 대비 최신(${data.lastUpdated}) 기준으로 추적 ${stats.movers.length}개국 중
+        ${stats.falls.length}개국의 환산 가격이 내렸고 ${stats.rises.length}개국은 올랐습니다(변동률 중간값 ${fmtSignedPercent(stats.median)}).
+        ${moverExample}
+      </p>
+      <p style="${P}">
+        따라서 특정 국가의 공식 요금 변경 여부는 이 표만으로 단정하지 말고,
+        해당 국가 페이지의 현지 통화 가격과 YouTube 공식 안내를 함께 확인하는 것이 정확합니다.
       </p>
 
       <h2 style="${H2}">대륙별 평균 가격</h2>
@@ -563,9 +794,30 @@ function buildTrendsContent() {
         이는 Google이 각 국가의 구매력·물가·세율을 종합 반영한 결과이며, 동일 서비스·동일 품질임에도 거주 국가에 따라 비용이 크게 다릅니다.
       </p>
       <p style="${P}">
-        참고로 한국은 현재 월 ${formatKrw(krKrw)}로 전 세계 상위 40% 수준의 가격대에 해당합니다.
-        반면 북유럽·스위스·호주 등 일부 국가는 월 2만원 이상으로 더 높은 편입니다.
+        참고로 한국은 현재 월 ${formatKrw(krKrw)}로 수집 ${prices.length}개국 중 비싼 순 ${expensiveRank}위입니다.
+        미국·영국·북유럽·스위스·호주 등 ${over20kCount}개국은 월 2만원 이상으로 한국보다 높은 편입니다.
       </p>
+
+      <h2 style="${H2}">가격 데이터 갱신·보정 기록</h2>
+      <p style="${P}">
+        수집 데이터를 재확인·보정한 기록입니다. 환율 반영이나 수치 검수 내역이 포함되며,
+        Google/YouTube의 공식 요금 개편 공지와는 다를 수 있습니다.
+      </p>
+      <table style="${TABLE}">
+        <thead>
+          <tr>
+            <th style="${TH}">일자</th>
+            <th style="${TH}">국가</th>
+            <th style="${TH}">이전</th>
+            <th style="${TH}">현재</th>
+            <th style="${TH}">메모</th>
+          </tr>
+        </thead>
+        <tbody>${changelogRowsHtml}</tbody>
+      </table>
+
+      <h2 style="${H2}">자주 묻는 질문 (FAQ)</h2>
+      ${buildFaqSectionHtml(getTrendsFaqItems())}
 
       <h2 style="${H2}">관련 링크</h2>
       <ul style="${UL}">
@@ -576,6 +828,7 @@ function buildTrendsContent() {
 
       <p style="font-size:12px;color:#64748b;margin-top:24px;">
         ※ 본 데이터는 ${data.lastUpdated} 기준 수집본이며, 환율과 가격 정책 변동에 따라 달라질 수 있습니다.
+        실시간·일 단위 시계열은 제공하지 않으며, 실제 결제 금액은 Google Play·YouTube 공식 페이지에서 최종 확인해야 합니다.
       </p>
     </article>`;
 }

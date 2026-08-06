@@ -1,5 +1,5 @@
 import { getNumber } from "./helpers";
-import type { PricesResponse, TrendPoint, TrendRow, TrendsResponse } from "./types";
+import type { PricesResponse, TrendPoint, TrendRow, TrendTimelineRow, TrendsResponse } from "./types";
 
 export type HistoryItem = {
   countryCode?: string;
@@ -92,6 +92,55 @@ export function buildCountryChanges(
   return timelineByCountry;
 }
 
+// 기준국 + 직전 스냅샷 대비 변동 상위 국가(하락·상승 각 maxPerDirection개)를
+// 수집 시점별 시계열과 함께 반환 — "trends" 페이지의 시점별 가격 표 데이터.
+// 상승/하락을 섞어 뽑는 이유: 절대값 상위만 취하면 환율 방향에 따라 한쪽으로 쏠린다.
+export function buildTimelineRows(
+  rows: TrendRow[],
+  countryChanges: Record<string, TrendPoint[]>,
+  baseCountryCode = "KR",
+  maxPerDirection = 5,
+): TrendTimelineRow[] {
+  const nameByCode = new Map<string, string>();
+  for (const row of rows) {
+    nameByCode.set(row.countryCode.toUpperCase(), row.country);
+  }
+
+  const candidates: TrendTimelineRow[] = [];
+  let baseRow: TrendTimelineRow | null = null;
+
+  for (const [code, points] of Object.entries(countryChanges)) {
+    if (!Array.isArray(points) || points.length === 0) continue;
+
+    const last = points[points.length - 1];
+    const prev = points.length >= 2 ? points[points.length - 2] : null;
+    const changePercent =
+      prev && prev.krw > 0 ? Math.round(((last.krw - prev.krw) / prev.krw) * 1000) / 10 : null;
+
+    const entry: TrendTimelineRow = {
+      country: nameByCode.get(code) || code,
+      countryCode: code,
+      points,
+      changePercent,
+    };
+
+    if (code === baseCountryCode.toUpperCase()) {
+      baseRow = entry;
+    } else if (changePercent != null) {
+      candidates.push(entry);
+    }
+  }
+
+  candidates.sort((a, b) => (a.changePercent ?? 0) - (b.changePercent ?? 0));
+  const falls = candidates.filter((row) => (row.changePercent ?? 0) < 0).slice(0, maxPerDirection);
+  const rises = candidates.filter((row) => (row.changePercent ?? 0) > 0).slice(-maxPerDirection);
+
+  const selected = [...falls, ...rises];
+  selected.sort((a, b) => (a.changePercent ?? 0) - (b.changePercent ?? 0));
+
+  return baseRow ? [baseRow, ...selected] : selected;
+}
+
 export function buildTrendSummary(
   priceData: PricesResponse,
   snapshots: HistorySnapshot[],
@@ -140,6 +189,8 @@ export function buildTrendSummary(
     .sort((a, b) => (a.changeKrw ?? 0) - (b.changeKrw ?? 0))
     .slice(0, 10);
 
+  const countryChanges = buildCountryChanges(rows, snapshots, priceData.lastUpdated || null);
+
   return {
     asOf: priceData.lastUpdated || null,
     exchangeRateDate: priceData.exchangeRateDate || null,
@@ -147,6 +198,7 @@ export function buildTrendSummary(
     cheapest,
     highestSavings,
     biggestDrops,
-    countryChanges: buildCountryChanges(rows, snapshots, priceData.lastUpdated || null),
+    countryChanges,
+    timeline: buildTimelineRows(rows, countryChanges, priceData.baseCountry || "KR"),
   };
 }

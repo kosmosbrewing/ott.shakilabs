@@ -72,13 +72,25 @@ export interface TrendRow {
   [key: string]: unknown;
 }
 
+// 수집 시점별 원화 환산 가격 타임라인 1행 (기준국 + 변동 상위 국가 샘플)
+export interface TrendTimelineRow {
+  country: string;
+  countryCode: string;
+  points: TrendPoint[];
+  // 직전 스냅샷 대비 최신 변동률(%) — 시계열 점이 2개 미만이면 null
+  changePercent: number | null;
+  [key: string]: unknown;
+}
+
 export interface TrendsResponse {
-  asOf?: string;
-  previousSnapshotDate?: string;
+  asOf?: string | null;
+  previousSnapshotDate?: string | null;
+  exchangeRateDate?: string | null;
   cheapest?: TrendRow[];
   highestSavings?: TrendRow[];
   biggestDrops?: TrendRow[];
   countryChanges?: Record<string, TrendPoint[]>;
+  timeline?: TrendTimelineRow[];
   [key: string]: unknown;
 }
 
