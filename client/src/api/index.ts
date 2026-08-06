@@ -15,6 +15,7 @@ export type {
   PricesResponse,
   TrendPoint,
   TrendRow,
+  TrendTimelineRow,
   TrendsResponse,
   CommunityPost,
   CommunityPostResponse,
