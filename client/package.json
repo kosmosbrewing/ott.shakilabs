@@ -7,7 +7,7 @@
     "predev": "node scripts/sync-price-data.mjs",
     "dev": "vite",
     "prebuild": "node scripts/sync-price-data.mjs && node scripts/generate-sitemap.mjs",
-    "build": "vite build && node scripts/generate-og-images.mjs && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/generate-og-images.mjs && node scripts/prerender.mjs && node scripts/validate-static-output.mjs",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "sbom:prod": "node scripts/sbom.mjs",

@@ -6,6 +6,7 @@ import {
   SERVICE_SLUG,
   getAllPrerenderRoutes,
   getCountryEntries,
+  canonicalPathFor,
 } from "./seo-routes.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent, getFaqItems } from "./prerender-content.mjs";
@@ -165,7 +166,25 @@ function routeToMeta(route, countryMap) {
     };
   }
 
-  if (route === "/" || route === `/${SERVICE_SLUG}`) {
+  // The site root is the service directory / methodology hub, not a second copy
+  // of the YouTube Premium price table. Its title, description and body must
+  // stay distinct from /youtube-premium or the two compete as duplicates.
+  if (route === "/") {
+    return {
+      title: "OTT 구독료 국가별 가격 비교 | 유튜브 프리미엄·넷플릭스 나라별 최저가",
+      description:
+        "OTT 구독료를 국가별로 비교하는 방법과 기준을 안내합니다. 비교 대상 서비스, 환율 환산 방식, 요금제 용어를 확인하고 원하는 서비스의 나라별 가격표로 이동하세요.",
+      heading: "OTT 구독료 국가별 가격 비교",
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "OTT 구독료 국가별 가격 비교",
+        url: SITE_URL,
+      },
+    };
+  }
+
+  if (route === `/${SERVICE_SLUG}`) {
     return {
       ...youtubePremiumMeta,
       jsonLd: {
@@ -245,8 +264,9 @@ function routeToOgImage(route) {
     }
     return `${SITE_URL}/og/v2/${SERVICE_SLUG}.png`;
   }
-  // / 또는 /youtube-premium → /og/v2/youtube-premium.png
-  if (route === "/" || route === `/${SERVICE_SLUG}`) {
+  // /youtube-premium → /og/v2/youtube-premium.png
+  // 루트는 서비스 허브이므로 서비스 전용 OG가 아닌 기본 OG를 쓴다
+  if (route === `/${SERVICE_SLUG}`) {
     return `${SITE_URL}/og/v2/${SERVICE_SLUG}.png`;
   }
   // 그 외 (about, privacy, community 등) — 기본 OG 이미지
@@ -258,7 +278,11 @@ function buildRouteHtml(templateHtml, route, countryMap) {
   const ogImage = routeToOgImage(route);
 
   let html = templateHtml;
-  const canonicalUrl = route === "/" ? SITE_URL : `${SITE_URL}${route}`;
+  // canonical / og:url must agree, so both derive from the same resolved path.
+  // Country variants resolve to the service page (doorway consolidation);
+  // every other route, /youtube-premium/trends included, resolves to itself.
+  const canonicalRoute = canonicalPathFor(route);
+  const canonicalUrl = canonicalRoute === "/" ? SITE_URL : `${SITE_URL}${canonicalRoute}`;
   html = updateTitle(html, meta.title);
   html = updateMetaTag(html, 'name="description"', meta.description);
   html = updateCanonicalLink(html, canonicalUrl);
@@ -284,6 +308,15 @@ function buildRouteHtml(templateHtml, route, countryMap) {
   html = html.replace(/\n?\s*<footer data-seo-prerender[\s\S]*?<\/footer>/i, "");
   html = html.replace(/\n?\s*<div data-seo-prerender[\s\S]*?<\/div>/i, "");
   html = html.replace(/\n?\s*<script data-seo-prerender[\s\S]*?<\/script>/i, "");
+
+  // index.html ships a generic <noscript> fallback for the SPA shell. Every
+  // prerendered page already carries route-specific plain HTML that renders
+  // without JS, so keeping the shell block would duplicate the same generic
+  // heading and paragraph across all routes -- it produced a second <h1> on
+  // 51/51 pages and identical boilerplate text sitewide. Only the prerendered
+  // build strips it; client/index.html keeps the block so `vite dev` and any
+  // non-prerendered entry still degrade gracefully without JS.
+  html = html.replace(/\n?\s*<noscript>[\s\S]*?<\/noscript>/i, "");
 
   // 리치 콘텐츠 우선 시도 → 없으면 기본 fallback
   const rich = buildRichContent(route);

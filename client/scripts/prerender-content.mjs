@@ -18,6 +18,7 @@ const CHANGELOG_DATA_PATH = path.resolve(
   __dirname,
   "../../data/reports/changelog.json"
 );
+const SERVICES_DATA_PATH = path.resolve(__dirname, "../../data/services.json");
 
 let _data = null;
 function loadData() {
@@ -38,6 +39,40 @@ function loadChangelog() {
   if (_changelog) return _changelog;
   _changelog = JSON.parse(fs.readFileSync(CHANGELOG_DATA_PATH, "utf-8"));
   return _changelog;
+}
+
+let _services = null;
+function loadServices() {
+  if (_services) return _services;
+  _services = JSON.parse(fs.readFileSync(SERVICES_DATA_PATH, "utf-8"));
+  return _services;
+}
+
+// 루트 허브에 쓰는 집계값 — 전부 가격 시드에서 도출한다(추정치 금지).
+function computeCatalogStats() {
+  const data = loadData();
+  const priced = data.prices
+    .filter((p) => p.converted?.individual?.krw)
+    .map((p) => ({ ...p, krw: p.converted.individual.krw }))
+    .sort((a, b) => a.krw - b.krw);
+  const kr = data.prices.find((p) => p.countryCode === "KR");
+  const krKrw = kr?.converted?.individual?.krw ?? null;
+  const cheapest = priced[0] || null;
+  const priciest = priced[priced.length - 1] || null;
+  const continents = new Set(data.prices.map((p) => p.continent).filter(Boolean));
+  const spread =
+    cheapest && priciest && cheapest.krw > 0 ? priciest.krw / cheapest.krw : null;
+
+  return {
+    data,
+    countryCount: data.prices.length,
+    pricedCount: priced.length,
+    continentCount: continents.size,
+    krKrw,
+    cheapest,
+    priciest,
+    spread,
+  };
 }
 
 // 트렌드 페이지 공용 통계 — 스냅샷·현재가에서 도출 가능한 사실만 계산한다.
@@ -190,6 +225,33 @@ function getHomeFaqItems() {
   ];
 }
 
+// 루트 허브 FAQ — "어떻게 비교하는가"(방법론)만 다룬다.
+// 유튜브 프리미엄 페이지 FAQ("어떻게 싸게 구독하는가")와 주제가 겹치면
+// 두 페이지가 다시 중복이 되므로 질문군을 의도적으로 분리한다.
+function getLandingFaqItems() {
+  const stats = computeCatalogStats();
+  const data = stats.data;
+  const rate = Number(data.krwRate);
+  return [
+    {
+      q: "가격은 어떤 기준으로 비교하나요?",
+      a: `각 국가의 <strong>개인(프리미엄) 플랜 월 요금</strong>을 기준으로 정렬합니다. 현지 통화 표시가를 그대로 싣고, 이를 미국 달러로 환산한 뒤 다시 원화로 환산해 같은 자에서 비교합니다. 표시가에 부가가치세가 포함되는지는 국가 제도에 따라 다르므로, 각 국가 상세 페이지에서 현지 통화 표시가를 함께 확인하는 편이 정확합니다.`,
+    },
+    {
+      q: "환율은 어떤 값을 쓰나요?",
+      a: `현재 적용 환율은 <strong>1 USD = ${Math.round(rate).toLocaleString("ko-KR")}원</strong>(기준일 ${data.exchangeRateDate})입니다. 환율은 공개 환율 API로 자동 갱신되고, 요금 자체는 사업자 공지를 확인한 뒤 수동으로 반영합니다. 가격 기준일과 환율 기준일이 다를 수 있어 두 날짜를 따로 표기합니다.`,
+    },
+    {
+      q: "지금 비교할 수 있는 서비스는 무엇인가요?",
+      a: `현재는 유튜브 프리미엄 ${stats.countryCount}개국 데이터가 공개되어 있습니다. 넷플릭스 등 다른 OTT는 국가별 요금제 구성이 서로 달라 같은 기준으로 정렬할 수 있을 때 순차적으로 추가합니다. 비교 대상이 아닌 서비스는 목록에 "준비 중"으로 표시합니다.`,
+    },
+    {
+      q: "전체 비교표와 국가 상세 페이지는 무엇이 다른가요?",
+      a: `전체 비교표는 ${stats.pricedCount}개국을 한 화면에서 정렬·필터로 훑어보는 용도이고, 국가 상세 페이지는 한 국가의 개인·패밀리·듀오·라이트 요금제와 현지 통화 표시가, 같은 대륙 국가와의 비교를 모아 봅니다. 순위만 필요하면 전체 비교표, 특정 국가의 요금제 구성이 궁금하면 상세 페이지가 빠릅니다.`,
+    },
+  ];
+}
+
 function getCountryFaqItems(countryCode) {
   const data = loadData();
   const row = data.prices.find(
@@ -263,7 +325,10 @@ function buildFaqSectionHtml(items) {
 // prerender.mjs가 FAQPage JSON-LD를 만들 때 사용하는 라우트별 FAQ 데이터.
 // 반환이 빈 배열이면 해당 페이지에는 화면 FAQ가 없다는 뜻 → 스키마 주입 금지.
 export function getFaqItems(route) {
-  if (route === "/" || route === "/youtube-premium") {
+  if (route === "/") {
+    return getLandingFaqItems();
+  }
+  if (route === "/youtube-premium") {
     return getHomeFaqItems();
   }
   if (route === "/youtube-premium/trends") {
@@ -495,6 +560,145 @@ function buildCountryContent(countryCode) {
 // =========================
 // 정적 페이지별 콘텐츠
 // =========================
+
+// =========================
+// 루트 허브 (/) — 서비스 디렉터리 + 비교 방법론
+//
+// The root used to reuse buildHomeContent() verbatim, which made "/" and
+// "/youtube-premium" byte-identical (1.00 similarity, same <title>). The root
+// now covers what the runtime HomeView actually shows -- the service catalogue
+// -- plus the comparison methodology, so the two URLs no longer compete.
+// =========================
+function buildLandingContent() {
+  const stats = computeCatalogStats();
+  const data = stats.data;
+  const services = loadServices().services || [];
+  const rate = Number(data.krwRate);
+
+  const serviceRowsHtml = services
+    .map((service) => {
+      const isActive = Boolean(service.active);
+      const planNames = (service.plans || []).map((plan) => plan.name).join(" · ");
+      const nameCell = isActive
+        ? `<a href="/ott/${service.slug}">${service.name}</a>`
+        : service.name;
+      const coverage = isActive ? `${stats.countryCount}개국` : "-";
+      const status = isActive
+        ? '<strong style="color:#047857;">비교 가능</strong>'
+        : '<span style="color:#64748b;">준비 중</span>';
+      return `<tr>
+          <td style="${TD}">${nameCell}</td>
+          <td style="${TD}">${status}</td>
+          <td style="${TD}">${coverage}</td>
+          <td style="${TD}">${planNames}</td>
+        </tr>`;
+    })
+    .join("");
+
+  const spreadText = stats.spread ? `${stats.spread.toFixed(1)}배` : "-";
+
+  return `
+    <article data-seo-prerender="landing" style="${ARTICLE}">
+      <h1 style="${H1}">OTT 구독료 국가별 가격 비교</h1>
+
+      <p style="${P}">
+        같은 OTT 서비스라도 어느 나라 계정으로 결제하느냐에 따라 청구되는 금액이 크게 달라집니다.
+        이곳은 그 차이를 <strong>같은 기준으로 환산해</strong> 확인할 수 있도록 만든 비교 서비스의 시작 페이지입니다.
+        어떤 서비스를 비교할 수 있는지, 가격을 어떤 방식으로 환산하는지, 어느 페이지부터 보면 되는지를 안내합니다.
+      </p>
+
+      <p style="${P}">
+        나라별 요금표 자체가 필요하다면 곧바로 <a href="/ott/youtube-premium">유튜브 프리미엄 전체 가격 비교</a>로 이동하세요.
+        이 페이지는 <em>비교 기준과 데이터 출처</em>를 설명하는 안내 페이지이며, 순위표는 각 서비스 페이지에 있습니다.
+      </p>
+
+      <h2 style="${H2}">비교할 수 있는 서비스</h2>
+      <table style="${TABLE}">
+        <thead>
+          <tr>
+            <th style="${TH}">서비스</th>
+            <th style="${TH}">상태</th>
+            <th style="${TH}">수록 국가</th>
+            <th style="${TH}">요금제 구성</th>
+          </tr>
+        </thead>
+        <tbody>${serviceRowsHtml}</tbody>
+      </table>
+      <p style="${P}">
+        "준비 중"으로 표시된 서비스는 국가별 요금제 구성이 서로 달라 같은 기준으로 정렬하기 어려운 상태입니다.
+        비교 가능한 형태로 정리되는 대로 순차적으로 공개합니다.
+      </p>
+
+      <h2 style="${H2}">가격을 환산하는 방식</h2>
+      <p style="${P}">
+        모든 순위는 <strong>개인(프리미엄) 플랜의 월 요금</strong>을 기준으로 계산합니다.
+        현지 통화 표시가를 먼저 수집하고, 기준 통화인 ${data.baseCurrency}로 환산한 뒤 다시 원화로 환산해 한 줄에 나란히 놓습니다.
+        연 단위로만 판매되는 요금제는 월 환산값을 별도로 표기하며, 표시가에 부가가치세가 포함되는지는 국가 제도에 따라 다릅니다.
+      </p>
+      <ul style="${UL}">
+        <li style="${LI}"><strong>가격 기준일</strong> — ${data.lastUpdated} (요금 자체는 사업자 공지 확인 후 수동 반영)</li>
+        <li style="${LI}"><strong>환율 기준일</strong> — ${data.exchangeRateDate} (공개 환율 API로 자동 갱신)</li>
+        <li style="${LI}"><strong>적용 환율</strong> — 1 ${data.baseCurrency} = ${Math.round(rate).toLocaleString("ko-KR")}원</li>
+        <li style="${LI}"><strong>기준 국가</strong> — ${data.baseCountry === "KR" ? "한국" : data.baseCountry} (절약률은 한국 가격 대비로 계산)</li>
+      </ul>
+
+      <h2 style="${H2}">현재 수록된 데이터</h2>
+      <table style="${TABLE}">
+        <tbody>
+          <tr>
+            <th style="${TH}">수록 국가</th>
+            <td style="${TD}">${stats.countryCount}개국 (${stats.continentCount}개 대륙)</td>
+          </tr>
+          <tr>
+            <th style="${TH}">한국 개인 플랜</th>
+            <td style="${TD}">${stats.krKrw != null ? formatKrw(stats.krKrw) : "-"}</td>
+          </tr>
+          <tr>
+            <th style="${TH}">가장 저렴한 국가</th>
+            <td style="${TD}">${stats.cheapest ? `${stats.cheapest.country} — ${formatKrw(stats.cheapest.krw)}` : "-"}</td>
+          </tr>
+          <tr>
+            <th style="${TH}">가장 비싼 국가</th>
+            <td style="${TD}">${stats.priciest ? `${stats.priciest.country} — ${formatKrw(stats.priciest.krw)}` : "-"}</td>
+          </tr>
+          <tr>
+            <th style="${TH}">최저-최고 격차</th>
+            <td style="${TD}">${spreadText}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style="${H2}">요금제와 용어</h2>
+      <ul style="${UL}">
+        <li style="${LI}"><strong>개인(프리미엄)</strong> — 1인 사용 기본 플랜. 모든 순위·절약률의 기준값입니다.</li>
+        <li style="${LI}"><strong>패밀리</strong> — 같은 가구 구성원이 함께 쓰는 플랜. 인원 한도는 서비스 약관을 따릅니다.</li>
+        <li style="${LI}"><strong>듀오</strong> — 2인용 플랜. 제공 국가가 제한적이라 빈칸인 국가가 많습니다.</li>
+        <li style="${LI}"><strong>라이트</strong> — 음악 서비스가 빠진 저가 플랜. 제공 국가에서만 표기됩니다.</li>
+        <li style="${LI}"><strong>청구 국가</strong> — 결제 수단 발행 국가와 계정 청구 주소로 정해지는 값. 접속 위치가 아니라 이 값이 가격을 결정합니다.</li>
+      </ul>
+
+      <h2 style="${H2}">어디부터 보면 되나요</h2>
+      <ul style="${UL}">
+        <li style="${LI}"><a href="/ott/youtube-premium">전체 국가 가격 비교</a> — ${stats.pricedCount}개국 순위표와 정렬·필터</li>
+        <li style="${LI}"><a href="/ott/youtube-premium/trends">가격 변동 트렌드</a> — 최근 인상·인하 국가와 변동 폭</li>
+        <li style="${LI}"><a href="/ott/youtube-premium/kr">한국 가격 상세</a> — 기준 국가의 요금제별 표시가</li>
+        <li style="${LI}"><a href="/ott/about">서비스 소개와 데이터 출처</a> — 수집·검증 절차</li>
+      </ul>
+
+      <h2 style="${H2}">자주 묻는 질문 (FAQ)</h2>
+      ${buildFaqSectionHtml(getLandingFaqItems())}
+
+      <div style="${CALLOUT}">
+        <strong>⚠️ 가격 정보 제공 목적입니다</strong><br>
+        여기 실린 국가별 가격은 각국 정가를 그대로 옮긴 정보이며, 우회 결제를 안내하는 자료가 아닙니다.
+        대부분의 사업자 약관은 실제 거주 국가의 요금 지불을 요구하며, 위반 시 구독 취소·환불 거부 등의 불이익이 있을 수 있습니다.
+      </div>
+
+      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+        ※ 본 서비스는 Google LLC·YouTube 및 각 OTT 사업자의 공식 제휴 서비스가 아닙니다. 가격 기준일: ${data.lastUpdated}.
+      </p>
+    </article>`;
+}
 
 function buildHomeContent() {
   const data = loadData();
@@ -1000,17 +1204,43 @@ function buildPrivacyContent() {
       <p style="${P}">
         방문 로그는 Google Analytics 정책에 따라 기본 26개월 보관됩니다.
         서버 액세스 로그는 보안·통계 목적으로 최대 6개월 보관 후 자동 파기됩니다.
+        익명 커뮤니티 글·댓글에 부수적으로 기록되는 IP와 User-Agent는 어뷰징·스팸 대응 목적으로만 사용하며,
+        해당 글이 삭제되면 함께 삭제됩니다.
       </p>
 
-      <h2 style="${H2}">6. 이용자 권리</h2>
+      <h2 style="${H2}">6. 국외 이전</h2>
       <p style="${P}">
-        이용자는 언제든 본인 관련 정보의 열람·정정·삭제를 요청할 수 있으며,
-        문의는 아래 이메일로 가능합니다. 합리적인 기간 내에 처리해 드립니다.
+        본 서비스는 Google Analytics와 Google AdSense를 이용하므로, 위 항목의 자동 수집 정보가
+        Google LLC가 운영하는 국외 서버에서 처리될 수 있습니다.
+        이전되는 항목은 접속 기록·쿠키 식별자 등 비식별 이용 정보이며, 이전 목적은 통계 분석과 광고 게재입니다.
+        이용자는 쿠키 차단 또는 아래 4항의 opt-out 수단으로 해당 처리를 거부할 수 있습니다.
       </p>
 
-      <h2 style="${H2}">7. 문의</h2>
+      <h2 style="${H2}">7. 만 14세 미만 아동</h2>
+      <p style="${P}">
+        본 서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 알면서 수집하지 않습니다.
+        아동의 정보가 수집된 사실을 확인한 경우 지체 없이 파기합니다.
+      </p>
+
+      <h2 style="${H2}">8. 안전성 확보 조치</h2>
+      <ul style="${UL}">
+        <li style="${LI}">전 구간 HTTPS 암호화 전송</li>
+        <li style="${LI}">계산·설정 값의 브라우저 내 처리(서버 미전송)로 수집 자체를 최소화</li>
+        <li style="${LI}">관리자 접근 권한 최소화 및 접근 기록 보관</li>
+      </ul>
+
+      <h2 style="${H2}">9. 이용자 권리</h2>
+      <p style="${P}">
+        이용자는 언제든 본인 관련 정보의 열람·정정·삭제·처리정지를 요청할 수 있으며,
+        문의는 아래 이메일로 가능합니다. 합리적인 기간 내에 처리해 드립니다.
+        개인정보 침해에 관한 상담이 필요하면 개인정보침해신고센터(privacy.kisa.or.kr, 국번 없이 118),
+        개인정보 분쟁조정위원회(kopico.go.kr)에 문의할 수 있습니다.
+      </p>
+
+      <h2 style="${H2}">10. 문의</h2>
       <ul style="${UL}">
         <li style="${LI}">운영: ShakiLabs</li>
+        <li style="${LI}">개인정보 보호 책임: 운영자 (ShakiLabs)</li>
         <li style="${LI}">이메일: <a href="mailto:skdba1313@gmail.com">skdba1313@gmail.com</a></li>
       </ul>
 
@@ -1066,18 +1296,43 @@ function buildTermsContent() {
         본 서비스는 이에 관여하지 않습니다.
       </p>
 
-      <h2 style="${H2}">6. 저작권</h2>
+      <h2 style="${H2}">6. 서비스 제공 시간과 변경</h2>
+      <p style="${P}">
+        서비스는 연중무휴 제공을 원칙으로 하나, 데이터 갱신·설비 점검·장애 복구가 필요한 경우 일시 중단될 수 있습니다.
+        긴급한 사유가 아니라면 중단 사실과 사유를 사전에 공지하며, 가격 데이터의 갱신 주기는
+        사업자 공지 확인 시점에 따라 달라질 수 있습니다.
+      </p>
+
+      <h2 style="${H2}">7. 금지 행위</h2>
+      <ul style="${UL}">
+        <li style="${LI}">자동화 도구로 과도한 요청을 발생시켜 서비스 운영을 방해하는 행위</li>
+        <li style="${LI}">가공된 가격 데이터를 무단으로 대량 수집·복제해 재배포하는 행위</li>
+        <li style="${LI}">타인의 권리를 침해하거나 약관 우회 방법을 안내하는 게시물을 등록하는 행위</li>
+      </ul>
+      <p style="${P}">
+        위 행위가 확인되면 사전 통지 없이 접근을 제한하거나 해당 게시물을 삭제할 수 있습니다.
+      </p>
+
+      <h2 style="${H2}">8. 외부 링크</h2>
+      <p style="${P}">
+        본 서비스는 사업자 공식 페이지 등 외부 사이트로 연결되는 링크를 포함합니다.
+        연결된 사이트의 콘텐츠와 정책은 해당 사이트 운영자의 책임이며, 본 서비스는 이에 대해 보증하지 않습니다.
+      </p>
+
+      <h2 style="${H2}">9. 저작권</h2>
       <p style="${P}">
         본 서비스의 디자인·코드·가공된 가격 데이터의 저작권은 Shakilabs에 있으며, 무단 복제·배포를 금지합니다.
         유튜브 관련 상표는 Google LLC의 소유입니다.
       </p>
 
-      <h2 style="${H2}">7. 준거법</h2>
+      <h2 style="${H2}">10. 준거법 및 분쟁 해결</h2>
       <p style="${P}">
-        본 약관은 대한민국 법령에 따라 해석되며, 분쟁 발생 시 서울중앙지방법원을 관할 법원으로 합니다.
+        본 약관은 대한민국 법령에 따라 해석됩니다. 서비스 이용과 관련해 분쟁이 발생한 경우
+        운영자와 이용자는 먼저 협의를 통한 해결을 시도하며, 협의가 이루어지지 않으면
+        민사소송법상 관할 법원에 소를 제기할 수 있습니다.
       </p>
 
-      <h2 style="${H2}">8. 개정</h2>
+      <h2 style="${H2}">11. 개정</h2>
       <p style="${P}">
         본 약관은 필요에 따라 개정될 수 있으며, 개정 시 본 페이지에 공지합니다.
         개정 후에도 서비스를 계속 이용할 경우 개정 약관에 동의한 것으로 간주됩니다.
@@ -1131,7 +1386,11 @@ function buildCommunityContent() {
 // 메인 엔트리
 // =========================
 export function buildRichContent(route) {
-  if (route === "/" || route === "/youtube-premium") {
+  if (route === "/") {
+    return buildLandingContent();
+  }
+
+  if (route === "/youtube-premium") {
     return buildHomeContent();
   }
 

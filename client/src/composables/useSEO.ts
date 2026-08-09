@@ -8,6 +8,16 @@ type SEOOptions = {
   ogImage?: MaybeRefOrGetter<string | undefined>;
   noindex?: MaybeRefOrGetter<boolean | undefined>;
   jsonLd?: MaybeRefOrGetter<Record<string, unknown> | undefined>;
+  /**
+   * Overrides the app-relative path used for canonical / hreflang / og:url.
+   * Country variant routes (/youtube-premium/:code) pass the service page
+   * because their body is one template with only the numbers swapped —
+   * canonical consolidation instead of noindex, so the ranking signals merge
+   * into the service page rather than being thrown away. Must stay in sync
+   * with canonicalPathFor() in scripts/seo-routes.mjs, which stamps the same
+   * value into the prerendered HTML.
+   */
+  canonicalPath?: MaybeRefOrGetter<string | undefined>;
 };
 
 // 페이지별 메타태그 동적 설정
@@ -17,6 +27,7 @@ export function useSEO({
   ogImage,
   noindex = false,
   jsonLd,
+  canonicalPath,
 }: SEOOptions): void {
   useHead(() => {
     const resolvedTitle = toValue(title);
@@ -24,6 +35,7 @@ export function useSEO({
     const resolvedNoindex = Boolean(toValue(noindex));
     const resolvedOgImage = toValue(ogImage);
     const resolvedJsonLd = toValue(jsonLd);
+    const resolvedCanonicalPath = toValue(canonicalPath);
     const currentUrl =
       typeof window !== "undefined"
         ? (() => {
@@ -32,11 +44,15 @@ export function useSEO({
               const canonicalUrl = new URL(getCanonicalSiteUrl());
               const basePath = canonicalUrl.pathname.replace(/\/+$/, "");
               const browserPath = browserUrl.pathname.replace(/\/+$/, "") || "/";
-              const routePath = browserPath.startsWith(`${basePath}/`)
-                ? browserPath.slice(basePath.length)
-                : browserPath === basePath || browserPath === "/"
-                  ? ""
-                  : browserPath;
+              // 오버라이드가 있으면 주소창 경로 대신 그 값을 쓴다 —
+              // canonical·hreflang·og:url이 항상 같은 경로에서 나오게 하기 위함
+              const routePath = resolvedCanonicalPath
+                ? resolvedCanonicalPath.replace(/\/+$/, "")
+                : browserPath.startsWith(`${basePath}/`)
+                  ? browserPath.slice(basePath.length)
+                  : browserPath === basePath || browserPath === "/"
+                    ? ""
+                    : browserPath;
               canonicalUrl.pathname = `${basePath}${routePath}`;
               return canonicalUrl.toString();
             } catch {

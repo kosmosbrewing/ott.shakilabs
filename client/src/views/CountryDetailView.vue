@@ -116,10 +116,19 @@ const pageDescription = computed(() => {
 // BreadcrumbList는 prerender(scripts/prerender.mjs)가 국가 라우트마다 <head>에 이미 주입하고,
 // 그 스크립트는 하이드레이션 후에도 남는다. 여기서 같은 그래프를 다시 내면 한 페이지에
 // BreadcrumbList가 2개 생기므로 런타임에서는 내지 않는다.
+// 국가 페이지는 44개가 같은 템플릿에 숫자만 다른 구조라(최악 쌍 유사도 0.98)
+// 서비스 페이지로 canonical을 통합한다. prerender(seo-routes.mjs의
+// canonicalPathFor)가 정적 HTML에 넣는 값과 반드시 같아야 한다.
+// 되돌릴 수 있다 — 국가별 고유 콘텐츠가 생기면 이 오버라이드를 지우면 된다.
+const canonicalPath = computed(() =>
+  serviceSlug.value ? `/${serviceSlug.value}` : undefined
+);
+
 useSEO({
   title: pageTitle,
   description: pageDescription,
   ogImage: `${siteUrl}/og/v2/youtube-premium/${countryCode.value}.png`,
+  canonicalPath,
 });
 
 // 통화 포맷 헬퍼
