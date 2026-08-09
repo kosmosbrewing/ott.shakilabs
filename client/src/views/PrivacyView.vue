@@ -92,6 +92,8 @@ useSEO({
         <p class="text-body leading-relaxed">
           수집된 정보는 서비스 운영 및 어뷰징 방지 목적으로만 사용되며,
           수집 목적 달성 후 또는 관련 법령에 따라 지체 없이 파기합니다.
+          방문 로그는 Google Analytics 정책에 따라 기본 26개월, 서버 액세스 로그는 최대 6개월 보관 후 자동 파기됩니다.
+          익명 커뮤니티 글·댓글에 부수적으로 기록되는 IP와 User-Agent는 해당 글이 삭제되면 함께 삭제됩니다.
         </p>
       </section>
 
@@ -121,7 +123,41 @@ useSEO({
       </section>
 
       <section>
-        <h2 class="text-h2 mb-3">6. 개인정보 보호책임자 및 문의</h2>
+        <h2 class="text-h2 mb-3">6. 국외 이전</h2>
+        <p class="text-body leading-relaxed">
+          본 서비스는 Google Analytics와 Google AdSense를 이용하므로, 자동 수집되는 접속 기록·쿠키 식별자 등
+          비식별 이용 정보가 Google LLC가 운영하는 국외 서버에서 처리될 수 있습니다.
+          이전 목적은 통계 분석과 광고 게재이며, 이용자는 쿠키 차단 또는 위 opt-out 수단으로 해당 처리를 거부할 수 있습니다.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-h2 mb-3">7. 만 14세 미만 아동</h2>
+        <p class="text-body leading-relaxed">
+          본 서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 알면서 수집하지 않습니다.
+          아동의 정보가 수집된 사실을 확인한 경우 지체 없이 파기합니다.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-h2 mb-3">8. 안전성 확보 조치</h2>
+        <ul class="list-disc list-inside text-body text-muted-foreground space-y-1">
+          <li>전 구간 HTTPS 암호화 전송</li>
+          <li>화면 설정 값의 브라우저 내 처리(서버 미전송)로 수집 자체를 최소화</li>
+          <li>관리자 접근 권한 최소화 및 접근 기록 보관</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-h2 mb-3">9. 권리 구제</h2>
+        <p class="text-body leading-relaxed">
+          개인정보 침해에 관한 상담이 필요하면 개인정보침해신고센터(privacy.kisa.or.kr, 국번 없이 118)
+          또는 개인정보 분쟁조정위원회(kopico.go.kr)에 문의할 수 있습니다.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-h2 mb-3">10. 개인정보 보호책임자 및 문의</h2>
         <p class="text-body leading-relaxed">운영: ShakiLabs</p>
         <p class="text-body leading-relaxed">
           이메일:

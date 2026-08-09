@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
 import { useSEO } from "@/composables/useSEO";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
@@ -94,7 +95,8 @@ useSEO({
             에서 거부할 수 있습니다.
           </li>
           <li>광고 콘텐츠는 광고주가 제공하며, 서비스는 광고 내용에 대해 책임을 지지 않습니다.</li>
-          <li>광고 쿠키 사용에 관한 자세한 내용은 <a href="/privacy" class="text-primary hover:underline">개인정보처리방침</a>을 참고하세요.</li>
+          <!-- RouterLink라야 라우터 base(/ott/)가 붙는다. 평문 href="/privacy"는 도메인 루트로 나간다 -->
+          <li>광고 쿠키 사용에 관한 자세한 내용은 <RouterLink to="/privacy" class="text-primary hover:underline">개인정보처리방침</RouterLink>을 참고하세요.</li>
         </ul>
       </CardContent>
     </Card>
@@ -103,8 +105,31 @@ useSEO({
       <CardHeader><CardTitle>제6조 서비스 변경 및 중단</CardTitle></CardHeader>
       <CardContent>
         <ul class="list-disc list-inside text-body text-muted-foreground space-y-1">
-          <li>운영자는 서비스 내용을 사전 고지 없이 변경·중단할 수 있습니다.</li>
+          <li>서비스는 연중무휴 제공을 원칙으로 하나, 데이터 갱신·설비 점검·장애 복구가 필요한 경우 일시 중단될 수 있습니다.</li>
+          <li>긴급한 사유가 아니라면 중단 사실과 사유를 사전에 공지합니다.</li>
+          <li>가격 데이터의 갱신 주기는 각 사업자의 공지 확인 시점에 따라 달라질 수 있습니다.</li>
           <li>본 약관은 변경 시 서비스 내 공지를 통해 안내하며, 변경 후 계속 이용 시 변경 내용에 동의한 것으로 간주합니다.</li>
+        </ul>
+      </CardContent>
+    </Card>
+
+    <Card class="retro-panel">
+      <CardHeader><CardTitle>제7조 외부 링크</CardTitle></CardHeader>
+      <CardContent>
+        <ul class="list-disc list-inside text-body text-muted-foreground space-y-1">
+          <li>서비스는 각 OTT 사업자의 공식 페이지 등 외부 사이트로 연결되는 링크를 포함합니다.</li>
+          <li>연결된 사이트의 콘텐츠와 정책은 해당 사이트 운영자의 책임이며, 서비스는 이에 대해 보증하지 않습니다.</li>
+        </ul>
+      </CardContent>
+    </Card>
+
+    <Card class="retro-panel">
+      <CardHeader><CardTitle>제8조 준거법 및 분쟁 해결</CardTitle></CardHeader>
+      <CardContent>
+        <ul class="list-disc list-inside text-body text-muted-foreground space-y-1">
+          <li>본 약관은 대한민국 법령에 따라 해석됩니다.</li>
+          <li>서비스 이용과 관련해 분쟁이 발생한 경우 운영자와 이용자는 먼저 협의를 통한 해결을 시도합니다.</li>
+          <li>협의가 이루어지지 않으면 민사소송법상 관할 법원에 소를 제기할 수 있습니다.</li>
         </ul>
       </CardContent>
     </Card>

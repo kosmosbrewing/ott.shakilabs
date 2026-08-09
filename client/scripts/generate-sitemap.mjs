@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import {
   SITE_URL,
   SERVICE_SLUG,
-  getCountryRoutes,
+  getSitemapRoutes,
   loadPriceSeed,
 } from "./seo-routes.mjs";
 
@@ -44,25 +44,23 @@ function main() {
       ? seed.lastUpdated.slice(0, 10)
       : new Date().toISOString().slice(0, 10);
 
-  const nodes = [
-    makeUrlNode("", { priority: "1.0", changefreq: "weekly", lastmod }),
-    makeUrlNode("/about", { priority: "0.5", changefreq: "monthly", lastmod }),
-    makeUrlNode("/privacy", { priority: "0.4", changefreq: "monthly", lastmod }),
-    makeUrlNode("/terms", { priority: "0.4", changefreq: "monthly", lastmod }),
-    makeUrlNode(`/${SERVICE_SLUG}`, {
-      priority: "0.9",
-      changefreq: "daily",
-      lastmod,
-    }),
-    makeUrlNode(`/${SERVICE_SLUG}/trends`, {
-      priority: "0.8",
-      changefreq: "daily",
-      lastmod,
-    }),
-    ...getCountryRoutes().map((route) =>
-      makeUrlNode(route, { priority: "0.7", changefreq: "daily", lastmod })
-    ),
-  ];
+  // Per-route crawl hints. Country routes are absent from getSitemapRoutes()
+  // because they canonicalize to the service page (see seo-routes.mjs).
+  const ROUTE_CONFIG = {
+    "/": { priority: "1.0", changefreq: "weekly" },
+    "/about": { priority: "0.5", changefreq: "monthly" },
+    "/privacy": { priority: "0.4", changefreq: "monthly" },
+    "/terms": { priority: "0.4", changefreq: "monthly" },
+    [`/${SERVICE_SLUG}`]: { priority: "0.9", changefreq: "daily" },
+    [`/${SERVICE_SLUG}/trends`]: { priority: "0.8", changefreq: "daily" },
+  };
+
+  const nodes = getSitemapRoutes().map((route) => {
+    const config = ROUTE_CONFIG[route] || { priority: "0.7", changefreq: "weekly" };
+    // The site root is advertised without a trailing slash so that the sitemap
+    // loc matches the canonical emitted by prerender.mjs exactly.
+    return makeUrlNode(route === "/" ? "" : route, { ...config, lastmod });
+  });
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',

@@ -57,6 +57,48 @@ export function getCountryRoutes() {
   return getCountryEntries().map((entry) => `/${SERVICE_SLUG}/${entry.countryCode}`);
 }
 
+// Routes that are advertised to crawlers. Country routes are deliberately
+// absent: they are doorway-grade duplicates of each other (worst observed pair
+// /ie vs /nl scored 0.976 similarity across all 1,035 pairs -- only the price
+// figures and the currency change, the prose is one template), so they
+// canonicalize to the service page instead of competing with it. Listing a URL
+// that immediately points elsewhere just wastes crawl budget.
+//
+// This is reversible: once a country page grows genuinely unique content
+// (local payment rules, market-specific commentary), drop it from
+// COUNTRY_ROUTE_SET below and it returns to the sitemap as self-canonical.
+// `/community` is prerendered but stays out of the sitemap as before: it is a
+// listing shell for user posts, not standalone content.
+export function getSitemapRoutes() {
+  return [
+    "/",
+    "/about",
+    "/privacy",
+    "/terms",
+    `/${SERVICE_SLUG}`,
+    `/${SERVICE_SLUG}/trends`,
+  ];
+}
+
+// Set membership, not a path-shape test: `/youtube-premium/trends` also lives
+// one segment under the service slug but is independent content (0.16
+// similarity vs country pages, 3,456 chars), so it must never be treated as a
+// country variant. Only codes that exist in the price seed qualify.
+function getCountryRouteSet() {
+  return new Set(getCountryRoutes());
+}
+
+// Canonical target for a prerendered route: country variants point at the
+// service page (e.g. /youtube-premium/ie -> /youtube-premium), everything else
+// (including /youtube-premium/trends and "/") stays self-canonical.
+export function canonicalPathFor(route) {
+  return getCountryRouteSet().has(route) ? `/${SERVICE_SLUG}` : route;
+}
+
+// Country routes stay prerendered on purpose: with no static HTML file the
+// SPA shell would be served for these URLs, which reads as a soft-404 to
+// crawlers. Never drop them from the prerender list -- consolidation removes
+// them from the sitemap only.
 export function getAllPrerenderRoutes() {
   return [...getStaticRoutes(), ...getCountryRoutes()];
 }
