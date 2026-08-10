@@ -19,6 +19,7 @@ import AnonymousCommunityPanel from "@/components/community/AnonymousCommunityPa
 import CountryVoteModal from "@/components/community/CountryVoteModal.vue";
 import PriceComparisonSection from "@/components/price/PriceComparisonSection.vue";
 import ServiceSEOSection from "@/components/price/ServiceSEOSection.vue";
+import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import { Vote } from "lucide-vue-next";
 import { useMyPlan } from "@/composables/useMyPlan";
@@ -645,6 +646,15 @@ watch(serviceSlug, async (slug) => {
       />
 
       <RelatedServices />
+    </div>
+
+    <!--
+      프리렌더에만 있던 해설(국가별 가격 차이가 생기는 이유·주요 기능·약관 주의·관련 페이지)을
+      화면에도 렌더한다. 라이브 가격표와 FAQ는 seo-content.mjs에서 live:true로 표시돼 제외된다.
+      조건 분기 바깥에 두는 이유는 API가 죽어도 이 문구는 보여야 하기 때문이다.
+    -->
+    <div class="retro-panel retro-panel-content mt-4 overflow-hidden border border-border/40">
+      <SeoRichContent :route="`/${serviceSlug}`" embedded />
     </div>
   </div>
 </template>

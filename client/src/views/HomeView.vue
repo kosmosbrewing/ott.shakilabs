@@ -1,90 +1,62 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { RouterLink } from "vue-router";
-import { ShSurface, ShText } from "@shakilabs/ui";
-import { useServices } from "@/composables/useServices";
+/**
+ * 루트 허브 — "무엇을 비교하는지·어떤 기준으로 환산하는지·어디부터 보면 되는지".
+ *
+ * 이전에는 서비스 카드 1장(=활성 서비스 1개)만 렌더해 1440×900에서 스크롤조차
+ * 생기지 않는 한 화면짜리 페이지였고, 프리렌더에만 있던 본문은 하이드레이션 때
+ * 통째로 사라졌다. 지금은 프리렌더와 같은 본문을 뷰가 직접 렌더한다
+ * (서비스 목록은 본문의 "비교할 수 있는 서비스" 표가 대신하므로 카드 그리드는 제거).
+ */
 import { useSEO } from "@/composables/useSEO";
 import { getSiteUrl } from "@/lib/site";
+import { getFaqItems } from "@/lib/seoContent";
+import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 
-const { services, loading, error, loadServices } = useServices();
 const siteUrl = getSiteUrl();
+
+// 화면 FAQ와 같은 소스에서 뽑는다 — 스키마 문구가 화면 문구와 어긋날 수 없다.
+// (프리렌더가 넣는 FAQPage는 하이드레이션 때 제거되므로 런타임 몫은 여기.)
+const faqItems = getFaqItems("/");
+
+// FAQ 답변에는 <strong> 같은 인라인 태그가 있다. 스키마에는 보이는 텍스트만 넣는다.
+function stripTags(html: string): string {
+  return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
 
 useSEO({
   title: "OTT 구독료 국가별 가격 비교 | 유튜브 프리미엄·넷플릭스 나라별 최저가",
   description:
-    "유튜브 프리미엄(YouTube Premium), 넷플릭스 등 OTT 서비스 국가별·나라별 구독료를 현재 환율 기준으로 비교. 최저가 국가 순위와 절약률.",
+    "OTT 구독료를 국가별로 비교하는 방법과 기준을 안내합니다. 비교 대상 서비스, 환율 환산 방식, 요금제 용어를 확인하고 원하는 서비스의 나라별 가격표로 이동하세요.",
   ogImage: `${siteUrl}/og-image.png`,
   jsonLd: {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "OTT 구독료 국가별 가격 비교",
-    url: siteUrl,
-    description: "유튜브 프리미엄·넷플릭스 등 OTT 서비스 국가별·나라별 구독료 최저가 비교",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${siteUrl}/?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: "OTT 구독료 국가별 가격 비교",
+        url: siteUrl,
+        description: "유튜브 프리미엄·넷플릭스 등 OTT 서비스 국가별·나라별 구독료 최저가 비교",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${siteUrl}/?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqItems.map((item) => ({
+          "@type": "Question",
+          name: stripTags(item.q),
+          acceptedAnswer: { "@type": "Answer", text: stripTags(item.a) },
+        })),
+      },
+    ],
   },
-});
-
-onMounted(() => {
-  void loadServices();
 });
 </script>
 
 <template>
   <div class="container py-6">
-    <h1 class="sr-only">OTT 서비스 국가별 가격 비교 — 나라별 구독료 최저가</h1>
-    <ShSurface as="section" variant="outlined" padding="none" class="overflow-hidden">
-      <header class="border-b border-border px-4 py-4 sm:px-6">
-        <ShText as="h2" variant="title">서비스 목록</ShText>
-        <ShText class="mt-1" variant="caption" tone="muted">
-          서비스별 국가 가격과 요금제를 같은 기준으로 확인하세요.
-        </ShText>
-      </header>
-
-      <div class="p-4 sm:p-6">
-        <div v-if="loading" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <ShSurface v-for="i in 4" :key="i" class="animate-pulse" padding="md">
-            <div class="mb-3 h-5 bg-muted"></div>
-            <div class="h-3 w-2/3 bg-muted"></div>
-          </ShSurface>
-        </div>
-
-        <div v-else-if="error" class="py-12">
-          <ShText align="center" tone="danger">{{ error }}</ShText>
-        </div>
-
-        <div v-else class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <RouterLink
-            v-for="service in services"
-            :key="service.id"
-            :to="`/${service.slug}`"
-            class="group block"
-          >
-            <ShSurface class="h-full transition-colors group-hover:border-primary" padding="md">
-              <div class="flex items-center justify-between gap-3">
-                <div class="flex min-w-0 items-center gap-3">
-                  <div
-                    class="flex h-10 w-10 shrink-0 items-center justify-center border border-border text-body font-bold text-white"
-                    :style="{ backgroundColor: service.color }"
-                  >
-                    {{ service.name.charAt(0) }}
-                  </div>
-                  <div class="min-w-0">
-                    <ShText as="h3" class="truncate" variant="heading">{{ service.name }}</ShText>
-                    <ShText class="truncate" variant="caption" tone="muted">
-                      {{ service.plans.map((p) => p.name).join(" · ") }}
-                    </ShText>
-                  </div>
-                </div>
-                <ShText class="shrink-0" variant="label" tone="primary">비교하기 →</ShText>
-              </div>
-            </ShSurface>
-          </RouterLink>
-        </div>
-      </div>
-    </ShSurface>
+    <SeoRichContent route="/" />
   </div>
 </template>

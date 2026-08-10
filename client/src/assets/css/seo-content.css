@@ -1,0 +1,216 @@
+/* scripts/seo-content.mjs가 만드는 .sp-* 마크업의 스타일.
+ *
+ * 같은 HTML이 두 곳에 들어간다:
+ *  1) 프리렌더 정적 HTML (JS 끔) — 빌드된 CSS가 <link>로 로드되므로 여기 규칙이 그대로 적용된다.
+ *  2) Vue 뷰 (SeoRichContent.vue) — 다크 모드가 켜질 수 있다.
+ * 따라서 색상은 반드시 테마 변수(hsl(var(--...)))를 쓴다. 인라인 하드코딩 색상을 쓰면
+ * 다크 모드에서 흰 배경 위 흰 글씨가 된다.
+ *
+ * Tailwind 유틸리티가 아니라 직접 쓴 규칙이므로 purge 대상이 아니다
+ * (스캐너는 scripts/*.mjs를 보지 않는다).
+ */
+
+.sp-article {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  line-height: 1.75;
+  font-size: 0.9375rem;
+  color: hsl(var(--foreground));
+  word-break: keep-all;
+  text-wrap: pretty;
+}
+
+/* 뷰 안에서는 컨테이너가 이미 여백을 주므로 바깥 패딩을 줄인다 */
+.sp-article--embedded {
+  padding: 0;
+  max-width: none;
+}
+
+.sp-h1 {
+  font-size: 1.75rem;
+  line-height: 1.3;
+  margin: 0 0 16px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.sp-h2 {
+  font-size: 1.25rem;
+  line-height: 1.35;
+  margin: 28px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid hsl(var(--primary) / 0.35);
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.sp-h3 {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin: 18px 0 6px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.sp-p {
+  margin: 0 0 10px;
+}
+
+.sp-article a {
+  color: hsl(var(--primary));
+  text-underline-offset: 2px;
+}
+
+.sp-article a:hover {
+  text-decoration: underline;
+}
+
+/* 넓은 표가 본문 폭을 넘겨 페이지 전체에 가로 스크롤을 만들지 않도록 감싼다 */
+.sp-table-scroll {
+  overflow-x: auto;
+  margin: 10px 0 16px;
+}
+
+.sp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 16px;
+  font-size: 0.875rem;
+}
+
+.sp-table-scroll > .sp-table {
+  margin: 0;
+}
+
+.sp-th {
+  padding: 8px 10px;
+  background: hsl(var(--muted));
+  text-align: left;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sp-td {
+  padding: 8px 10px;
+  border: 1px solid hsl(var(--border));
+}
+
+.sp-ul,
+.sp-article ol.sp-ul {
+  margin: 0 0 12px 20px;
+  padding: 0;
+}
+
+.sp-article ol.sp-ul {
+  list-style: decimal;
+}
+
+.sp-ul-nested {
+  margin: 8px 0 0 20px;
+  padding: 0;
+  list-style: disc;
+}
+
+.sp-li {
+  margin-bottom: 4px;
+}
+
+.sp-callout {
+  background: hsl(var(--destructive) / 0.08);
+  border-left: 4px solid hsl(var(--destructive));
+  padding: 12px 14px;
+  margin: 12px 0 16px;
+}
+
+.sp-info {
+  background: hsl(var(--savings) / 0.1);
+  border-left: 4px solid hsl(var(--savings));
+  padding: 12px 14px;
+  margin: 12px 0 16px;
+}
+
+/* 의미색 — 절약/인하는 savings 토큰, 인상은 destructive 토큰을 탄다 */
+.sp-down {
+  color: hsl(var(--savings));
+  font-weight: 700;
+}
+
+.sp-up {
+  color: hsl(var(--destructive));
+  font-weight: 700;
+}
+
+.sp-muted {
+  color: hsl(var(--muted-foreground));
+}
+
+.sp-row--down {
+  background: hsl(var(--savings) / 0.08);
+}
+
+.sp-row--up {
+  background: hsl(var(--destructive) / 0.06);
+}
+
+.sp-crumbs {
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 10px;
+}
+
+.sp-crumb {
+  color: hsl(var(--muted-foreground));
+}
+
+.sp-note {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  margin-top: 24px;
+}
+
+.sp-note--tight {
+  margin-top: -8px;
+}
+
+/* 홈 상단 CTA — 심사자·첫 방문자가 바로 요금표로 들어갈 수 있는 진입점 */
+.sp-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.sp-cta__link {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sp-cta__link--primary {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.sp-article .sp-cta__link:hover {
+  text-decoration: none;
+  border-color: hsl(var(--primary));
+}
+
+@media (max-width: 640px) {
+  .sp-article {
+    padding: 16px 12px;
+  }
+
+  .sp-h1 {
+    font-size: 1.5rem;
+  }
+}

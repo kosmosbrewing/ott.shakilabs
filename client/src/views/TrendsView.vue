@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 import changelogSeed from "../../../data/reports/changelog.json";
 
 type ChangelogEntry = {
@@ -386,26 +387,11 @@ watch(serviceSlug, async () => {
         </CardContent>
       </Card>
 
-      <Card class="mt-4 retro-panel overflow-hidden">
-        <div class="retro-titlebar">
-          <h2 class="retro-title">이 변동을 읽는 법</h2>
-        </div>
-        <CardContent class="px-4 py-3">
-          <p class="text-caption mb-2">
-            표의 변동에는 세 가지 요인이 섞여 있습니다. ① 현지 통화 요금 개편(실제 인상·인하)
-            ② 원화 환율 변동(현지 요금이 같아도 환산값이 변함) ③ 수집 데이터 보정입니다.
-          </p>
-          <p class="text-caption mb-2">
-            짧은 기간에 나타나는 큰 등락은 대부분 환율·보정 요인일 수 있으므로, 특정 국가의
-            공식 요금 변경 여부는 YouTube 공식 안내에서 별도로 확인하는 것이 정확합니다.
-          </p>
-          <p class="text-caption">
-            본 페이지는 수집 시점별 스냅샷만 보유하며, 실시간·일 단위 가격 시계열이나 공식 요금
-            이력 아카이브는 제공하지 않습니다.
-          </p>
-        </CardContent>
-      </Card>
-
+      <!--
+        "이 변동을 읽는 법" 카드는 제거했다 — 같은 주제를 프리렌더판이 실제 수치
+        (하락·상승 개국 수, 변동률 중간값, 최대 변동국)와 함께 설명하고, 아래
+        SeoRichContent가 그 문구를 그대로 렌더한다. 두 벌을 두면 같은 설명이 두 번 나온다.
+      -->
       <Card v-if="changelogEntries.length" class="mt-4 retro-panel overflow-hidden">
         <div class="retro-titlebar">
           <h2 class="retro-title">가격 데이터 갱신·보정 기록</h2>
@@ -443,22 +429,38 @@ watch(serviceSlug, async () => {
         </CardContent>
       </Card>
 
-      <Card v-if="faqItems.length" class="mt-4 retro-panel overflow-hidden">
-        <div class="retro-titlebar">
-          <h2 class="retro-title">자주 묻는 질문</h2>
-        </div>
-        <CardContent class="px-4 py-2">
-          <Accordion type="multiple" class="w-full">
-            <AccordionItem v-for="(item, i) in faqItems" :key="i" :value="`trends-faq-${i}`">
-              <article>
-                <AccordionTrigger class="text-caption">{{ item.q }}</AccordionTrigger>
-                <AccordionContent>{{ item.a }}</AccordionContent>
-              </article>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
     </div>
+
+    <!--
+      프리렌더에만 있던 해설(변동 읽는 법·대륙별 평균·비싼 국가·가격 격차·관련 링크)을
+      화면에도 렌더한다. 위 카드들이 라이브로 보여주는 표는 seo-content.mjs에서
+      live:true로 표시돼 여기서 제외된다.
+
+      조건 분기 바깥에 두는 이유: 이 문구는 커밋된 시드에서 나오므로 API가 죽어도
+      보여줄 수 있어야 하고(로딩·에러 화면이 빈 페이지가 되지 않는다),
+      하이드레이션 패리티 게이트도 API 상태와 무관하게 결정적으로 돌 수 있다.
+    -->
+    <Card class="mt-4 retro-panel overflow-hidden">
+      <CardContent class="px-4 py-3">
+        <SeoRichContent route="/youtube-premium/trends" embedded />
+      </CardContent>
+    </Card>
+
+    <Card v-if="faqItems.length" class="mt-4 retro-panel overflow-hidden">
+      <div class="retro-titlebar">
+        <h2 class="retro-title">자주 묻는 질문</h2>
+      </div>
+      <CardContent class="px-4 py-2">
+        <Accordion type="multiple" class="w-full">
+          <AccordionItem v-for="(item, i) in faqItems" :key="i" :value="`trends-faq-${i}`">
+            <article>
+              <AccordionTrigger class="text-caption">{{ item.q }}</AccordionTrigger>
+              <AccordionContent>{{ item.a }}</AccordionContent>
+            </article>
+          </AccordionItem>
+        </Accordion>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
