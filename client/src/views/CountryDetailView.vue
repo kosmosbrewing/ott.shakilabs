@@ -12,6 +12,7 @@ import {
 import { formatNumber, calcSavingsPercent, countryFlag } from "@/lib/utils";
 import { getSiteUrl } from "@/lib/site";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 import { LoadingSpinner } from "@/components/ui/loading";
 import SavingsBadge from "@/components/price/SavingsBadge.vue";
 import { ArrowLeft } from "lucide-vue-next";
@@ -305,6 +306,18 @@ watch(
         </Table>
       </div>
 
+    </div>
+
+    <!--
+      프리렌더에만 있던 국가별 해설(한국 대비 비교·가격 차이 이유·약관 주의·FAQ·
+      다른 저렴한 국가)을 화면에도 렌더한다. 위 요금제 카드가 라이브로 보여주는
+      표는 seo-content.mjs에서 live:true로 표시돼 여기서 제외된다.
+
+      조건 분기 바깥에 두는 이유: 이 문구는 커밋된 시드에서 나오므로 API가 죽어도
+      보여줄 수 있어야 하고, 하이드레이션 패리티 게이트도 결정적으로 돌 수 있다.
+    -->
+    <div class="retro-panel retro-panel-content mt-4 overflow-hidden border border-border/40">
+      <SeoRichContent :route="`/${serviceSlug}/${countryCode.toLowerCase()}`" embedded />
     </div>
   </div>
 </template>

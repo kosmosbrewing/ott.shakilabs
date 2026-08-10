@@ -12,7 +12,8 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "sbom:prod": "node scripts/sbom.mjs",
     "verify:supply-chain": "node scripts/verify-vendor.mjs && node scripts/verify-sbom-identity.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate:parity": "node scripts/validate-hydration-parity.mjs"
   },
   "dependencies": {
     "@sentry/vue": "^10.43.0",
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@vitejs/plugin-vue": "^6.0.2",
+    "playwright": "^1.61.1",
     "satori": "^0.19.2",
     "typescript": "^5.7.3",
     "vite": "^7.3.1",

@@ -3,6 +3,10 @@ import { createHead } from "@unhead/vue/client";
 import App from "./App.vue";
 import router from "./router";
 import "./assets/css/main.css";
+// 프리렌더 HTML과 뷰가 공유하는 SEO 본문(.sp-*) 스타일.
+// 빌드된 index CSS에 포함되고 프리렌더 정적 HTML도 같은 <link>로 로드하므로
+// JS를 꺼도 동일하게 스타일된다.
+import "./assets/css/seo-content.css";
 import "@shakilabs/ui/styles.css";
 import { initAnalytics } from "./lib/analytics";
 import { captureSentryException, initSentry } from "./lib/sentry";

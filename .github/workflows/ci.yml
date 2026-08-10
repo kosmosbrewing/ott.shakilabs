@@ -37,6 +37,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      # 프리렌더 본문이 하이드레이션 뒤에도 화면에 남아 있는지 실제 브라우저로 확인한다.
+      # 선언 단위 검사로는 안 잡히는 종류의 회귀라(스크립트도 뷰도 각자는 멀쩡해 보인다)
+      # JS 끔/켬을 두 번 렌더해 비교하는 방법만이 판정이 된다.
+      # 게이트가 API를 막고 돌기 때문에 네트워크 상태와 무관하게 결정적이다.
+      - name: Install Chromium for parity gate
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate hydration parity
+        run: npm run validate:parity
+
       - name: Generate production SBOM
         run: npm run sbom:prod
 
