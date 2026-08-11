@@ -42,7 +42,10 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 
 const alertStyles = computed(() => {
   if (props.confirmMode) return "";
-  if (props.type === "error") return "bg-primary text-destructive-foreground";
+  // 토스트 배경은 타입과 무관하게 --primary고, 성공/에러 구분은 아이콘이 맡는다.
+  // 그런데 error만 글자에 --destructive-foreground를 써서 배경과 짝이 어긋나 있었다.
+  // 다크에서는 밝은 인디고 위 흰 글씨(2.81:1)가 되어 사실상 읽히지 않았다.
+  // 배경에 맞는 짝으로 통일한다 — 라이트 5.07:1 / 다크 6.41:1.
   return "bg-primary text-primary-foreground";
 });
 

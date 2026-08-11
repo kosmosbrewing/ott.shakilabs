@@ -10,7 +10,9 @@ export const badgeVariants = cva(
         destructive: "border-transparent bg-destructive text-destructive-foreground",
         outline: "text-foreground",
         savings: "border-transparent bg-savings text-savings-foreground",
-        neutral: "border-border/50 bg-muted-foreground/70 text-white",
+        // 반투명 회색(/70) 위 흰 글씨는 라이트 3.03:1 · 다크 3.90:1로 양쪽 다 미달이었다.
+        // 불투명 토큰 짝(muted-foreground ↔ background)으로 바꿔 5.32:1 / 7.73:1을 만든다.
+        neutral: "border-border/50 bg-muted-foreground text-background",
       },
     },
     defaultVariants: {

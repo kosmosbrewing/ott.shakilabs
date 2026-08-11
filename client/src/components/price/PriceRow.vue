@@ -99,7 +99,7 @@ const flag = computed(() => countryFlag(props.item.countryCode));
       <Badge
         v-if="isBase"
         variant="neutral"
-        class="h-5 w-[50px] justify-center px-0 py-0 text-tiny font-bold leading-none !text-white"
+        class="h-5 w-[50px] justify-center px-0 py-0 text-tiny font-bold leading-none"
       >기준</Badge>
       <SavingsBadge
         v-else-if="baseKrw != null && krwPrice != null"
