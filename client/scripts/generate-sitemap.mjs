@@ -1,16 +1,57 @@
+/**
+ * Sitemap generator. Runs after prerender.mjs because <lastmod> is derived from
+ * the prerendered HTML, not from a clock.
+ *
+ * Why not the price seed (the bug this replaces): lastmod used to be
+ * `priceSeed.lastUpdated`, so every URL advertised 2026-02-20 — the day the
+ * price snapshot was taken. The August rework (44 country variants
+ * canonicalised, trends body 1,095 -> 3,478 chars, prerender hydration fix,
+ * policy pages) never touched that field, so the sitemap kept telling Google
+ * nothing had changed since February and the whole cleanup sat behind a
+ * deferred recrawl.
+ *
+ * Why not `new Date()` either: stamping today on every build is the mirror
+ * image of the same lie. A redeploy that changed no copy would claim six fresh
+ * pages, and a sitemap that cries wolf every deploy is one Google learns to
+ * ignore. The 8 sibling apps do exactly this and it is already logged as
+ * TD-012 in the 2026-07-31 quality audit.
+ *
+ * What this does instead: hash each route's crawler-visible content (see
+ * sitemap-content-signature.mjs) and keep the hash alongside the date it was
+ * first seen in sitemap-lastmod.json. A route's lastmod only advances on the
+ * build where its own content actually changed. The date itself is still the
+ * build date — that is the newest instant we can honestly attribute a change
+ * to, and it errs late rather than early.
+ *
+ * The ledger is committed. When this script advances a date it rewrites the
+ * file and says so; commit it with the change that caused it. If you forget,
+ * nothing breaks and no stale date is served — the changed route just keeps
+ * restamping the current build date until the ledger catches up.
+ */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  SITE_URL,
-  SERVICE_SLUG,
-  getSitemapRoutes,
-  loadPriceSeed,
-} from "./seo-routes.mjs";
+import { SITE_URL, SERVICE_SLUG, getSitemapRoutes } from "./seo-routes.mjs";
+import { hashContentSignature } from "./sitemap-content-signature.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const OUTPUT_PATH = path.resolve(__dirname, "../public/sitemap.xml");
+const DIST_DIR = path.resolve(__dirname, "../dist");
+const PUBLIC_PATH = path.resolve(__dirname, "../public/sitemap.xml");
+const DIST_PATH = path.resolve(DIST_DIR, "sitemap.xml");
+const LEDGER_PATH = path.resolve(__dirname, "../sitemap-lastmod.json");
+
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+// Same helper as the sibling apps' build.mjs so a coordinated rebuild can pin
+// one date across the whole domain.
+function resolveBuildDate() {
+  const candidate = process.env.BUILD_DATE?.trim();
+  if (candidate && DATE_PATTERN.test(candidate)) {
+    return candidate;
+  }
+  return new Date().toISOString().slice(0, 10);
+}
 
 function escapeXml(value) {
   return value
@@ -27,35 +68,88 @@ function makeUrlNode(route, options = {}) {
   const changefreq = options.changefreq || "weekly";
   const priority = options.priority || "0.7";
 
+  // sitemaps.org 0.9 declares tUrl as an xsd:sequence, so the child order
+  // loc -> lastmod -> changefreq -> priority is normative, not cosmetic. This
+  // file used to emit lastmod last, which is the one arrangement a strict
+  // parser may reject -- a bad way to ship a fix whose entire payload is the
+  // lastmod. Values are untouched; the 11 sibling apps already emit this order.
   return [
     "  <url>",
     `    <loc>${escapeXml(loc)}</loc>`,
+    ...(lastmod ? [`    <lastmod>${escapeXml(lastmod)}</lastmod>`] : []),
     `    <changefreq>${changefreq}</changefreq>`,
     `    <priority>${priority}</priority>`,
-    ...(lastmod ? [`    <lastmod>${escapeXml(lastmod)}</lastmod>`] : []),
     "  </url>",
   ].join("\n");
 }
 
-function main() {
-  const seed = loadPriceSeed();
-  const lastmod =
-    typeof seed?.lastUpdated === "string" && seed.lastUpdated
-      ? seed.lastUpdated.slice(0, 10)
-      : new Date().toISOString().slice(0, 10);
+function routeToDistFile(route) {
+  return route === "/"
+    ? path.join(DIST_DIR, "index.html")
+    : path.join(DIST_DIR, route.replace(/^\//, ""), "index.html");
+}
 
-  // Per-route crawl hints. Country routes are absent from getSitemapRoutes()
-  // because they canonicalize to the service page (see seo-routes.mjs).
-  const ROUTE_CONFIG = {
-    "/": { priority: "1.0", changefreq: "weekly" },
-    "/about": { priority: "0.5", changefreq: "monthly" },
-    "/privacy": { priority: "0.4", changefreq: "monthly" },
-    "/terms": { priority: "0.4", changefreq: "monthly" },
-    [`/${SERVICE_SLUG}`]: { priority: "0.9", changefreq: "daily" },
-    [`/${SERVICE_SLUG}/trends`]: { priority: "0.8", changefreq: "daily" },
+function loadLedger() {
+  if (!fs.existsSync(LEDGER_PATH)) return {};
+  try {
+    const parsed = JSON.parse(fs.readFileSync(LEDGER_PATH, "utf-8"));
+    return parsed && typeof parsed.routes === "object" ? parsed.routes : {};
+  } catch {
+    // A corrupt ledger must not wedge the build: fall through to restamping.
+    process.stderr.write("[sitemap] sitemap-lastmod.json unreadable, restamping all routes\n");
+    return {};
+  }
+}
+
+function writeLedger(routes) {
+  const ordered = {};
+  for (const route of Object.keys(routes).sort()) ordered[route] = routes[route];
+  const payload = {
+    _note:
+      "Generated by scripts/generate-sitemap.mjs. lastmod advances only when a route's crawler-visible content hash changes. Commit this file together with the content change.",
+    routes: ordered,
   };
+  fs.writeFileSync(LEDGER_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf-8");
+}
+
+// Per-route crawl hints. Country routes are absent from getSitemapRoutes()
+// because they canonicalize to the service page (see seo-routes.mjs).
+const ROUTE_CONFIG = {
+  "/": { priority: "1.0", changefreq: "weekly" },
+  "/about": { priority: "0.5", changefreq: "monthly" },
+  "/privacy": { priority: "0.4", changefreq: "monthly" },
+  "/terms": { priority: "0.4", changefreq: "monthly" },
+  [`/${SERVICE_SLUG}`]: { priority: "0.9", changefreq: "daily" },
+  [`/${SERVICE_SLUG}/trends`]: { priority: "0.8", changefreq: "daily" },
+};
+
+function main() {
+  const buildDate = resolveBuildDate();
+  const ledger = loadLedger();
+  const nextLedger = {};
+  const advanced = [];
 
   const nodes = getSitemapRoutes().map((route) => {
+    const file = routeToDistFile(route);
+    if (!fs.existsSync(file)) {
+      throw new Error(
+        `[sitemap] prerendered output missing for ${route}: ${path.relative(process.cwd(), file)}. ` +
+          "Run this script after scripts/prerender.mjs."
+      );
+    }
+
+    const contentHash = hashContentSignature(fs.readFileSync(file, "utf-8"));
+    const previous = ledger[route];
+    const carriedOver =
+      previous &&
+      previous.contentHash === contentHash &&
+      DATE_PATTERN.test(previous.lastmod || "") &&
+      previous.lastmod <= buildDate;
+
+    const lastmod = carriedOver ? previous.lastmod : buildDate;
+    if (!carriedOver) advanced.push(route);
+    nextLedger[route] = { contentHash, lastmod };
+
     const config = ROUTE_CONFIG[route] || { priority: "0.7", changefreq: "weekly" };
     // The site root is advertised without a trailing slash so that the sitemap
     // loc matches the canonical emitted by prerender.mjs exactly.
@@ -70,10 +164,21 @@ function main() {
     "",
   ].join("\n");
 
-  fs.writeFileSync(OUTPUT_PATH, xml, "utf-8");
-  process.stdout.write(
-    `[sitemap] generated ${nodes.length} urls -> ${path.relative(process.cwd(), OUTPUT_PATH)}\n`
-  );
+  // dist/ is what ships; public/ is the committed copy so the repo and the
+  // deployed sitemap never disagree (and `vite dev` serves something real).
+  fs.writeFileSync(DIST_PATH, xml, "utf-8");
+  fs.writeFileSync(PUBLIC_PATH, xml, "utf-8");
+  writeLedger(nextLedger);
+
+  process.stdout.write(`[sitemap] generated ${nodes.length} urls -> dist/sitemap.xml\n`);
+  if (advanced.length > 0) {
+    process.stdout.write(
+      `[sitemap] content changed, lastmod -> ${buildDate} for: ${advanced.join(", ")}\n` +
+        "[sitemap] commit client/sitemap-lastmod.json and client/public/sitemap.xml with this change.\n"
+    );
+  } else {
+    process.stdout.write("[sitemap] no content change; lastmod carried over from the ledger\n");
+  }
 }
 
 main();
