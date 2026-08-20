@@ -84,7 +84,11 @@
         --accent-foreground: 222 25% 20%;
         --popover: 0 0% 100%;
         --popover-foreground: 222 28% 18%;
-        --destructive: 0 72% 52%;
+        /* 0 72% 52%는 --background(212 36% 97%) 위 4.38:1, 짝 foreground를 얹으면
+           4.49:1로 둘 다 AA 미달이었다. finance·house·travel이 이미 쓰는 통과값으로
+           통일한다(6.41:1 / 6.12:1). 브랜드 hue(234)는 DESIGN_TOKENS.md §2 소관이라
+           건드리지 않는다 — 여기서 조정한 건 의미색뿐이다. */
+        --destructive: 0 74% 42%;
         --destructive-foreground: 210 40% 98%;
         --border: 214 20% 82%;
         --input: 214 20% 74%;
@@ -109,13 +113,24 @@
         --accent-foreground: 210 26% 92%;
         --popover: 222 24% 13%;
         --popover-foreground: 210 26% 92%;
-        --destructive: 0 72% 58%;
-        --destructive-foreground: 0 0% 100%;
+        /* 다크 빨강은 텍스트로도 쓰인다(TrendsView·ServicePriceView의 인상 금액
+           text-destructive, 폼 에러 문구). 0 72% 58%는 카드(222 24% 13%) 위 4.13:1로
+           AA 미달이었다 — 라이브 실측값. 8개 저장소에 같은 리터럴이 복제돼 있어
+           공통 상향값 0 75% 72%로 통일한다(6.45:1).
+           배경으로 쓰일 때(Badge destructive) 위에 얹히는 foreground는 흰색이면
+           4.04:1로 미달이므로, --primary-foreground와 같은 방식으로 앱 hue를 유지한 채
+           어둡게 뒤집는다(6.83:1). */
+        --destructive: 0 75% 72%;
+        --destructive-foreground: 0 65% 12%;
         --border: 223 17% 27%;
         --input: 223 17% 31%;
         --ring: 234 62% 72%;
+        /* --savings 자체는 text-savings로 카드 위 7.04:1이라 통과한다 — 손대지 않는다.
+           문제는 짝인 foreground였다. 절약률 배지(bg-savings)의 흰 글씨가 2.37:1로
+           앱 전체에서 가장 심한 미달이었다(라이브 실측). hue 148을 유지한 채 어둡게
+           뒤집어 6.45:1을 만든다. */
         --savings: 148 56% 48%;
-        --savings-foreground: 0 0% 100%;
+        --savings-foreground: 148 70% 10%;
       }
 
       html {

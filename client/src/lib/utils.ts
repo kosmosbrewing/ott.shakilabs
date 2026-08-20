@@ -1,5 +1,19 @@
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+// tailwind.config.ts의 커스텀 fontSize(h1·h2·heading·body·caption·tiny)를
+// twMerge에 알려준다. 기본 설정만 쓰면 `text-tiny`를 폰트 크기가 아니라 '색'으로
+// 오분류해서, 같은 cn() 호출에 들어온 `text-savings-foreground` 같은 색 클래스를
+// 뒤에 온 크기 클래스가 조용히 지워버린다.
+// 배지의 `!text-white` 하드코딩이 바로 이 버그의 우회책이었고, 그 탓에 다크 절약
+// 배지가 2.37:1이 됐다. 토큰이 정상 적용되도록 분류를 바로잡는 게 근본 수정이다.
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      "font-size": [{ text: ["h1", "h2", "heading", "body", "caption", "tiny"] }],
+    },
+  },
+});
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));

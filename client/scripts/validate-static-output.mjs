@@ -107,6 +107,56 @@ function validateRoute(route) {
   titlesByRoute.set(route, titleOf(html));
 }
 
+// lastmod is the one field in this file with no visible symptom when it breaks:
+// the sitemap stays well-formed and the loc set stays correct while every URL
+// quietly advertises a frozen date (it sat on the price seed's 2026-02-20 for
+// five months). So assert it against the ledger that produced it — a future
+// rewiring back to a clock or a data field fails here instead of in Search
+// Console six weeks later.
+function validateLastmod(xml, locCount) {
+  // tUrl is an xsd:sequence in the sitemaps.org 0.9 schema, so child order is
+  // normative. Assert it here because a reordering regression produces a file
+  // that still looks fine to every human reader.
+  for (const block of xml.matchAll(/<url>([\s\S]*?)<\/url>/g)) {
+    const order = [...block[1].matchAll(/<(loc|lastmod|changefreq|priority)>/g)].map((m) => m[1]);
+    const expectedOrder = ["loc", "lastmod", "changefreq", "priority"];
+    assert(
+      JSON.stringify(order) === JSON.stringify(expectedOrder),
+      `Sitemap <url> children must follow the xsd:sequence ${expectedOrder.join(" -> ")}, got ${order.join(" -> ")}`
+    );
+  }
+
+  const values = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
+  assert(
+    values.length === locCount,
+    `Every sitemap URL needs exactly one <lastmod>: ${locCount} locs, ${values.length} lastmods`
+  );
+
+  const today = new Date().toISOString().slice(0, 10);
+  for (const value of values) {
+    assert(
+      /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)),
+      `Sitemap lastmod must be an ISO date (YYYY-MM-DD), got "${value}"`
+    );
+    // A future date is the one error Google treats as a reason to distrust the
+    // whole file, and it is what a timezone-naive stamp produces.
+    assert(value <= today, `Sitemap lastmod is in the future: ${value} > ${today}`);
+  }
+
+  const ledgerPath = path.resolve(__dirname, "../sitemap-lastmod.json");
+  if (!fs.existsSync(ledgerPath)) {
+    failures.push("client/sitemap-lastmod.json is missing (generate-sitemap.mjs writes it)");
+    return;
+  }
+  const ledger = JSON.parse(fs.readFileSync(ledgerPath, "utf-8")).routes ?? {};
+  const expected = sitemapRoutes.map((route) => ledger[route]?.lastmod ?? null);
+  assert(
+    JSON.stringify(values) === JSON.stringify(expected),
+    "Sitemap lastmod must come from the content ledger, not a clock or a data field.\n" +
+      `  ledger: ${JSON.stringify(expected)}\n  sitemap: ${JSON.stringify(values)}`
+  );
+}
+
 function validateSitemap() {
   const sitemapPath = path.join(DIST_DIR, "sitemap.xml");
   if (!fs.existsSync(sitemapPath)) {
@@ -122,6 +172,8 @@ function validateSitemap() {
     JSON.stringify(actual) === JSON.stringify(expected),
     `Sitemap must list exactly the self-canonical routes.\n  expected: ${JSON.stringify(expected)}\n  actual:   ${JSON.stringify(actual)}`
   );
+
+  validateLastmod(xml, actual.length);
 
   const variantUrls = new Set(countryRoutes.map(urlFor));
   const leaked = actual.filter((url) => variantUrls.has(url));

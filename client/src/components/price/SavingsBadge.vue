@@ -27,7 +27,9 @@ const variant = computed<"savings" | "destructive" | "neutral">(() => {
 </script>
 
 <template>
-  <Badge :variant="variant" class="h-5 min-w-[5ch] justify-center px-1.5 py-0 text-tiny font-bold tabular-nums leading-none !text-white">
+  <!-- !text-white는 variant마다 다른 foreground 토큰을 전부 덮어써서 다크 절약 배지를
+       2.37:1로 만들던 자리다. 토큰 짝(savings/destructive/neutral-foreground)에 맡긴다. -->
+  <Badge :variant="variant" class="h-5 min-w-[5ch] justify-center px-1.5 py-0 text-tiny font-bold tabular-nums leading-none">
     {{ label }}
   </Badge>
 </template>
