@@ -1,11 +1,11 @@
 # ShakiLabs UI artifact
 
-`shakilabs-ui-0.3.12.tgz` is the active exact artifact for `@shakilabs/ui` 0.3.12.
+`shakilabs-ui-0.3.13.tgz` is the active exact artifact for `@shakilabs/ui` 0.3.13.
 
 - Source repository: `kosmosbrewing/00.root-shakilabs`
-- Source commit: `5a421633c62b4e3270be8c84d605510d4355b0ec`
-- SHA-256: `6b056b7dbc1463ea624098df1d15f65077134f38c8d6097e9f275d4b406da0e1`
-- Consumed by: `client/package.json` → `"@shakilabs/ui": "file:vendor/shakilabs-ui-0.3.12.tgz"`
+- Source commit: `0dff191df93c42523b77cf9a55b933a449c107c7`
+- SHA-256: `5b92fa339c7169568a3ea389ed316c3e6a15b2f72b6e40da507eda74f19c6e00`
+- Consumed by: `client/package.json` → `"@shakilabs/ui": "file:vendor/shakilabs-ui-0.3.13.tgz"`
 - Rollback artifacts: available from Git history when needed
 
 활성 산출물 하나만 커밋한다 — 격리된 Vercel 체크아웃이 프라이빗 레지스트리 토큰 없이 `npm ci`를 돌릴 수 있어야 하기 때문이다.
@@ -16,14 +16,14 @@
 버전만 맞추고 해시를 방치하면 무결성 검증을 하려는 사람에게 오답을 주게 된다.
 
 ```sh
-shasum -a 256 client/vendor/shakilabs-ui-0.3.12.tgz   # 위 SHA-256과 일치해야 한다
+shasum -a 256 client/vendor/shakilabs-ui-0.3.13.tgz   # 위 SHA-256과 일치해야 한다
 node client/scripts/verify-vendor-readme.mjs   # 파일명·이 문서·client/package.json 3자 대조
 ```
 
 ## Update procedure
 
 1. 공급 저장소에서 **깨끗한 체크아웃**으로 패킹한다: `npm pack -w @shakilabs/ui --pack-destination <dir>`.
-   더티 트리에서 패킹하면 tarball 내용이 기록된 소스 커밋과 어긋난다(0.3.11에서 실제로 발생).
+   더티 트리에서 패킹하면 tarball 내용이 기록된 소스 커밋과 어긋난다(과거 릴리스에서 실제로 발생).
 2. 새 tgz를 `client/vendor/`에 복사하고 **이전 tgz는 삭제한다** — 활성 산출물은 항상 1개다.
 3. `client/package.json`의 `file:vendor/...` 참조를 새 파일명으로 바꾸고 `npm install`로 lockfile integrity를 갱신한다.
 4. 이 문서를 공급 저장소에서 다시 생성한다(손으로 고치지 않는다):
