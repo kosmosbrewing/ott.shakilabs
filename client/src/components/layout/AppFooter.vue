@@ -6,6 +6,9 @@ import { FOOTER_SECTIONS } from "@/data/footerNav";
 const year = new Date().getFullYear();
 
 const policyLinks = [
+  // 블로그는 root 앱(shakilabs.com/blog) 소유라 앱 라우터로는 못 간다.
+  // href를 주면 ShSiteFooter가 RouterLink 대신 <a href>로 렌더해 절대경로가 그대로 나간다.
+  { to: "", href: "/blog", label: "블로그" },
   { to: "/about", label: "사이트 안내" },
   { to: "/terms", label: "이용약관" },
   { to: "/privacy", label: "개인정보 처리방침" },
