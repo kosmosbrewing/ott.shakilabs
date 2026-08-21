@@ -116,6 +116,7 @@ export function buildPrerenderFooter() {
       <div style="padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;line-height:1.8;">
         <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:#64748b;">skdba1313@gmail.com</a></p>
         <p style="margin:0 0 6px;">
+          <a href="/blog" style="color:#64748b;margin-right:12px;">블로그</a>
           <a href="/ott/about" style="color:#64748b;margin-right:12px;">서비스 소개</a>
           <a href="/ott/privacy" style="color:#64748b;margin-right:12px;">개인정보처리방침</a>
           <a href="/ott/terms" style="color:#64748b;">이용약관</a>
