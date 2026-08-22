@@ -198,14 +198,14 @@ function routeToMeta(route, countryMap) {
 
   if (route === `/${SERVICE_SLUG}/trends`) {
     return {
-      title: "유튜브 프리미엄 가격 변동 트렌드 · 국가별 구독료 변화 | OTT 가격 비교",
+      title: "유튜브 프리미엄 국가별 가격 격차 · 최저가 순위 | OTT 가격 비교",
       description:
-        "유튜브 프리미엄 국가별 구독료를 수집 시점별 스냅샷으로 비교. 최저가·절약률 순위와 원화 환산 가격 변동의 환율 영향 해석. 실시간 시세가 아닌 시점별 데이터 기준.",
-      heading: "유튜브 프리미엄 가격 변동 트렌드",
+        "유튜브 프리미엄 국가별 구독료를 같은 시점 기준으로 비교. 최저가·절약률 순위, 대륙별 평균, 원화 환산 시 주의할 점. 실시간 시세·가격 변동 시계열은 제공하지 않습니다.",
+      heading: "유튜브 프리미엄 국가별 가격 격차",
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        name: "유튜브 프리미엄 가격 변동 트렌드",
+        name: "유튜브 프리미엄 국가별 가격 격차",
         url: `${SITE_URL}${route}`,
       },
     };

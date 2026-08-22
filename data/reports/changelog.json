@@ -1,48 +1,9 @@
 {
-  "updates": [
-    {
-      "id": "chg_20260212_kr",
-      "serviceSlug": "youtube-premium",
-      "countryCode": "KR",
-      "planId": "individual",
-      "previousKrw": 15198,
-      "currentKrw": 14900,
-      "deltaKrw": -298,
-      "note": "공식 요금 재확인 및 환율 반영",
-      "updatedAt": "2026-02-12T09:30:00.000Z"
-    },
-    {
-      "id": "chg_20260212_tr",
-      "serviceSlug": "youtube-premium",
-      "countryCode": "TR",
-      "planId": "individual",
-      "previousKrw": 3266,
-      "currentKrw": 3205,
-      "deltaKrw": -61,
-      "note": "터키 개인 요금제 수치 보정",
-      "updatedAt": "2026-02-12T09:45:00.000Z"
-    },
-    {
-      "id": "chg_20260212_us",
-      "serviceSlug": "youtube-premium",
-      "countryCode": "US",
-      "planId": "individual",
-      "previousKrw": 20115,
-      "currentKrw": 20359,
-      "deltaKrw": 244,
-      "note": "환율 변동 반영",
-      "updatedAt": "2026-02-12T10:00:00.000Z"
-    },
-    {
-      "id": "chg_20260211_vn",
-      "serviceSlug": "youtube-premium",
-      "countryCode": "VN",
-      "planId": "individual",
-      "previousKrw": 4571,
-      "currentKrw": 4526,
-      "deltaKrw": -45,
-      "note": "베트남 지역 가격표 업데이트",
-      "updatedAt": "2026-02-11T07:10:00.000Z"
-    }
-  ]
+  "_warning": "이 파일에 시드/샘플 값을 넣지 마라. 여기 들어온 항목은 /youtube-premium/trends 프리렌더 HTML의 '가격 데이터 갱신·보정 기록' 표에 그대로 노출된다. 실제로 수행한 보정만 기록할 것. 자세한 배경은 data/README.md 참고.",
+  "_removedFixture": {
+    "removedOn": "2026-08-22",
+    "reason": "4개 항목(KR·TR·US·VN, 2026-02-11~02-12) 전부 저장소 최초 커밋(2026-02-14)에 들어온 픽스처였다. 기록된 보정 작업이 실제로 있었다는 근거가 저장소 어디에도 없고, KR 항목(₩15,198 → ₩14,900 '공식 요금 재확인 및 환율 반영')은 같은 커밋의 history 파일이 같은 구간을 정반대(상승)로 서술해 서로 모순된다. 원본 값은 git 이력에 남아 있다.",
+    "entryIds": ["chg_20260212_kr", "chg_20260212_tr", "chg_20260212_us", "chg_20260211_vn"]
+  },
+  "updates": []
 }

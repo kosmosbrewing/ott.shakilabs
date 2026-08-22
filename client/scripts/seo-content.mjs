@@ -210,7 +210,9 @@ function getHomeFaqItems() {
     },
     {
       q: "데이터는 얼마나 자주 업데이트되나요?",
-      a: `가격 정보는 주기적으로 수집해 갱신하며, 환율은 자동 갱신됩니다. 최종 업데이트: <strong>${data.lastUpdated}</strong>. Google의 가격 정책 변경 공지가 있을 때마다 수동 확인 후 반영하며, 환율은 공개 환율 API를 통해 매일 자동 업데이트됩니다.`,
+      // 두 날짜는 성격이 다르다. 요금 조사는 자동 수집 수단이 없어 사람이 하고,
+      // 환율만 API로 자동 갱신된다. 하나로 뭉뚱그리면 "요금도 매일 갱신된다"로 읽힌다.
+      a: `가격 기준일과 환율 기준일은 서로 다르며 따로 표기합니다. <strong>요금 조사일: ${data.lastUpdated}</strong> — 현지 통화 정가는 Google의 가격 정책 변경 공지를 사람이 확인한 뒤 반영하므로, 이 날짜는 실제로 요금을 조사한 날짜입니다. <strong>환율 기준일: ${data.exchangeRateDate}</strong> — 원화 환산에 쓰는 환율은 공개 환율 API에서 자동으로 가져옵니다. 미리 렌더된 페이지의 원화 값은 배포 시점 환율로 계산돼 있어, 지금 보고 계신 시점의 환율과는 차이가 날 수 있습니다.`,
     },
     {
       q: "광고 제거 외에 유튜브 프리미엄의 혜택은?",
@@ -293,22 +295,22 @@ function getCountryFaqItems(countryCode) {
 
 // 트렌드 페이지 FAQ — 런타임 TrendsView.vue의 faqItems와 동일 문구를 유지한다
 function getTrendsFaqItems() {
-  const { data, timelineDates } = computeTrendStats();
+  const data = loadData();
   const fxDate = data.exchangeRateDate || data.lastUpdated || "-";
-  const dates = timelineDates.length > 0 ? timelineDates.join(" · ") : "-";
+  const surveyDate = data.lastUpdated || "-";
 
   return [
     {
-      q: "이 페이지의 가격 변동은 실제 요금 인상·인하인가요?",
-      a: "반드시 그렇지는 않습니다. 표의 값은 수집 시점의 원화(KRW) 환산 가격이어서 현지 통화 요금 개편, 원화 환율 변동, 데이터 보정이 함께 반영됩니다. 짧은 기간의 등락 상당수는 환율 요인일 수 있으므로, 공식 요금 변경 여부는 YouTube 공식 안내에서 별도로 확인해야 합니다.",
+      q: "이 페이지에서 가격 변동 추이를 볼 수 있나요?",
+      a: `아직 볼 수 없습니다. 변동을 보여주려면 같은 국가를 서로 다른 시점에 두 번 이상 조사한 이력이 있어야 하는데, 현재는 요금 조사 1회분(${surveyDate} 기준)만 확보돼 있습니다. 그래서 이 페이지는 시점 간 변동 대신 같은 시점의 국가 간 가격 격차를 보여줍니다. 두 번째 조사가 쌓이면 시점별 비교표가 이 자리에 나타납니다.`,
     },
     {
       q: "가격 데이터는 어떻게, 얼마나 자주 수집되나요?",
-      a: `실시간 시계열이 아니라 수집 시점별 스냅샷 방식입니다. 현재 비교에 사용된 시점은 ${dates}이며, 환율은 공개 환율 API 기준(${fxDate})으로 갱신됩니다. 스냅샷 사이의 일별 가격은 제공하지 않습니다.`,
+      a: `현지 통화 정가는 자동 수집 수단이 없어 사람이 공식 요금 안내를 확인해 반영합니다. 현재 요금 조사일은 ${surveyDate}입니다. 원화 환산에 쓰는 환율만 공개 환율 API에서 자동으로 가져오며 기준일은 ${fxDate}입니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.`,
     },
     {
       q: "과거 특정 시점의 공식 요금도 확인할 수 있나요?",
-      a: "아니요. 본 페이지는 자체 수집 스냅샷만 제공하며, Google/YouTube의 공식 가격 변경 이력 아카이브가 아닙니다. 특정 시점의 공식 요금이나 인상 공지는 YouTube 고객센터 등 공식 채널에서 확인해야 정확합니다.",
+      a: "아니요. 본 페이지는 Google/YouTube의 공식 가격 변경 이력 아카이브가 아니며, 과거 요금 이력을 보관하고 있지 않습니다. 특정 시점의 공식 요금이나 인상 공지는 YouTube 고객센터 등 공식 채널에서 확인해야 정확합니다.",
     },
     {
       q: "환율이 바뀌면 순위도 바뀌나요?",
@@ -449,7 +451,7 @@ function buildCountryContent(countryCode) {
         ${countryName}
       </nav>
 
-      <h1 class="${H1}">유튜브 프리미엄 ${countryName} 가격 (${lastUpdated} 기준)</h1>
+      <h1 class="${H1}">유튜브 프리미엄 ${countryName} 가격 (요금 조사 ${lastUpdated} 기준)</h1>
 
       <p class="${P}">
         유튜브 프리미엄 <strong>${countryName}</strong>(${continent}) 개인 플랜은
@@ -481,7 +483,7 @@ function buildCountryContent(countryCode) {
 
       <p class="sp-note sp-note--tight">
         ※ ${krwRate} 기준. 환율은 매일 변동하므로 실제 결제 금액은 해당 통화 원가 × 현재 환율로 계산됩니다.
-        최종 업데이트: ${lastUpdated}
+        요금 조사일: ${lastUpdated} · 환율 기준일: ${data.exchangeRateDate}
       </p>
 
 `,
@@ -566,7 +568,7 @@ function buildCountryContent(countryCode) {
       </ul>
 
       <p class="sp-note">
-        ※ 본 페이지 가격 정보는 공개된 출처를 기반으로 수집된 ${lastUpdated} 기준 데이터이며, 실제 Google Play/YouTube 공식 가격과 다를 수 있습니다.
+        ※ 본 페이지의 현지 통화 요금은 공개된 출처를 기반으로 ${lastUpdated}에 조사한 자료이고, 원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다. 실제 Google Play/YouTube 공식 가격과 다를 수 있습니다.
         가격 우회 구독은 약관 위반 위험이 있어 권장하지 않습니다. 본 사이트는 Google 또는 YouTube의 공식 제휴 서비스가 아닙니다.
       </p>`,
     },
@@ -744,7 +746,7 @@ function buildHomeContent() {
       id: "home",
       live: true,
       html: `
-      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 비교 (${data.lastUpdated} 기준)</h1>
+      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 비교 (요금 조사 ${data.lastUpdated} 기준)</h1>
 
       <p class="${P}">
         전 세계 <strong>${prices.length}개 국가</strong>의 유튜브 프리미엄(YouTube Premium) 개인 플랜 가격을 한눈에 비교하는 서비스입니다.
@@ -832,7 +834,7 @@ function buildHomeContent() {
       </ul>
 
       <p class="sp-note">
-        ※ 본 서비스는 Google LLC 또는 YouTube의 공식 제휴 서비스가 아닙니다. 최종 업데이트: ${data.lastUpdated}.
+        ※ 본 서비스는 Google LLC 또는 YouTube의 공식 제휴 서비스가 아닙니다. 요금 조사일: ${data.lastUpdated} · 환율 기준일: ${data.exchangeRateDate}.
       </p>`,
     },
   ];
@@ -851,6 +853,11 @@ function buildTrendsContent() {
   const fmtSignedPercent = (value) =>
     value == null ? "-" : `${value > 0 ? "+" : ""}${value}%`;
   const percentClass = (value) => (value < 0 ? "sp-down" : value > 0 ? "sp-up" : "sp-muted");
+
+  // 변동 표는 "서로 다른 시점의 실제 조사"가 2회 이상 있을 때만 의미가 있다.
+  // 관측이 1회뿐인데 표를 그리면 환율 차이가 "가격 변동"으로 둔갑한다 —
+  // 실제로 이 페이지가 시드 픽스처로 그 상태였다(data/README.md 참고).
+  const hasObservedHistory = stats.snapshots.length > 0;
 
   // 수집 시점별 타임라인 표: 기준국(KR) + 직전 스냅샷 대비 하락/상승 상위 5개국
   const timelineRowsData = [
@@ -879,14 +886,6 @@ function buildTrendsContent() {
         </tr>`;
     })
     .join("");
-
-  const biggestFall = stats.movers[0] || null;
-  const biggestRise = stats.movers[stats.movers.length - 1] || null;
-  const moverExample =
-    biggestFall && biggestRise && biggestFall.changePercent < 0 && biggestRise.changePercent > 0
-      ? `이 기간 환산 표시값이 가장 크게 내린 곳은 ${stats.nameByCode.get(biggestFall.code) || biggestFall.code}(${fmtSignedPercent(biggestFall.changePercent)}), 가장 크게 오른 곳은 ${stats.nameByCode.get(biggestRise.code) || biggestRise.code}(${fmtSignedPercent(biggestRise.changePercent)})입니다.
-        몇 주 사이의 이런 큰 폭 변동은 현지 정가 개편만으로 보기 어렵고, 환율과 데이터 보정 영향이 섞여 있을 수 있습니다.`
-      : "";
 
   // 가격 데이터 갱신·보정 기록 (data/reports/changelog.json)
   const changelogUpdates = (loadChangelog().updates || [])
@@ -923,23 +922,13 @@ function buildTrendsContent() {
         가격 트렌드
       </nav>
 
-      <h1 class="${H1}">유튜브 프리미엄 가격 변동 트렌드 (${data.lastUpdated})</h1>
-
+      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 격차 (요금 조사 ${data.lastUpdated} 기준)</h1>
+${
+  hasObservedHistory
+    ? `
+      <h2 class="${H2}">관측 시점별 원화 환산 가격 (기준국 + 변동 상위)</h2>
       <p class="${P}">
-        이 페이지는 유튜브 프리미엄 개인 플랜의 국가별 가격을 <strong>수집 시점별 스냅샷</strong>으로 비교합니다.
-        현재 비교에 사용된 시점은 ${stats.timelineDates.join(" · ")}이며, 모든 값은 원화(KRW) 환산 기준입니다.
-        어떤 국가의 표시 가격이 오르내렸는지와 함께, 그 변동을 요금 개편·환율·데이터 보정 중 무엇으로 읽어야 하는지 안내합니다.
-      </p>
-      <div class="${INFO}">
-        <strong>데이터 범위 안내</strong> — 본 페이지는 실시간·일 단위 가격 시계열을 제공하지 않으며,
-        Google/YouTube의 공식 가격 변경 이력 아카이브가 아닙니다.
-        자체 수집 스냅샷 ${stats.snapshots.length}회(${stats.snapshots.map((s) => s.date).join(", ")} · ${stats.movers.length}개국 추적)와
-        최신 가격표(${data.lastUpdated} 기준 ${prices.length}개국)에서 도출할 수 있는 사실만 제공합니다.
-      </div>
-
-      <h2 class="${H2}">수집 시점별 원화 환산 가격 (기준국 + 변동 상위)</h2>
-      <p class="${P}">
-        직전 스냅샷(${stats.lastSnapshot?.date || "-"}) 대비 최신 가격표(${data.lastUpdated}) 기준으로
+        직전 관측(${stats.lastSnapshot?.date || "-"}) 대비 최신 가격표(${data.lastUpdated}) 기준으로
         환산 가격이 가장 크게 내린 5개국과 가장 크게 오른 5개국, 그리고 기준국인 한국을 함께 보여줍니다.
       </p>
       <div class="sp-table-scroll"><table class="${TABLE}">
@@ -955,29 +944,80 @@ function buildTrendsContent() {
       <p class="sp-note sp-note--tight">
         ※ 원화 환산 기준이라 현지 요금이 그대로여도 환율에 따라 표시값이 달라질 수 있습니다.
       </p>
+`
+    : ""
+}
+`,
+    },
+    // 도입부와 "데이터 범위 안내"는 일부러 live:false다. 이 페이지에서 가장 중요한 문장이
+    // "지금은 변동 데이터가 없다"인데, 이걸 live:true 섹션에 두면 하이드레이션 후 제거돼
+    // 크롤러만 보고 실제 사용자는 못 보는 상태가 된다. 해명 문구야말로 양쪽에 다 있어야 한다.
+    {
+      id: "trends-intro",
+      live: false,
+      html: `      <p class="${P}">
+        이 페이지는 유튜브 프리미엄 개인 플랜의 국가별 가격을 <strong>같은 시점 기준으로 나란히</strong> 비교합니다.
+        현지 통화 정가는 ${data.lastUpdated}에 조사한 ${prices.length}개국 자료이고,
+        원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다. 두 날짜는 성격이 다르므로 따로 표기합니다.
+      </p>
+      <div class="${INFO}">
+        <strong>데이터 범위 안내</strong> — 본 페이지는 실시간·일 단위 가격 시계열을 제공하지 않으며,
+        Google/YouTube의 공식 가격 변경 이력 아카이브도 아닙니다.
+        ${
+          hasObservedHistory
+            ? `관측 이력 ${stats.snapshots.length}회(${stats.snapshots.map((s) => s.date).join(", ")})와 최신 가격표(${data.lastUpdated} 기준 ${prices.length}개국)에서 도출할 수 있는 사실만 제공합니다.`
+            : `현재 확보된 요금 조사는 <strong>1회분(${data.lastUpdated} 기준 ${prices.length}개국)</strong>뿐이라, 시점 간 가격 변동은 표시하지 않습니다. 같은 국가를 서로 다른 시점에 두 번 이상 조사해야 변동을 말할 수 있고, 아직 그 조건을 충족하지 못했습니다.`
+        }
+      </div>
 
 `,
     },
-    // 프리렌더판에는 하락·상승 개국 수, 변동률 중간값, 최대 변동국 같은 실제 수치가 들어 있어
-    // 뷰의 일반론 카드보다 정확하다 → 뷰가 이쪽을 렌더하고 기존 카드는 제거했다.
     {
       id: "trends-reading",
       live: false,
-      html: `      <h2 class="${H2}">이 변동을 어떻게 읽어야 하나</h2>
+      html: `      <h2 class="${H2}">이 페이지가 보여주는 것과 보여주지 않는 것</h2>
       <p class="${P}">
-        표의 변동에는 세 가지 요인이 섞여 있습니다.
-        ① <strong>현지 통화 요금 개편</strong>(실제 인상·인하)
-        ② <strong>원화 환율 변동</strong>(현지 요금이 같아도 환산값이 변함)
-        ③ <strong>수집 데이터 보정</strong>(수집 경로·검수에 따른 수치 재확인)입니다.
+        <strong>보여주는 것</strong> — 요금 조사일(${data.lastUpdated}) 하나를 기준으로 한
+        ${prices.length}개국의 개인 플랜 현지 통화 정가와 그 원화 환산값, 그리고 국가 사이의 가격 격차와 순위입니다.
+        같은 시점끼리의 비교이므로 "어느 나라가 더 싼가"에는 그대로 답할 수 있습니다.
       </p>
       <p class="${P}">
-        직전 스냅샷(${stats.lastSnapshot?.date || "-"}) 대비 최신(${data.lastUpdated}) 기준으로 추적 ${stats.movers.length}개국 중
-        ${stats.falls.length}개국의 환산 가격이 내렸고 ${stats.rises.length}개국은 올랐습니다(변동률 중간값 ${fmtSignedPercent(stats.median)}).
-        ${moverExample}
+        <strong>보여주지 않는 것</strong> — 특정 국가의 요금이 언제 얼마나 올랐거나 내렸는지입니다.
+        시점 간 변동을 말하려면 같은 국가를 서로 다른 날짜에 두 번 이상 조사한 이력이 있어야 하는데,
+        ${
+          hasObservedHistory
+            ? `현재 관측 이력은 ${stats.snapshots.length}회입니다.`
+            : `현재 확보된 요금 조사는 1회분뿐입니다. 그래서 변동률 표를 싣지 않습니다.`
+        }
       </p>
       <p class="${P}">
-        따라서 특정 국가의 공식 요금 변경 여부는 이 표만으로 단정하지 말고,
-        해당 국가 페이지의 현지 통화 가격과 YouTube 공식 안내를 함께 확인하는 것이 정확합니다.
+        변동을 굳이 만들어 싣지 않는 이유가 있습니다. 원화 환산값만 놓고 두 시점을 빼면
+        <strong>환율이 움직인 것을 요금이 움직인 것처럼</strong> 보이게 만들기 때문입니다.
+        예를 들어 한국 정가 ${formatKrw(krKrw)}은 애초에 원화로 매겨져 있어 환율과 무관하게 고정인데,
+        달러를 거쳐 환산하는 계산을 두 번 돌리면 숫자가 미세하게 흔들립니다.
+        그 흔들림에 "가격 변동"이라는 이름을 붙이면 사실이 아닌 정보가 됩니다.
+      </p>
+      <p class="${P}">
+        관측 이력은 다음 요금 조사부터 쌓입니다. 서로 다른 시점의 조사가 2회 이상 모이면
+        시점별 비교표와 변동률이 이 자리에 다시 나타납니다. 그때까지는 국가 간 격차만 제공합니다.
+      </p>
+
+      <h2 class="${H2}">원화 환산값을 읽을 때 주의할 점</h2>
+      <p class="${P}">
+        표의 원화 값에는 세 가지가 섞여 있습니다.
+        ① <strong>현지 통화 요금</strong>(각국 공표가 그 자체)
+        ② <strong>원화 환율</strong>(현지 요금이 같아도 환산값이 변함)
+        ③ <strong>두 날짜의 시차</strong>(요금 조사일과 환율 기준일이 다름)입니다.
+      </p>
+      <p class="${P}">
+        이 페이지의 환율 기준일은 ${data.exchangeRateDate}입니다. 환율은 매일 움직이므로
+        실제 결제 시점의 청구 금액은 여기 표시된 원화 값과 다를 수 있고,
+        카드사 해외 결제 수수료가 추가로 붙습니다. 원화 환산 순위는 참고용으로 보고,
+        국가를 고르는 판단은 각 국가 페이지의 <strong>현지 통화 가격</strong>과 함께 확인하는 편이 정확합니다.
+      </p>
+      <p class="${P}">
+        특정 국가의 공식 요금이 실제로 바뀌었는지는 이 페이지만으로 단정하지 말고,
+        YouTube 고객센터·Google Play의 공식 안내에서 확인하시기 바랍니다.
       </p>
 
 `,
@@ -1070,7 +1110,9 @@ function buildTrendsContent() {
     {
       id: "trends-log",
       live: true,
-      html: `      <h2 class="${H2}">가격 데이터 갱신·보정 기록</h2>
+      html: `${
+        changelogUpdates.length > 0
+          ? `      <h2 class="${H2}">가격 데이터 갱신·보정 기록</h2>
       <p class="${P}">
         수집 데이터를 재확인·보정한 기록입니다. 환율 반영이나 수치 검수 내역이 포함되며,
         Google/YouTube의 공식 요금 개편 공지와는 다를 수 있습니다.
@@ -1088,7 +1130,9 @@ function buildTrendsContent() {
         <tbody>${changelogRowsHtml}</tbody>
       </table></div>
 
-      <h2 class="${H2}">자주 묻는 질문 (FAQ)</h2>
+`
+          : ""
+      }      <h2 class="${H2}">자주 묻는 질문 (FAQ)</h2>
       ${buildFaqSectionHtml(getTrendsFaqItems())}
 
 `,
@@ -1104,7 +1148,7 @@ function buildTrendsContent() {
       </ul>
 
       <p class="sp-note">
-        ※ 본 데이터는 ${data.lastUpdated} 기준 수집본이며, 환율과 가격 정책 변동에 따라 달라질 수 있습니다.
+        ※ 현지 통화 요금은 ${data.lastUpdated}에 조사한 자료이고, 원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다.
         실시간·일 단위 시계열은 제공하지 않으며, 실제 결제 금액은 Google Play·YouTube 공식 페이지에서 최종 확인해야 합니다.
       </p>`,
     },
@@ -1220,7 +1264,7 @@ function buildAboutContent() {
       </p>
 
       <p class="sp-note">
-        최종 업데이트: ${loadData().lastUpdated}
+        요금 조사일: ${loadData().lastUpdated} · 환율 기준일: ${loadData().exchangeRateDate}
       </p>` }];
 }
 

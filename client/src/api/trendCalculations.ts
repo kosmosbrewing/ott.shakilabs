@@ -191,6 +191,13 @@ export function buildTrendSummary(
 
   const countryChanges = buildCountryChanges(rows, snapshots, priceData.lastUpdated || null);
 
+  // 관측 스냅샷이 하나도 없으면 시점 간 비교 자체가 성립하지 않는다.
+  // 이 가드가 없으면 buildTimelineRows가 현재값 1점짜리 기준국 행(changePercent=null)을
+  // 돌려주고, 화면에는 열이 하나뿐인 "시점별 비교표"가 남는다 — 비교한 적 없는 것을
+  // 비교표 모양으로 보여주는 셈이다.
+  const timeline =
+    snapshots.length > 0 ? buildTimelineRows(rows, countryChanges, priceData.baseCountry || "KR") : [];
+
   return {
     asOf: priceData.lastUpdated || null,
     exchangeRateDate: priceData.exchangeRateDate || null,
@@ -199,6 +206,6 @@ export function buildTrendSummary(
     highestSavings,
     biggestDrops,
     countryChanges,
-    timeline: buildTimelineRows(rows, countryChanges, priceData.baseCountry || "KR"),
+    timeline,
   };
 }

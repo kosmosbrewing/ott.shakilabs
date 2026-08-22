@@ -41,19 +41,19 @@ const currentService = computed(() =>
 
 const trendHeading = computed(() => {
   if (serviceSlug.value === "youtube-premium") {
-    return "YouTube Premium 가격 트렌드";
+    return "YouTube Premium 국가별 가격 격차";
   }
-  return `${currentService.value?.name || serviceSlug.value} 가격 트렌드`;
+  return `${currentService.value?.name || serviceSlug.value} 국가별 가격 격차`;
 });
 
 const pageTitle = computed(() => {
   const serviceName = currentService.value?.name || serviceSlug.value;
-  return `${serviceName} 가격 변동 트렌드 · 국가별 구독료 변화 | OTT 가격 비교`;
+  return `${serviceName} 국가별 가격 격차 · 최저가 순위 | OTT 가격 비교`;
 });
 
 const pageDescription = computed(() => {
   const serviceName = currentService.value?.name || serviceSlug.value;
-  return `${serviceName} 국가별 구독료를 수집 시점별 스냅샷으로 비교. 최저가·절약률 순위와 원화 환산 가격 변동의 환율 영향 해석. 실시간 시세가 아닌 시점별 데이터 기준.`;
+  return `${serviceName} 국가별 구독료를 같은 시점 기준으로 비교. 최저가·절약률 순위, 대륙별 평균, 원화 환산 시 주의할 점. 실시간 시세·가격 변동 시계열은 제공하지 않습니다.`;
 });
 
 // ─── 수집 시점별 타임라인 ────────────────────────────────────────────────────
@@ -97,23 +97,25 @@ const changelogEntries = computed<ChangelogEntry[]>(() => {
 });
 
 // ─── FAQ (화면 텍스트 = FAQPage 스키마 텍스트 동일 소스) ─────────────────────
+// seo-content.mjs의 getTrendsFaqItems()와 문구가 같아야 한다
+// (화면 텍스트 = FAQPage 스키마 텍스트 = 프리렌더 HTML).
 const faqItems = computed<{ q: string; a: string }[]>(() => {
   if (!trends.value) return [];
   const fxDate = trends.value.exchangeRateDate || trends.value.asOf || "-";
-  const dates = timelineDates.value.length > 0 ? timelineDates.value.join(" · ") : "-";
+  const surveyDate = trends.value.asOf || "-";
 
   return [
     {
-      q: "이 페이지의 가격 변동은 실제 요금 인상·인하인가요?",
-      a: "반드시 그렇지는 않습니다. 표의 값은 수집 시점의 원화(KRW) 환산 가격이어서 현지 통화 요금 개편, 원화 환율 변동, 데이터 보정이 함께 반영됩니다. 짧은 기간의 등락 상당수는 환율 요인일 수 있으므로, 공식 요금 변경 여부는 YouTube 공식 안내에서 별도로 확인해야 합니다.",
+      q: "이 페이지에서 가격 변동 추이를 볼 수 있나요?",
+      a: `아직 볼 수 없습니다. 변동을 보여주려면 같은 국가를 서로 다른 시점에 두 번 이상 조사한 이력이 있어야 하는데, 현재는 요금 조사 1회분(${surveyDate} 기준)만 확보돼 있습니다. 그래서 이 페이지는 시점 간 변동 대신 같은 시점의 국가 간 가격 격차를 보여줍니다. 두 번째 조사가 쌓이면 시점별 비교표가 이 자리에 나타납니다.`,
     },
     {
       q: "가격 데이터는 어떻게, 얼마나 자주 수집되나요?",
-      a: `실시간 시계열이 아니라 수집 시점별 스냅샷 방식입니다. 현재 비교에 사용된 시점은 ${dates}이며, 환율은 공개 환율 API 기준(${fxDate})으로 갱신됩니다. 스냅샷 사이의 일별 가격은 제공하지 않습니다.`,
+      a: `현지 통화 정가는 자동 수집 수단이 없어 사람이 공식 요금 안내를 확인해 반영합니다. 현재 요금 조사일은 ${surveyDate}입니다. 원화 환산에 쓰는 환율만 공개 환율 API에서 자동으로 가져오며 기준일은 ${fxDate}입니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.`,
     },
     {
       q: "과거 특정 시점의 공식 요금도 확인할 수 있나요?",
-      a: "아니요. 본 페이지는 자체 수집 스냅샷만 제공하며, Google/YouTube의 공식 가격 변경 이력 아카이브가 아닙니다. 특정 시점의 공식 요금이나 인상 공지는 YouTube 고객센터 등 공식 채널에서 확인해야 정확합니다.",
+      a: "아니요. 본 페이지는 Google/YouTube의 공식 가격 변경 이력 아카이브가 아니며, 과거 요금 이력을 보관하고 있지 않습니다. 특정 시점의 공식 요금이나 인상 공지는 YouTube 고객센터 등 공식 채널에서 확인해야 정확합니다.",
     },
     {
       q: "환율이 바뀌면 순위도 바뀌나요?",
@@ -208,8 +210,8 @@ watch(serviceSlug, async () => {
         </div>
         <div class="retro-panel-content flex items-center justify-between flex-wrap gap-3">
           <p class="text-caption text-muted-foreground">
-            기준일: {{ trends.asOf || "-" }} · 비교 기준: {{ trends.previousSnapshotDate || "-" }} ·
-            수집 시점별 스냅샷 비교(실시간 시계열 아님)
+            요금 조사일: {{ trends.asOf || "-" }} · 환율 기준일: {{ trends.exchangeRateDate || "-" }} ·
+            같은 시점 기준 국가 간 비교(실시간 시계열 아님)
           </p>
           <div class="flex items-center gap-2 text-caption">
             <RouterLink :to="`/${serviceSlug}`" class="retro-button-subtle">가격표 보기</RouterLink>
@@ -289,7 +291,11 @@ watch(serviceSlug, async () => {
         </Card>
       </div>
 
-      <Card class="mt-4 retro-panel overflow-hidden">
+      <!--
+        관측 이력이 2회 미만이면 trends.biggestDrops는 빈 배열이 된다.
+        v-if 없이 두면 머리글만 남은 빈 표가 "변동 없음"처럼 보이므로 카드째 숨긴다.
+      -->
+      <Card v-if="trends.biggestDrops.length" class="mt-4 retro-panel overflow-hidden">
         <div class="retro-titlebar">
           <h2 class="retro-title">최근 가격 변동 TOP 10 (개인 · KRW)</h2>
         </div>

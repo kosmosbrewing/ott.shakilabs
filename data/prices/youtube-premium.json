@@ -1,8 +1,8 @@
 {
   "serviceId": "youtube-premium",
   "lastUpdated": "2026-02-20",
-  "exchangeRateDate": "2026-02-21",
-  "krwRate": 1447.738325,
+  "exchangeRateDate": "2026-08-22",
+  "krwRate": 1385.741836,
   "baseCurrency": "USD",
   "baseCountry": "KR",
   "prices": [
@@ -23,12 +23,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 10.29,
+          "usd": 10.75,
           "krw": 14897
         },
         "lite": {
-          "usd": 5.87,
-          "krw": 8498
+          "usd": 6.13,
+          "krw": 8495
         }
       }
     },
@@ -54,15 +54,15 @@
       "converted": {
         "individual": {
           "usd": 13.99,
-          "krw": 20254
+          "krw": 19387
         },
         "family": {
           "usd": 22.99,
-          "krw": 33284
+          "krw": 31858
         },
         "lite": {
           "usd": 7.99,
-          "krw": 11567
+          "krw": 11072
         }
       }
     },
@@ -87,16 +87,16 @@
       },
       "converted": {
         "individual": {
-          "usd": 17.51,
-          "krw": 25350
+          "usd": 17.71,
+          "krw": 24541
         },
         "family": {
-          "usd": 26.94,
-          "krw": 39002
+          "usd": 27.26,
+          "krw": 37775
         },
         "lite": {
-          "usd": 10.77,
-          "krw": 15592
+          "usd": 10.9,
+          "krw": 15105
         }
       }
     },
@@ -121,16 +121,16 @@
       },
       "converted": {
         "individual": {
-          "usd": 16.26,
-          "krw": 23540
+          "usd": 16.47,
+          "krw": 22823
         },
         "family": {
-          "usd": 28.28,
-          "krw": 40942
+          "usd": 28.65,
+          "krw": 39702
         },
         "lite": {
-          "usd": 6.36,
-          "krw": 9208
+          "usd": 6.44,
+          "krw": 8924
         }
       }
     },
@@ -159,20 +159,20 @@
       },
       "converted": {
         "individual": {
-          "usd": 1.64,
-          "krw": 2374
+          "usd": 1.56,
+          "krw": 2162
         },
         "family": {
-          "usd": 3.29,
-          "krw": 4763
+          "usd": 3.12,
+          "krw": 4324
         },
         "lite": {
-          "usd": 0.98,
-          "krw": 1419
+          "usd": 0.93,
+          "krw": 1289
         },
         "duo": {
-          "usd": 2.41,
-          "krw": 3489
+          "usd": 2.29,
+          "krw": 3173
         }
       }
     },
@@ -193,12 +193,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 8.25,
-          "krw": 11944
+          "usd": 8.05,
+          "krw": 11155
         },
         "family": {
-          "usd": 14.7,
-          "krw": 21282
+          "usd": 14.34,
+          "krw": 19872
         }
       }
     },
@@ -223,16 +223,16 @@
       },
       "converted": {
         "individual": {
-          "usd": 6.31,
-          "krw": 9135
+          "usd": 6.26,
+          "krw": 8675
         },
         "family": {
-          "usd": 15.19,
-          "krw": 21991
+          "usd": 15.06,
+          "krw": 20869
         },
         "duo": {
-          "usd": 9.48,
-          "krw": 13725
+          "usd": 9.4,
+          "krw": 13026
         }
       }
     },
@@ -257,16 +257,16 @@
       },
       "converted": {
         "individual": {
-          "usd": 11.26,
-          "krw": 16302
+          "usd": 11.22,
+          "krw": 15548
         },
         "family": {
-          "usd": 26.62,
-          "krw": 38539
+          "usd": 26.53,
+          "krw": 36764
         },
         "duo": {
-          "usd": 16.38,
-          "krw": 23714
+          "usd": 16.33,
+          "krw": 22629
         }
       }
     },
@@ -287,12 +287,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 11.03,
-          "krw": 15969
+          "usd": 11.01,
+          "krw": 15257
         },
         "family": {
-          "usd": 22.07,
-          "krw": 31952
+          "usd": 22.04,
+          "krw": 30542
         }
       }
     },
@@ -313,12 +313,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 5.74,
-          "krw": 8310
+          "usd": 5.48,
+          "krw": 7594
         },
         "family": {
-          "usd": 11.51,
-          "krw": 16663
+          "usd": 10.99,
+          "krw": 15229
         }
       }
     },
@@ -339,12 +339,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 5.35,
-          "krw": 7745
+          "usd": 5.17,
+          "krw": 7164
         },
         "family": {
-          "usd": 10.73,
-          "krw": 15534
+          "usd": 10.37,
+          "krw": 14370
         }
       }
     },
@@ -365,12 +365,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 4.09,
-          "krw": 5921
+          "usd": 3.91,
+          "krw": 5418
         },
         "family": {
-          "usd": 8.23,
-          "krw": 11915
+          "usd": 7.87,
+          "krw": 10906
         }
       }
     },
@@ -391,12 +391,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 2.74,
-          "krw": 3967
+          "usd": 2.58,
+          "krw": 3575
         },
         "family": {
-          "usd": 6.53,
-          "krw": 9454
+          "usd": 6.14,
+          "krw": 8508
         }
       }
     },
@@ -417,12 +417,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 3.05,
-          "krw": 4416
+          "usd": 3.04,
+          "krw": 4213
         },
         "family": {
-          "usd": 5.75,
-          "krw": 8324
+          "usd": 5.74,
+          "krw": 7954
         }
       }
     },
@@ -444,11 +444,11 @@
       "converted": {
         "individual": {
           "usd": 7.35,
-          "krw": 10641
+          "krw": 10185
         },
         "family": {
           "usd": 13.34,
-          "krw": 19313
+          "krw": 18486
         }
       }
     },
@@ -470,11 +470,11 @@
       "converted": {
         "individual": {
           "usd": 7.2,
-          "krw": 10424
+          "krw": 9977
         },
         "family": {
           "usd": 13.33,
-          "krw": 19298
+          "krw": 18472
         }
       }
     },
@@ -495,12 +495,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 15.3,
-          "krw": 22150
+          "usd": 15.17,
+          "krw": 21022
         },
         "family": {
-          "usd": 35.32,
-          "krw": 51134
+          "usd": 35.03,
+          "krw": 48543
         }
       }
     },
@@ -525,16 +525,16 @@
       },
       "converted": {
         "individual": {
-          "usd": 15.3,
-          "krw": 22150
+          "usd": 15.17,
+          "krw": 21022
         },
         "family": {
-          "usd": 35.32,
-          "krw": 51134
+          "usd": 35.03,
+          "krw": 48543
         },
         "duo": {
-          "usd": 23.54,
-          "krw": 34080
+          "usd": 23.35,
+          "krw": 32357
         }
       }
     },
@@ -555,12 +555,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 16.48,
-          "krw": 23859
+          "usd": 16.34,
+          "krw": 22643
         },
         "family": {
-          "usd": 30.61,
-          "krw": 44315
+          "usd": 30.36,
+          "krw": 42071
         }
       }
     },
@@ -581,12 +581,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 16.48,
-          "krw": 23859
+          "usd": 16.34,
+          "krw": 22643
         },
         "family": {
-          "usd": 30.61,
-          "krw": 44315
+          "usd": 30.36,
+          "krw": 42071
         }
       }
     },
@@ -607,12 +607,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 16.48,
-          "krw": 23859
+          "usd": 16.34,
+          "krw": 22643
         },
         "family": {
-          "usd": 30.61,
-          "krw": 44315
+          "usd": 30.36,
+          "krw": 42071
         }
       }
     },
@@ -633,12 +633,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 16.48,
-          "krw": 23859
+          "usd": 16.34,
+          "krw": 22643
         },
         "family": {
-          "usd": 30.61,
-          "krw": 44315
+          "usd": 30.36,
+          "krw": 42071
         }
       }
     },
@@ -659,12 +659,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 23.08,
-          "krw": 33414
+          "usd": 22.35,
+          "krw": 30971
         },
         "family": {
-          "usd": 43.7,
-          "krw": 63266
+          "usd": 42.33,
+          "krw": 58658
         }
       }
     },
@@ -685,12 +685,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 16.44,
-          "krw": 23801
+          "usd": 15.73,
+          "krw": 21798
         },
         "family": {
-          "usd": 30.79,
-          "krw": 44576
+          "usd": 29.46,
+          "krw": 40824
         }
       }
     },
@@ -711,12 +711,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 21.93,
-          "krw": 31749
+          "usd": 21.73,
+          "krw": 30112
         },
         "family": {
-          "usd": 40.86,
-          "krw": 59155
+          "usd": 40.49,
+          "krw": 56109
         }
       }
     },
@@ -737,12 +737,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 17.72,
-          "krw": 25654
+          "usd": 18.17,
+          "krw": 25179
         },
         "family": {
-          "usd": 28.2,
-          "krw": 40826
+          "usd": 28.93,
+          "krw": 40090
         }
       }
     },
@@ -763,12 +763,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 8.37,
-          "krw": 12118
+          "usd": 8.13,
+          "krw": 11266
         },
         "family": {
-          "usd": 16.74,
-          "krw": 24235
+          "usd": 16.26,
+          "krw": 22532
         }
       }
     },
@@ -789,12 +789,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 10.16,
-          "krw": 14709
+          "usd": 10.13,
+          "krw": 14038
         },
         "family": {
-          "usd": 18.9,
-          "krw": 27362
+          "usd": 18.85,
+          "krw": 26121
         }
       }
     },
@@ -815,12 +815,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 2.29,
-          "krw": 3315
+          "usd": 2.53,
+          "krw": 3506
         },
         "family": {
-          "usd": 3.67,
-          "krw": 5313
+          "usd": 4.07,
+          "krw": 5640
         }
       }
     },
@@ -842,11 +842,11 @@
       "converted": {
         "individual": {
           "usd": 6.45,
-          "krw": 9338
+          "krw": 8938
         },
         "family": {
           "usd": 11.07,
-          "krw": 16026
+          "krw": 15340
         }
       }
     },
@@ -871,16 +871,16 @@
       },
       "converted": {
         "individual": {
-          "usd": 1.82,
-          "krw": 2635
+          "usd": 1.66,
+          "krw": 2300
         },
         "family": {
-          "usd": 3.65,
-          "krw": 5284
+          "usd": 3.33,
+          "krw": 4615
         },
         "lite": {
-          "usd": 1.14,
-          "krw": 1650
+          "usd": 1.04,
+          "krw": 1441
         }
       }
     },
@@ -901,12 +901,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 2.34,
-          "krw": 3388
+          "usd": 2.27,
+          "krw": 3146
         },
         "family": {
-          "usd": 4.68,
-          "krw": 6775
+          "usd": 4.54,
+          "krw": 6291
         }
       }
     },
@@ -927,12 +927,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 5.16,
-          "krw": 7470
+          "usd": 5.2,
+          "krw": 7206
         },
         "family": {
-          "usd": 10.34,
-          "krw": 14970
+          "usd": 10.41,
+          "krw": 14426
         }
       }
     },
@@ -953,12 +953,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 9.26,
-          "krw": 13406
+          "usd": 9.4,
+          "krw": 13026
         },
         "family": {
-          "usd": 18.58,
-          "krw": 26899
+          "usd": 18.85,
+          "krw": 26121
         }
       }
     },
@@ -979,12 +979,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 5.68,
-          "krw": 8223
+          "usd": 5.7,
+          "krw": 7899
         },
         "family": {
-          "usd": 11.4,
-          "krw": 16504
+          "usd": 11.44,
+          "krw": 15853
         }
       }
     },
@@ -1006,11 +1006,11 @@
       "converted": {
         "individual": {
           "usd": 8.09,
-          "krw": 11712
+          "krw": 11211
         },
         "family": {
           "usd": 15.91,
-          "krw": 23034
+          "krw": 22047
         }
       }
     },
@@ -1031,12 +1031,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 1.85,
-          "krw": 2678
+          "usd": 1.73,
+          "krw": 2397
         },
         "family": {
-          "usd": 3.37,
-          "krw": 4879
+          "usd": 3.14,
+          "krw": 4351
         }
       }
     },
@@ -1058,11 +1058,11 @@
       "converted": {
         "individual": {
           "usd": 1.26,
-          "krw": 1824
+          "krw": 1746
         },
         "family": {
-          "usd": 2.08,
-          "krw": 3011
+          "usd": 2.07,
+          "krw": 2868
         }
       }
     },
@@ -1084,11 +1084,11 @@
       "converted": {
         "individual": {
           "usd": 6.28,
-          "krw": 9092
+          "krw": 8702
         },
         "family": {
           "usd": 11.88,
-          "krw": 17199
+          "krw": 16463
         }
       }
     },
@@ -1110,11 +1110,11 @@
       "converted": {
         "individual": {
           "usd": 6.49,
-          "krw": 9396
+          "krw": 8993
         },
         "family": {
           "usd": 11.9,
-          "krw": 17228
+          "krw": 16490
         }
       }
     },
@@ -1135,12 +1135,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 10.23,
-          "krw": 14810
+          "usd": 10.16,
+          "krw": 14079
         },
         "family": {
-          "usd": 16.8,
-          "krw": 24322
+          "usd": 16.7,
+          "krw": 23142
         }
       }
     },
@@ -1161,12 +1161,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 7.52,
-          "krw": 10887
+          "usd": 7.94,
+          "krw": 11003
         },
         "family": {
-          "usd": 11.45,
-          "krw": 16577
+          "usd": 12.1,
+          "krw": 16767
         }
       }
     },
@@ -1187,12 +1187,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 6.84,
-          "krw": 9903
+          "usd": 6.86,
+          "krw": 9506
         },
         "family": {
-          "usd": 11.2,
-          "krw": 16215
+          "usd": 11.23,
+          "krw": 15562
         }
       }
     },
@@ -1213,12 +1213,12 @@
       },
       "converted": {
         "individual": {
-          "usd": 10.75,
-          "krw": 15563
+          "usd": 10.76,
+          "krw": 14911
         },
         "family": {
-          "usd": 17.91,
-          "krw": 25929
+          "usd": 17.93,
+          "krw": 24846
         }
       }
     }
