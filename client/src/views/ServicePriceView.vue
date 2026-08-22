@@ -533,7 +533,7 @@ watch(serviceSlug, async (slug) => {
               />
               <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-caption font-normal text-muted-foreground leading-tight">
                 <span>총 {{ filteredPrices.length }}개국</span>
-                <span>· 업데이트 {{ priceData.lastUpdated }}</span>
+                <span>· 요금 조사 {{ priceData.lastUpdated }}</span>
                 <span>· 환율 기준 {{ priceData.exchangeRateDate }}</span>
                 <span v-if="usdToKrwRate">· $1 = ₩{{ formatNumber(usdToKrwRate) }}</span>
               </div>
