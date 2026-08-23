@@ -752,7 +752,7 @@ function buildHomeContent() {
         전 세계 <strong>${prices.length}개 국가</strong>의 유튜브 프리미엄(YouTube Premium) 개인 플랜 가격을 한눈에 비교하는 서비스입니다.
         한국은 현재 월 <strong>${formatKrw(krKrw)}</strong>(부가세 포함)이지만, 국가에 따라
         <strong class="sp-down">월 2천원대</strong>부터 이용할 수 있습니다.
-        각 국가의 가격 차이, 환율 기준 원화 환산, 한국 대비 절약률을 실시간 환율로 계산해 제공합니다.
+        각 국가의 가격 차이, 한국 대비 절약률을 환율 기준일(${data.exchangeRateDate}) 시점의 환율로 환산해 제공합니다.
       </p>
 
       <p class="${P}">
@@ -1161,7 +1161,7 @@ function buildAboutContent() {
 
       <p class="${P}">
         <strong>OTT Watcher</strong>는 유튜브 프리미엄(YouTube Premium) 등 글로벌 OTT 서비스의
-        국가별 구독료를 실시간 환율 기준으로 비교 제공하는 무료 서비스입니다.
+        국가별 구독료를 원화로 환산해 비교 제공하는 무료 서비스입니다.
         회원가입 없이 누구나 이용할 수 있으며, 44개국의 플랜별 상세 가격과 한국 대비 절약률을 한눈에 확인할 수 있습니다.
       </p>
 
@@ -1187,7 +1187,7 @@ function buildAboutContent() {
       <h2 class="${H2}">2. 제공 정보</h2>
       <ul class="${UL}">
         <li class="${LI}"><strong>44개국 유튜브 프리미엄 가격</strong> — 개인·가족·학생·Duo·Lite 플랜</li>
-        <li class="${LI}"><strong>실시간 환율 변환</strong> — 최신 USD/KRW 환율로 자동 환산</li>
+        <li class="${LI}"><strong>원화 환산</strong> — 공개 환율 API에서 가져온 기준일 환율로 USD/KRW 환산</li>
         <li class="${LI}"><strong>한국 대비 절약률</strong> — 월·연 단위 절약 가능 금액 계산</li>
         <li class="${LI}"><strong>가격 트렌드 분석</strong> — 대륙별·국가별 평균 가격 분포</li>
         <li class="${LI}"><strong>이용 가이드</strong> — 국가별 결제·계정 설정 주의사항</li>

@@ -31,7 +31,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SITE_URL, SERVICE_SLUG, getSitemapRoutes } from "./seo-routes.mjs";
+import { SITE_URL, getSitemapRoutes, getCrawlHint } from "./seo-routes.mjs";
 import { hashContentSignature } from "./sitemap-content-signature.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -65,8 +65,12 @@ function escapeXml(value) {
 function makeUrlNode(route, options = {}) {
   const loc = `${SITE_URL}${route}`;
   const lastmod = options.lastmod || undefined;
-  const changefreq = options.changefreq || "weekly";
-  const priority = options.priority || "0.7";
+  // 여기서도 폴백을 두지 않는다. 호출부가 크롤 힌트를 빠뜨렸을 때 그럴듯한 기본값을
+  // 채워 넣으면 "선언한 적 없음"이 "0.7로 정함"과 구분되지 않는다.
+  const { changefreq, priority } = options;
+  if (!changefreq || !priority) {
+    throw new Error(`[sitemap] ${route || "/"}: changefreq·priority 없이 URL 노드를 만들 수 없다`);
+  }
 
   // sitemaps.org 0.9 declares tUrl as an xsd:sequence, so the child order
   // loc -> lastmod -> changefreq -> priority is normative, not cosmetic. This
@@ -112,17 +116,6 @@ function writeLedger(routes) {
   fs.writeFileSync(LEDGER_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf-8");
 }
 
-// Per-route crawl hints. Country routes are absent from getSitemapRoutes()
-// because they canonicalize to the service page (see seo-routes.mjs).
-const ROUTE_CONFIG = {
-  "/": { priority: "1.0", changefreq: "weekly" },
-  "/about": { priority: "0.5", changefreq: "monthly" },
-  "/privacy": { priority: "0.4", changefreq: "monthly" },
-  "/terms": { priority: "0.4", changefreq: "monthly" },
-  [`/${SERVICE_SLUG}`]: { priority: "0.9", changefreq: "daily" },
-  [`/${SERVICE_SLUG}/trends`]: { priority: "0.8", changefreq: "daily" },
-};
-
 function main() {
   const buildDate = resolveBuildDate();
   const ledger = loadLedger();
@@ -150,7 +143,8 @@ function main() {
     if (!carriedOver) advanced.push(route);
     nextLedger[route] = { contentHash, lastmod };
 
-    const config = ROUTE_CONFIG[route] || { priority: "0.7", changefreq: "weekly" };
+    // 폴백 없음 — 크롤 힌트를 선언하지 않은 라우트는 빌드를 죽인다(seo-routes.mjs).
+    const config = getCrawlHint(route);
     // The site root is advertised without a trailing slash so that the sitemap
     // loc matches the canonical emitted by prerender.mjs exactly.
     return makeUrlNode(route === "/" ? "" : route, { ...config, lastmod });

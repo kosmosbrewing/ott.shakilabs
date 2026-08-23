@@ -52,7 +52,10 @@ const items: RelatedServiceItem[] = [
               <p class="text-body font-bold text-foreground">{{ item.title }}</p>
               <p class="mt-1.5 text-caption text-muted-foreground">{{ item.description }}</p>
             </div>
-            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+            <!-- /12는 Tailwind opacity 스케일(5·10·20·25…)에 없어 규칙이 아예 생성되지
+                 않았고, 아이콘 칩 배경이 6개월간 칠해지지 않은 채 배포됐다. 스케일 밖
+                 값은 임의값 문법으로 적어야 실제 CSS가 나온다. -->
+            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/[12%] text-primary">
               <component :is="item.icon" class="h-5 w-5" />
             </span>
           </div>
