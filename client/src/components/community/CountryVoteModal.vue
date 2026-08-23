@@ -150,11 +150,14 @@ async function handleVote(countryCode: string): Promise<void> {
                 총 <strong class="text-foreground">{{ totalVotes }}</strong>명 투표
               </p>
               <ul class="space-y-3">
+                <!-- 투표한 국가의 강조 배경은 bg-primary/8이었다. /8은 Tailwind opacity
+                     스케일 밖이라 규칙이 아예 생성되지 않아 배경이 칠해진 적이 없다.
+                     스케일 밖 값은 임의값 문법으로 적어야 CSS가 나온다. -->
                 <li
                   v-for="(item, idx) in top10Results"
                   :key="item.countryCode"
                   class="rounded-md px-3 py-2.5 transition-colors"
-                  :class="item.countryCode === votedCountry ? 'bg-primary/8 border border-primary/30' : 'border border-transparent'"
+                  :class="item.countryCode === votedCountry ? 'bg-primary/[8%] border border-primary/30' : 'border border-transparent'"
                 >
                   <div class="flex items-center justify-between mb-1.5">
                     <span class="flex items-center gap-2.5 font-semibold text-sm">

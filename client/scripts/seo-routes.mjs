@@ -80,6 +80,37 @@ export function getSitemapRoutes() {
   ];
 }
 
+// 라우트별 크롤 힌트. generate-sitemap.mjs가 아니라 여기 사는 이유: 라우트 목록의
+// 사본이 하나 늘어날 때마다 드리프트가 생긴다(house는 같은 구조에서 /jeonse-risk가
+// priority 기본값 0.5로 나갔다 — 형제는 0.8인데). 사이트맵 라우트와 같은 파일에 두고
+// 아래 게이트가 키 집합이 정확히 일치하는지 양방향으로 검사한다.
+//
+// 기본값은 일부러 없다. 미선언 라우트에 0.7을 조용히 물리면 "우선순위를 정한 적 없음"과
+// "0.7로 정함"이 구분되지 않고, 잘못된 값이 아무 신호 없이 배포된다.
+const ROUTE_CRAWL_HINTS = {
+  "/": { priority: "1.0", changefreq: "weekly" },
+  "/about": { priority: "0.5", changefreq: "monthly" },
+  "/privacy": { priority: "0.4", changefreq: "monthly" },
+  "/terms": { priority: "0.4", changefreq: "monthly" },
+  [`/${SERVICE_SLUG}`]: { priority: "0.9", changefreq: "daily" },
+  [`/${SERVICE_SLUG}/trends`]: { priority: "0.8", changefreq: "daily" },
+};
+
+export function getCrawlHintRoutes() {
+  return Object.keys(ROUTE_CRAWL_HINTS);
+}
+
+export function getCrawlHint(route) {
+  const hint = ROUTE_CRAWL_HINTS[route];
+  if (!hint) {
+    throw new Error(
+      `[seo-routes] ${route}에 크롤 힌트(priority·changefreq)가 선언돼 있지 않다. ` +
+        "seo-routes.mjs의 ROUTE_CRAWL_HINTS에 추가하라 — 기본값으로 조용히 내보내지 않는다."
+    );
+  }
+  return hint;
+}
+
 // Set membership, not a path-shape test: `/youtube-premium/trends` also lives
 // one segment under the service slug but is independent content (0.16
 // similarity vs country pages, 3,456 chars), so it must never be treated as a

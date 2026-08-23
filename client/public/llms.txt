@@ -1,30 +1,34 @@
 # OttWatcher — OTT 구독료 국가별 가격 비교
 
-> 유튜브 프리미엄(YouTube Premium) 등 OTT 서비스의 국가별·나라별 구독료를 현재 환율 기준으로 비교하는 서비스입니다. 최저가 국가 순위, 한국 대비 절약률, 가격 변동 트렌드를 제공합니다.
+> 유튜브 프리미엄(YouTube Premium) 등 OTT 서비스의 국가별·나라별 구독료를 원화로 환산해 비교하는 서비스입니다. 최저가 국가 순위, 한국 대비 절약률을 제공합니다.
 
 ## 사이트 정보
 
 - URL: https://shakilabs.com/ott
 - 언어: 한국어
-- 데이터 갱신: 매일 (환율 및 가격 데이터)
-- 제공 서비스: 유튜브 프리미엄 (YouTube Premium)
+- 제공 서비스: 유튜브 프리미엄 (YouTube Premium), 44개국
+- 요금 조사일과 환율 기준일은 서로 다르며, 각 페이지에 따로 표기합니다.
 
 ## 주요 페이지
 
-- [홈](https://shakilabs.com/ott/): OTT 서비스 목록 및 국가별 가격 비교 진입점
-- [유튜브 프리미엄 글로벌 가격 비교](https://shakilabs.com/ott/youtube-premium): 43개국 구독료를 KRW/USD로 환산하여 비교, 최저가 순위 제공
-- [유튜브 프리미엄 가격 변동 트렌드](https://shakilabs.com/ott/youtube-premium/trends): 최근 가격 하락 국가, 절약률 상위 국가, 가격 변동 TOP 10
+- [홈](https://shakilabs.com/ott): OTT 서비스 목록 및 국가별 가격 비교 진입점
+- [유튜브 프리미엄 글로벌 가격 비교](https://shakilabs.com/ott/youtube-premium): 44개국 구독료를 KRW/USD로 환산하여 비교, 최저가 순위 제공
+- [유튜브 프리미엄 가격 변동 트렌드](https://shakilabs.com/ott/youtube-premium/trends): 요금 조사일 기준 국가별 가격 분포와 절약률, 관측 이력의 범위와 한계 설명
+- [소개](https://shakilabs.com/ott/about): 서비스 소개와 데이터 취급 방식
+- [개인정보처리방침](https://shakilabs.com/ott/privacy)
+- [이용약관](https://shakilabs.com/ott/terms)
 
 ## 국가별 상세 페이지
 
-각 국가별로 유튜브 프리미엄 개인/가족/학생 요금제 가격, 현지 통화 가격, KRW·USD 환산가, 한국 대비 절약률, 같은 대륙 국가 비교, 최근 가격 변동 이력을 제공합니다.
+각 국가별로 유튜브 프리미엄 개인/가족/학생 요금제 가격, 현지 통화 가격, KRW·USD 환산가, 한국 대비 절약률, 같은 대륙 국가 비교를 제공합니다. 이 페이지들은 서로 중복도가 높아 대표 페이지(/youtube-premium)로 canonical 통합돼 있으며 사이트맵에는 실리지 않습니다.
 
 주요 국가: 한국(/youtube-premium/kr), 미국(/youtube-premium/us), 일본(/youtube-premium/jp), 인도(/youtube-premium/in), 터키(/youtube-premium/tr), 영국(/youtube-premium/gb), 대만(/youtube-premium/tw), 브라질(/youtube-premium/br)
 
-## 데이터 출처
+## 데이터 출처와 갱신 방식
 
-- 가격: 각 서비스의 공식 공개 요금 기준
-- 환율: 실시간 환율 데이터 (매일 갱신)
+- 가격: 각 서비스의 공식 공개 요금을 사람이 확인해 반영합니다. 자동 수집 수단이 없으므로 상시 최신을 보장하지 않으며, 실제로 조사한 날짜를 '요금 조사일'로 표기합니다.
+- 환율: 공개 환율 API(open.er-api.com)에서 가져온 스냅샷을 사용하며 기준일을 함께 표기합니다. 미리 렌더된 페이지의 원화 값은 배포 시점 환율로 계산돼 있어 현재 환율과 차이가 날 수 있습니다.
+- 제공하지 않는 것: 실시간 가격, 일 단위 가격 시계열. 관측 이력이 2회 이상 쌓인 항목에 한해 변동을 표시합니다.
 - 비교 기준: 월 구독료 기준 KRW 환산
 
 ## 연락처
