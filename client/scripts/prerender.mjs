@@ -93,7 +93,8 @@ function routeToMeta(route, countryMap) {
   const youtubePremiumMeta = {
     title: "유튜브 프리미엄 글로벌 가격 비교 · 나라별 구독료 최저가 순위",
     description:
-      "유튜브 프리미엄(YouTube Premium) 국가별·나라별 구독료를 한눈에 비교. 최저가 국가 순위와 한국 대비 절약률. 현재 환율 기준 최신 데이터.",
+      // ServicePriceView.vue의 SEO_MAP과 같은 문자열이어야 한다(둘이 갈리면 크롤러와 화면이 다른 설명을 본다).
+      "유튜브 프리미엄(YouTube Premium) 국가별·나라별 구독료를 한눈에 비교. 최저가 국가 순위와 한국 대비 절약률. 요금 조사일과 환율 기준일을 함께 표기합니다.",
     heading: "유튜브 프리미엄 국가별·나라별 가격 비교",
   };
 

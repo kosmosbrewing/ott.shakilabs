@@ -795,8 +795,10 @@ function buildHomeContent() {
 
       <h2 class="${H2}">서비스 주요 기능</h2>
       <ul class="${UL}">
-        <li class="${LI}"><strong>44개 국가 실시간 가격 비교</strong> — 모든 국가의 개인·가족·학생·Lite 플랜 가격</li>
-        <li class="${LI}"><strong>원화 자동 환산</strong> — 최신 환율 반영으로 실제 원화 비용 확인</li>
+        <!-- 시점 주장 금지. 정가는 자동 수집 수단이 없어 사람이 조사하므로 "실시간"·"최신"은
+             거짓이 된다. 기능은 그대로 두고 근거 날짜(요금 조사일·환율 기준일)에 기댄다. -->
+        <li class="${LI}"><strong>44개 국가 요금 한눈에 비교</strong> — 모든 국가의 개인·가족·학생·Lite 플랜 가격을 같은 시점(요금 조사일 ${data.lastUpdated}) 기준으로 비교</li>
+        <li class="${LI}"><strong>원화 자동 환산</strong> — 환율 기준일 ${data.exchangeRateDate}의 공개 환율로 원화 비용 확인</li>
         <li class="${LI}"><strong>절약률 계산</strong> — 한국 대비 월·연 절약액 자동 계산</li>
         <li class="${LI}"><strong>가격 트렌드</strong> — 국가별 가격 변동 추이 (<a href="/ott/youtube-premium/trends">트렌드 페이지</a>)</li>
         <li class="${LI}"><strong>이용 가이드</strong> — 국가별 결제·계정 설정 주의사항</li>

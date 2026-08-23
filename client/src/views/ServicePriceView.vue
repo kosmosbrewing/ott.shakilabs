@@ -69,7 +69,8 @@ const SEO_MAP: Record<string, { title: string; description: string }> = {
   "youtube-premium": {
     title: "유튜브 프리미엄 글로벌 가격 비교 · 나라별 구독료 최저가 순위",
     description:
-      "유튜브 프리미엄(YouTube Premium) 국가별·나라별 구독료를 한눈에 비교. 최저가 국가 순위와 한국 대비 절약률. 현재 환율 기준 최신 데이터.",
+      // scripts/prerender.mjs의 youtubePremiumMeta와 같은 문자열이어야 한다.
+      "유튜브 프리미엄(YouTube Premium) 국가별·나라별 구독료를 한눈에 비교. 최저가 국가 순위와 한국 대비 절약률. 요금 조사일과 환율 기준일을 함께 표기합니다.",
   },
 };
 
@@ -257,7 +258,8 @@ const seoJsonLd = computed<Record<string, unknown> | undefined>(() => {
     {
       "@type": "Dataset",
       name: `${currentServiceName} 국가별 구독 가격 데이터`,
-      description: `${currentServiceName} ${selectedPlanLabel.value} 요금제의 국가별 월 구독료를 현지 통화, 한국 원(KRW), 미국 달러(USD)로 환산하여 비교할 수 있는 데이터셋입니다. 전 세계 주요 국가의 최신 가격 정보를 포함합니다.`,
+      // 정가는 사람이 조사해 반영하므로 "최신"이라 단언하지 않는다. 조사 시점은 dateModified가 들고 있다.
+      description: `${currentServiceName} ${selectedPlanLabel.value} 요금제의 국가별 월 구독료를 현지 통화, 한국 원(KRW), 미국 달러(USD)로 환산하여 비교할 수 있는 데이터셋입니다. 각 서비스의 공식 공개 요금을 사람이 확인해 반영한 정가이며, 조사 시점은 dateModified에 표기합니다.`,
       url: `${siteUrl}/${serviceSlug.value}`,
       dateModified: priceData.value?.lastUpdated || undefined,
       variableMeasured: ["월 구독료 (현지 통화)", "월 구독료 (KRW)", "월 구독료 (USD)"],
