@@ -20,7 +20,9 @@
 
 ## 국가별 상세 페이지
 
-각 국가별로 유튜브 프리미엄 개인/가족/학생 요금제 가격, 현지 통화 가격, KRW·USD 환산가, 한국 대비 절약률, 같은 대륙 국가 비교를 제공합니다. 이 페이지들은 서로 중복도가 높아 대표 페이지(/youtube-premium)로 canonical 통합돼 있으며 사이트맵에는 실리지 않습니다.
+각 국가에서 실제로 제공되는 요금제(개인/가족/학생/Duo/Lite 중 해당 국가에 있는 것)의 현지 통화 가격, KRW·USD 환산가, 한국 대비 절약률, 같은 대륙 국가 비교를 제공합니다. 제공되지 않는 요금제는 표에 싣지 않습니다. 이 페이지들은 서로 중복도가 높아 대표 페이지(/youtube-premium)로 canonical 통합돼 있으며 사이트맵에는 실리지 않습니다.
+
+대한민국은 YouTube 가족 요금제와 학생 할인 플랜이 제공되지 않는 국가입니다. YouTube 고객센터는 가족 요금제 미제공 국가로 대한민국·베네수엘라·벨라루스·슬로베니아·아이슬란드를 명시합니다. 한국 계정에서 선택할 수 있는 요금제는 개인 플랜과 Premium Lite 두 가지입니다.
 
 주요 국가: 한국(/youtube-premium/kr), 미국(/youtube-premium/us), 일본(/youtube-premium/jp), 인도(/youtube-premium/in), 터키(/youtube-premium/tr), 영국(/youtube-premium/gb), 대만(/youtube-premium/tw), 브라질(/youtube-premium/br)
 

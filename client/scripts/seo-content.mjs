@@ -201,12 +201,33 @@ function getContinentLabel(c) {
 // "스키마 텍스트 = 화면 텍스트" 불일치를 원천 차단한다
 // =========================
 
+// 한국에 없는 요금제를 문장에서 주장하지 않기 위한 근거 상수.
+// YouTube 고객센터가 가족 요금제 미제공 국가로 명시한 목록이며(대한민국 포함),
+// 학생 할인도 한국은 제공 국가 목록에 없다. 이 FAQ가 한때 "한국 가족 플랜 월 22,900원"을
+// 주장했던 것이 blog(/blog/youtube-premium-prices-2026)와 정면으로 어긋난 원인이었다.
+const FAMILY_PLAN_UNAVAILABLE_NOTE =
+  "YouTube 고객센터는 가족 요금제 미제공 국가로 대한민국·베네수엘라·벨라루스·슬로베니아·아이슬란드를 명시합니다";
+
 function getHomeFaqItems() {
   const data = loadData();
+  // 문구의 숫자는 가격표와 같은 소스에서 뽑는다. 하드코딩하면 표와 본문이 갈라지고,
+  // 실제로 그렇게 갈라진 결과가 "표에 없는 가족 플랜"을 본문이 주장하는 상태였다.
+  const krRow = (data.prices || []).find(
+    (p) => String(p.countryCode || "").toUpperCase() === "KR"
+  );
+  const krPlans = krRow?.plans || {};
+  const fmtWon = (value) => `${Number(value).toLocaleString("ko-KR")}원`;
+  const krIndividual = Number(krPlans.individual?.monthly);
+  const krLite = Number(krPlans.lite?.monthly);
+  const krLiteGap =
+    Number.isFinite(krIndividual) && Number.isFinite(krLite)
+      ? krIndividual - krLite
+      : null;
+
   return [
     {
       q: "한국에서 가장 저렴하게 구독하는 방법은 무엇인가요?",
-      a: `합법적인 방법으로는 한국 정상 가격(₩14,900) 또는 "가족 플랜 공유"(최대 5인 한도)가 가장 현실적입니다. 가족 플랜은 월 22,900원으로 5명이 나누면 1인당 약 4,580원입니다. 이는 개인 플랜보다 약 70% 저렴한 수준입니다. 학생이라면 학생 할인 플랜(월 8,690원)도 이용할 수 있습니다.`,
+      a: `한국 계정에서 고를 수 있는 요금제는 <strong>개인 플랜(월 ${fmtWon(krIndividual)})</strong>과 <strong>Premium Lite(월 ${fmtWon(krLite)})</strong> 두 가지입니다. 광고 제거·백그라운드 재생만 필요하고 YouTube Music이 필요 없다면 Lite가 월 ${krLiteGap != null ? fmtWon(krLiteGap) : "-"} 저렴합니다. <strong>대한민국은 가족 요금제와 학생 할인 플랜이 모두 제공되지 않는 국가</strong>입니다(${FAMILY_PLAN_UNAVAILABLE_NOTE}). 따라서 여러 명이 나눠 내 1인당 요금을 낮추는 방식은 한국 계정에서는 선택지가 아니며, 이 페이지의 국가별 표에서 한국 행에 가족·학생 요금이 비어 있는 것도 같은 이유입니다.`,
     },
     {
       q: "데이터는 얼마나 자주 업데이트되나요?",
@@ -216,15 +237,21 @@ function getHomeFaqItems() {
     },
     {
       q: "광고 제거 외에 유튜브 프리미엄의 혜택은?",
-      a: `광고 제거, 백그라운드 재생, 오프라인 저장, YouTube Music Premium 포함, 고품질 오디오(최대 256kbps)가 포함됩니다. YouTube Music 단독 구독(월 8,690원)보다 약 6천원만 추가하면 유튜브 광고까지 제거되어 사실상 묶음 할인 혜택이 있습니다.`,
+      // 여기 있던 "YouTube Music 단독 구독(월 8,690원)"은 사실이 아니었다.
+      // 8,690원은 한국 유튜브 프리미엄의 최초 출시가이며(아래 가격 변동 섹션 참조),
+      // Music 단독 요금이 아니다. 확인 가능한 단독 요금을 이 저장소가 들고 있지 않으므로
+      // 틀린 숫자를 다른 추정 숫자로 바꾸지 않고, 숫자 주장 자체를 뺀다.
+      a: `광고 제거, 백그라운드 재생, 오프라인 저장, YouTube Music Premium 포함, 고품질 오디오(최대 256kbps)가 포함됩니다. YouTube Music Premium을 단독으로 구독할 때보다 요금은 높지만, 그 차액으로 유튜브 앱 전체의 광고 제거와 백그라운드 재생까지 함께 얻는 구조입니다. 단독 구독 요금은 이 페이지의 비교 대상이 아니어서 따로 싣지 않으니, 정확한 차액은 YouTube 공식 요금 안내에서 확인하세요.`,
     },
     {
       q: "VPN으로 다른 국가 가격으로 구독이 가능한가요?",
       a: `원칙적으로 불가능합니다. 가격은 VPN 위치가 아니라 Google 계정의 <strong>청구 국가</strong>와 <strong>결제 수단 발행 국가</strong>로 결정됩니다. VPN만 사용해서는 다른 국가의 가격을 볼 수 없으며, 강제로 변경하려 해도 결제가 거부되거나 향후 자동으로 재변경됩니다.`,
     },
     {
-      q: "가족 플랜은 어떻게 공유하나요?",
-      a: `가족 플랜은 한 가구 내 최대 5명(가구주 1명 + 가족 구성원 4명)까지 공유할 수 있습니다. Google 계정의 "가족 그룹" 기능을 통해 초대하며, 모든 구성원은 동일 가구 주소에 거주해야 합니다. 정책상 주소가 다른 친구·지인과의 공유는 금지되며, 감지 시 일부 계정이 제거될 수 있습니다.`,
+      // 질문을 "어떻게 공유하나요?"로 두면 한국에서 가입 가능하다는 전제가 깔린다.
+      // 제공 여부를 먼저 묻는 형태로 바꿔 전제 자체를 없앤다.
+      q: "한국에서도 가족 요금제로 나눠 낼 수 있나요?",
+      a: `아니오. <strong>대한민국에서는 YouTube Premium 가족 요금제를 이용할 수 없습니다.</strong> ${FAMILY_PLAN_UNAVAILABLE_NOTE}. 한국 청구 국가로 설정된 계정으로는 가입도 공유도 불가능합니다. 가족 요금제가 제공되는 국가에서는 관리자가 <strong>같은 거주지 주소에 사는 가족 구성원을 최대 5명까지</strong> 초대할 수 있고, 주소가 다른 친구·지인과의 공유는 정책상 금지되어 감지 시 구성원이 제거될 수 있습니다. 따라서 한국 가족 요금제 가격이나 지인과의 분할 금액을 제시하는 안내는 사실과 다릅니다.`,
     },
     {
       q: "유튜브 프리미엄 라이트(Lite) 플랜이 뭔가요?",
@@ -415,6 +442,10 @@ function buildCountryContent(countryCode) {
     });
   }
 
+  // 소개 문장의 요금제 목록은 실제 planRows에서 만든다. 예전에는 "개인 플랜·가족 플랜·Lite 플랜"이
+  // 하드코딩돼 있어, 가족 요금제가 없는 국가(대한민국 등)의 페이지에서도 있다고 말했다.
+  const planNamesLabel = planRows.map((p) => p.name).join("·");
+
   const planRowsHtml = planRows
     .map(
       (p) =>
@@ -461,8 +492,9 @@ function buildCountryContent(countryCode) {
       </p>
 
       <p class="${P}">
-        본 페이지는 ${countryName}의 유튜브 프리미엄 개인 플랜·가족 플랜·Lite 플랜 등 모든 요금제 정보를 제공하며,
+        본 페이지는 ${countryName}에서 확인된 요금제${planNamesLabel ? `(${planNamesLabel})` : ""}의 가격 정보를 제공하며,
         한국 대비 절약률, VPN·지역 변경 우회 이용 시의 약관 위반 위험, 결제 시 주의사항을 함께 안내합니다.
+        확인되지 않은 요금제는 표와 본문 어디에도 싣지 않습니다.
       </p>
 
       <h2 class="${H2}">1. ${countryName} 유튜브 프리미엄 요금제 전체</h2>
@@ -797,7 +829,7 @@ function buildHomeContent() {
       <ul class="${UL}">
         <!-- 시점 주장 금지. 정가는 자동 수집 수단이 없어 사람이 조사하므로 "실시간"·"최신"은
              거짓이 된다. 기능은 그대로 두고 근거 날짜(요금 조사일·환율 기준일)에 기댄다. -->
-        <li class="${LI}"><strong>44개 국가 요금 한눈에 비교</strong> — 모든 국가의 개인·가족·학생·Lite 플랜 가격을 같은 시점(요금 조사일 ${data.lastUpdated}) 기준으로 비교</li>
+        <li class="${LI}"><strong>44개 국가 요금 한눈에 비교</strong> — 각 국가에서 실제로 제공되는 개인·가족·학생·Lite 플랜 가격을 같은 시점(요금 조사일 ${data.lastUpdated}) 기준으로 비교</li>
         <li class="${LI}"><strong>원화 자동 환산</strong> — 환율 기준일 ${data.exchangeRateDate}의 공개 환율로 원화 비용 확인</li>
         <li class="${LI}"><strong>절약률 계산</strong> — 한국 대비 월·연 절약액 자동 계산</li>
         <li class="${LI}"><strong>가격 트렌드</strong> — 국가별 가격 변동 추이 (<a href="/ott/youtube-premium/trends">트렌드 페이지</a>)</li>
@@ -1501,15 +1533,15 @@ function buildCommunityContent() {
 
       <p class="${P}">
         OTT Watcher 커뮤니티는 유튜브 프리미엄 등 OTT 구독료 정보를 공유하고, 절약 팁과 이용 경험을 나누는 공간입니다.
-        국가별 가격 변동, 합법적인 절약 방법, 가족 플랜 공유 후기 등을 함께 공유해보세요.
+        국가별 가격 변동, 합법적인 절약 방법, 요금제 선택 경험 등을 함께 공유해보세요.
       </p>
 
       <h2 class="${H2}">주요 주제</h2>
       <ul class="${UL}">
         <li class="${LI}"><strong>가격 변동 소식</strong> — 국가별 가격 인상·인하 정보</li>
-        <li class="${LI}"><strong>가족 플랜 공유 후기</strong> — 합법적 5인 공유 경험담</li>
+        <li class="${LI}"><strong>요금제 선택 후기</strong> — 개인 플랜·Lite 플랜 전환 경험담</li>
         <li class="${LI}"><strong>해외 거주자 팁</strong> — 국가별 결제·VAT 주의사항</li>
-        <li class="${LI}"><strong>학생 플랜 자격</strong> — 대학 인증 과정 공유</li>
+        <li class="${LI}"><strong>국가별 제공 요금제</strong> — 가족·학생 플랜을 제공하는 국가와 그 조건</li>
       </ul>
 
       <h2 class="${H2}">주의사항</h2>

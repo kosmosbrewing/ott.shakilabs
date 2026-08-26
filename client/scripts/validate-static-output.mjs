@@ -15,6 +15,7 @@ import {
   getSitemapRoutes,
   getCountryRoutes,
   canonicalPathFor,
+  loadPriceSeed,
 } from "./seo-routes.mjs";
 import { getCrawlHintRoutes } from "./seo-routes.mjs";
 import { parseRouterRoutes, expandRoute, buildServeMatcher } from "./router-routes.mjs";
@@ -410,6 +411,62 @@ assert(
   "/youtube-premium/trends is independent content and must never be treated as a country variant"
 );
 
+// 요금제 주장 게이트 — "가격표에 없는 요금제를 본문이 주장하는" 상태를 잡는다.
+//
+// 왜 필요한가: 이 앱은 /youtube-premium FAQ에서 "한국 가족 플랜 월 22,900원, 5명이 나누면
+// 1인당 4,580원"을 주장했다. 그런데 data/prices의 KR 행에는 family 항목이 아예 없었고,
+// 같은 회사의 root 블로그(/blog/youtube-premium-prices-2026)는 바로 그 서술을 두고
+// "현재 유효하지 않습니다"라고 못박고 있었다. 데이터와도, 자매 사이트와도 동시에
+// 어긋났는데 빌드는 조용히 통과했다. 데이터가 옳아도 산문은 틀릴 수 있으므로
+// 산출된 HTML 본문을 데이터와 직접 대조한다.
+const PLAN_LABELS = {
+  family: "가족 플랜",
+  student: "학생 플랜",
+  duo: "2인 플랜(Duo)",
+  lite: "Lite 플랜",
+};
+
+function bodyBlockOf(html) {
+  const match =
+    html.match(/<article\s+data-seo-prerender[\s\S]*?<\/article>/i) ||
+    html.match(/<div\s+data-seo-prerender[\s\S]*?<\/div>/i);
+  return match ? match[0] : "";
+}
+
+function validatePlanClaims() {
+  const seed = loadPriceSeed();
+  const rows = Array.isArray(seed?.prices) ? seed.prices : [];
+
+  for (const row of rows) {
+    const code = String(row?.countryCode || "").toLowerCase();
+    if (!code) continue;
+    const route = `/youtube-premium/${code}`;
+    const file = routeToFile(route);
+    // 파일 부재는 validateRoute가 이미 소프트404로 잡는다. 여기서 중복 보고하지 않는다.
+    if (!fs.existsSync(file)) continue;
+    const body = bodyBlockOf(fs.readFileSync(file, "utf-8"));
+    const plans = row?.plans || {};
+    for (const [key, label] of Object.entries(PLAN_LABELS)) {
+      if (plans[key]) continue;
+      assert(
+        !body.includes(label),
+        `${route} names "${label}" but ${row.country}(${code.toUpperCase()}) has no ${key} plan in data/prices`
+      );
+    }
+  }
+
+  // 한국 허브는 "가족 요금제가 없다"는 사실을 명시적으로 유지해야 한다.
+  // 부재 검사만 두면 문장을 통째로 지워도 통과하므로 긍정 어서션으로 잠근다.
+  const hubFile = routeToFile("/youtube-premium");
+  if (fs.existsSync(hubFile)) {
+    const hub = fs.readFileSync(hubFile, "utf-8");
+    assert(
+      hub.includes("가족 요금제를 이용할 수 없습니다"),
+      "/youtube-premium must keep stating that the family plan is unavailable in Korea (KR has no family plan in data/prices)"
+    );
+  }
+}
+
 prerenderRoutes.forEach(validateRoute);
 const serves = validateRouterSitemapParity(validateSitemap());
 // serves가 없으면 라우터 파싱이 이미 실패한 것이다. 부수 목록 검사는 그 위에 얹혀
@@ -418,6 +475,7 @@ if (serves) validateRouteSideLists(serves);
 validateGeneratedUtilities();
 validateTitles();
 validateNotFound();
+validatePlanClaims();
 
 if (failures.length > 0) {
   process.stderr.write(`\n[validate-static-output] ${failures.length} problem(s):\n`);
