@@ -4,51 +4,12 @@ import {
   type CountryPrice,
   type PricesResponse,
 } from "@/api";
-import { ensureValidSlug } from "@/api/helpers";
-import { normalizePricesResponse } from "@/api/priceTransforms";
 
 export type SortOrder = "asc" | "desc";
 export type DisplayCurrency = "krw" | "usd";
 
-// 모듈 스코프 캐시 — slug별 가격 데이터 (하루 1회 갱신이므로 5분 TTL)
-const CACHE_TTL_MS = 5 * 60 * 1000;
-const STATIC_PRICE_TIMEOUT_MS = 5_000;
-
-type CacheEntry = { data: PricesResponse; fetchedAt: number };
-const priceCache = new Map<string, CacheEntry>();
-
-function getCached(slug: string): PricesResponse | null {
-  const entry = priceCache.get(slug);
-  if (!entry) return null;
-  if (Date.now() - entry.fetchedAt > CACHE_TTL_MS) {
-    priceCache.delete(slug);
-    return null;
-  }
-  return entry.data;
-}
-
-async function fetchStaticPrices(serviceSlug: string): Promise<PricesResponse> {
-  ensureValidSlug(serviceSlug);
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), STATIC_PRICE_TIMEOUT_MS);
-  const baseUrl = import.meta.env.BASE_URL.endsWith("/")
-    ? import.meta.env.BASE_URL
-    : `${import.meta.env.BASE_URL}/`;
-
-  try {
-    const response = await fetch(`${baseUrl}data/prices/${serviceSlug}.json`, {
-      headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      throw new Error("정적 가격 정보를 불러오지 못했습니다.");
-    }
-    return normalizePricesResponse(await response.json());
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
+// 모듈 스코프 캐시 — 같은 slug를 여러 뷰가 동시에 요구할 때 중복 작업만 막는다.
+const priceCache = new Map<string, PricesResponse>();
 
 export function usePrices() {
   const priceData = ref<PricesResponse | null>(null);
@@ -59,9 +20,13 @@ export function usePrices() {
   const selectedPlan = ref<string>("individual");
   const sortOrder = ref<SortOrder>("asc"); // asc: 싼 순, desc: 비싼 순
 
+  /**
+   * 출처가 하나뿐이라 "먼저 정적 값을 그리고 나중에 API 값으로 덮어쓰는" 2단계가 없다.
+   * 그 2단계가 바로 프리렌더와 화면의 순위·날짜가 갈리던 자리였다 —
+   * 첫 페인트는 프리렌더와 같은 값, 이어서 다른 값. 이제 한 번만 읽는다.
+   */
   async function loadPrices(serviceSlug: string): Promise<void> {
-    // 캐시 히트 시 네트워크 요청 생략
-    const cached = getCached(serviceSlug);
+    const cached = priceCache.get(serviceSlug);
     if (cached) {
       priceData.value = cached;
       return;
@@ -70,30 +35,10 @@ export function usePrices() {
     loading.value = true;
     error.value = null;
 
-    const liveResultPromise = Promise.resolve()
-      .then(() => fetchPrices(serviceSlug))
-      .then((data) => ({ data, requestError: null }))
-      .catch((requestError: unknown) => ({ data: null, requestError }));
-    let hasStaticFallback = false;
-
     try {
-      try {
-        const staticData = await fetchStaticPrices(serviceSlug);
-        priceCache.set(serviceSlug, { data: staticData, fetchedAt: Date.now() });
-        priceData.value = staticData;
-        hasStaticFallback = true;
-        loading.value = false;
-      } catch {
-        // 정적 데이터가 없으면 기존 API 응답을 기다린다.
-      }
-
-      const { data, requestError } = await liveResultPromise;
-      if (data) {
-        priceCache.set(serviceSlug, { data, fetchedAt: Date.now() });
-        priceData.value = data;
-      } else if (!hasStaticFallback) {
-        throw requestError;
-      }
+      const data = await fetchPrices(serviceSlug);
+      priceCache.set(serviceSlug, data);
+      priceData.value = data;
     } catch (loadError: unknown) {
       error.value = loadError instanceof Error
         ? loadError.message

@@ -467,6 +467,148 @@ function validatePlanClaims() {
   }
 }
 
+// =====================================================================
+// 출처 단일성 게이트 — "같은 가격에 서로 다른 출처 날짜 두 쌍"과
+// "크롤러와 사용자가 서로 다른 순위표를 보는 상태"를 잡는다.
+//
+// 왜 필요한가(2026-08-27 라이브 실측): 프리렌더는 커밋된 시드
+// (요금 조사일 2026-02-20 / 환율 기준일 2026-08-22)로 정적 HTML을 굽고,
+// 브라우저는 하이드레이션 직후 백엔드 API 응답(02-21 / 08-27)으로 덮어썼다.
+// 두 쌍이 동시에 공개됐고, 환율이 다르니 원화 환산 순위까지 갈렸다 —
+// /trends 프리렌더는 우크라이나를 ₩3,506·6위로, 화면은 3,071원·5위로 보여줬다.
+//
+// 세 방향으로 잠근다.
+//  ① 소스: 런타임 가격 로더가 원격 API 경로를 갖고 있으면 안 된다(두 번째 출처의 씨앗).
+//  ② 산출물: 발행된 정적 JSON이 프리렌더가 읽은 시드와 바이트 단위로 같아야 한다.
+//  ③ 표시: 프로브넌스 라우트의 HTML에 시드의 두 날짜 말고 다른 날짜가 없어야 하고,
+//     프리렌더 순위표가 시드에서 계산한 순위와 정확히 같아야 한다.
+// 가격 프로브넌스(요금 조사일·환율 기준일)를 실제로 표기하는 라우트.
+// 정책 문서(/privacy·/terms)는 시행일 같은 다른 성격의 날짜를 쓰므로 뺀다.
+const PROVENANCE_ROUTES = ["/", "/about", `/youtube-premium`, `/youtube-premium/trends`];
+
+// 근거 없는 주기 약속·날조 프로브넌스가 다시 기어들어오는 것을 막는다.
+// 12개 저장소 전부 schedule: 워크플로가 0개다 — 주기를 약속하는 문장은 쓸 근거가 없다.
+const FORBIDDEN_PHRASES = [
+  "자체 수집",
+  "매일 자동 업데이트",
+  "정기적으로 갱신",
+  "실시간 가격 비교",
+];
+
+function validateSingleSourceProvenance() {
+  const seed = loadPriceSeed();
+  const surveyDate = seed?.lastUpdated;
+  const fxDate = seed?.exchangeRateDate;
+  assert(
+    /^\d{4}-\d{2}-\d{2}$/.test(String(surveyDate)),
+    `data/prices: lastUpdated must be an ISO date, got ${JSON.stringify(surveyDate)}`
+  );
+  assert(
+    /^\d{4}-\d{2}-\d{2}$/.test(String(fxDate)),
+    `data/prices: exchangeRateDate must be an ISO date, got ${JSON.stringify(fxDate)}`
+  );
+
+  // ① 런타임 로더에 원격 출처가 없는가.
+  const loaderPath = path.resolve(__dirname, "../src/api/prices.ts");
+  if (!fs.existsSync(loaderPath)) {
+    failures.push("client/src/api/prices.ts is missing — the runtime price loader must exist");
+  } else {
+    const loader = fs.readFileSync(loaderPath, "utf-8");
+    assert(
+      !/API_BASE/.test(loader),
+      "src/api/prices.ts must not read prices from the remote API: a second copy with its own " +
+        "lastUpdated/exchangeRateDate is exactly what put two provenance date pairs on one page"
+    );
+    assert(
+      loader.includes("data/prices/youtube-premium.json"),
+      "src/api/prices.ts must import the committed seed that the prerender also reads"
+    );
+  }
+  const composerPath = path.resolve(__dirname, "../src/composables/usePrices.ts");
+  if (fs.existsSync(composerPath)) {
+    assert(
+      !/fetch\(/.test(fs.readFileSync(composerPath, "utf-8")),
+      "usePrices.ts must not fetch prices itself: the static-then-live overwrite is what made " +
+        "the first paint and the settled screen disagree"
+    );
+  }
+
+  // ② 발행된 사본이 시드와 같은가.
+  const seedPath = path.resolve(__dirname, "../../data/prices/youtube-premium.json");
+  const publishedPath = path.join(DIST_DIR, "data/prices/youtube-premium.json");
+  if (!fs.existsSync(publishedPath)) {
+    failures.push("dist/data/prices/youtube-premium.json is missing (sync-price-data.mjs writes it)");
+  } else {
+    assert(
+      fs.readFileSync(publishedPath, "utf-8") === fs.readFileSync(seedPath, "utf-8"),
+      "dist/data/prices/youtube-premium.json differs from data/prices/youtube-premium.json — " +
+        "the published copy is a second source and will drift"
+    );
+  }
+
+  // ③ 표시된 날짜와 순위.
+  const allowedDates = new Set([surveyDate, fxDate]);
+  for (const route of PROVENANCE_ROUTES) {
+    const file = routeToFile(route);
+    if (!fs.existsSync(file)) continue;
+    const html = fs.readFileSync(file, "utf-8");
+
+    const dates = new Set(html.match(/\d{4}-\d{2}-\d{2}/g) ?? []);
+    const stray = [...dates].filter((d) => !allowedDates.has(d));
+    assert(
+      stray.length === 0,
+      `${route} publishes provenance dates that are not in the price seed: ${stray.join(", ")} ` +
+        `(seed says survey=${surveyDate}, fx=${fxDate})`
+    );
+  }
+
+  // 금지 문구는 프리렌더 전 라우트에서 본다 — 한 페이지만 잠그면 옆 페이지로 번진다.
+  for (const route of prerenderRoutes) {
+    const file = routeToFile(route);
+    if (!fs.existsSync(file)) continue;
+    const html = fs.readFileSync(file, "utf-8");
+    for (const phrase of FORBIDDEN_PHRASES) {
+      assert(
+        !html.includes(phrase),
+        `${route} contains a claim with no basis in this repository: "${phrase}"`
+      );
+    }
+  }
+
+  // /youtube-premium/trends와 /youtube-premium은 두 날짜를 실제로 표기해야 한다.
+  // 부재 검사만 두면 날짜 표기를 통째로 지워도 통과한다.
+  for (const route of [`/youtube-premium`, `/youtube-premium/trends`]) {
+    const file = routeToFile(route);
+    if (!fs.existsSync(file)) continue;
+    const html = fs.readFileSync(file, "utf-8");
+    assert(html.includes(surveyDate), `${route} must state the survey date ${surveyDate}`);
+    assert(html.includes(fxDate), `${route} must state the exchange-rate date ${fxDate}`);
+  }
+
+  // 프리렌더 순위표 == 시드에서 계산한 순위. 프리렌더가 굳힌 환율과 런타임 환율이
+  // 갈리면 여기서 먼저 터진다(=크롤러와 사용자가 다른 순위표를 보기 전에).
+  const expectedTop = (Array.isArray(seed?.prices) ? seed.prices : [])
+    .filter((p) => p?.converted?.individual?.krw != null)
+    .map((p) => ({ country: p.country, krw: p.converted.individual.krw }))
+    .sort((a, b) => a.krw - b.krw)
+    .slice(0, 10)
+    .map((p) => `${p.country} ₩${Intl.NumberFormat("en-US").format(p.krw)}`);
+
+  const trendsFile = routeToFile(`/youtube-premium/trends`);
+  if (fs.existsSync(trendsFile) && expectedTop.length === 10) {
+    const html = fs.readFileSync(trendsFile, "utf-8");
+    const block = html.match(/저렴한 국가 상위 10위[\s\S]*?<\/ol>/)?.[0] ?? "";
+    const actualTop = [...block.matchAll(/<li[^>]*>.*?>([^<]+)<\/a>\s*—\s*(₩[\d,]+)/g)].map(
+      (m) => `${m[1].trim()} ${m[2].trim()}`
+    );
+    assert(
+      JSON.stringify(actualTop) === JSON.stringify(expectedTop),
+      "Prerendered cheapest-10 ranking does not match the ranking computed from the price seed.\n" +
+        `  seed:      ${JSON.stringify(expectedTop)}\n  prerender: ${JSON.stringify(actualTop)}`
+    );
+  }
+}
+
 prerenderRoutes.forEach(validateRoute);
 const serves = validateRouterSitemapParity(validateSitemap());
 // serves가 없으면 라우터 파싱이 이미 실패한 것이다. 부수 목록 검사는 그 위에 얹혀
@@ -476,6 +618,7 @@ validateGeneratedUtilities();
 validateTitles();
 validateNotFound();
 validatePlanClaims();
+validateSingleSourceProvenance();
 
 if (failures.length > 0) {
   process.stderr.write(`\n[validate-static-output] ${failures.length} problem(s):\n`);
