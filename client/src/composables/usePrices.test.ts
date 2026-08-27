@@ -15,58 +15,51 @@ function pricePayload(source: string): PricesResponse {
   };
 }
 
-function staticResponse(payload: PricesResponse): Response {
-  return {
-    ok: true,
-    json: vi.fn().mockResolvedValue(payload),
-  } as unknown as Response;
-}
-
 describe("usePrices", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockedFetchPrices.mockReset();
   });
 
-  it("renders static prices before replacing them with live prices", async () => {
-    let resolveLive!: (value: PricesResponse) => void;
-    mockedFetchPrices.mockReturnValue(
-      new Promise((resolve) => {
-        resolveLive = resolve;
-      }),
-    );
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(staticResponse(pricePayload("static"))));
+  // 이 테스트가 지키는 것: 가격 출처는 하나뿐이다.
+  // 예전에는 정적 스냅샷을 먼저 그린 뒤 원격 API 응답으로 덮어썼고, 두 사본의
+  // 요금 조사일·환율 기준일이 달라 같은 화면이 서로 다른 출처 날짜 두 쌍을 노출했다.
+  // 환율까지 달라 원화 환산 순위가 프리렌더와 라이브에서 뒤집혔다.
+  it("커밋된 스냅샷 한 벌만 읽고 다른 값으로 덮어쓰지 않는다", async () => {
+    mockedFetchPrices.mockResolvedValue(pricePayload("2026-02-20"));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
 
     const prices = usePrices();
-    const loadingPromise = prices.loadPrices("youtube-static-first");
+    await prices.loadPrices("youtube-premium");
 
-    await vi.waitFor(() => expect(prices.priceData.value?.lastUpdated).toBe("static"));
+    expect(prices.priceData.value?.lastUpdated).toBe("2026-02-20");
+    expect(prices.error.value).toBeNull();
     expect(prices.loading.value).toBe(false);
-
-    resolveLive(pricePayload("live"));
-    await loadingPromise;
-    expect(prices.priceData.value?.lastUpdated).toBe("live");
+    expect(mockedFetchPrices).toHaveBeenCalledTimes(1);
+    // 네트워크 경로가 하나도 남아 있으면 안 된다 — 그 경로가 두 번째 출처였다.
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("uses the live API when static prices are unavailable", async () => {
-    mockedFetchPrices.mockResolvedValue(pricePayload("live-only"));
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+  it("같은 slug를 두 번 부르면 캐시를 쓴다", async () => {
+    mockedFetchPrices.mockResolvedValue(pricePayload("cached"));
 
-    const prices = usePrices();
-    await prices.loadPrices("youtube-live-only");
+    await usePrices().loadPrices("youtube-cache-check");
+    const second = usePrices();
+    await second.loadPrices("youtube-cache-check");
 
-    expect(prices.priceData.value?.lastUpdated).toBe("live-only");
-    expect(prices.error.value).toBeNull();
+    expect(second.priceData.value?.lastUpdated).toBe("cached");
+    expect(mockedFetchPrices).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps static prices when the live API fails", async () => {
-    mockedFetchPrices.mockRejectedValue(new Error("API unavailable"));
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(staticResponse(pricePayload("fallback"))));
+  it("시드를 제공하지 않는 slug는 에러 메시지로 끝난다", async () => {
+    mockedFetchPrices.mockRejectedValue(new Error("아직 가격 데이터를 제공하지 않는 서비스입니다."));
 
     const prices = usePrices();
-    await prices.loadPrices("youtube-static-fallback");
+    await prices.loadPrices("youtube-missing-seed");
 
-    expect(prices.priceData.value?.lastUpdated).toBe("fallback");
-    expect(prices.error.value).toBeNull();
+    expect(prices.priceData.value).toBeNull();
+    expect(prices.error.value).toBe("아직 가격 데이터를 제공하지 않는 서비스입니다.");
+    expect(prices.loading.value).toBe(false);
   });
 });

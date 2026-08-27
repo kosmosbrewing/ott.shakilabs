@@ -1140,7 +1140,13 @@ ${
 
 `,
     },
-    // 뷰의 갱신·보정 기록 표와 FAQ 아코디언과 같은 내용
+    // 뷰의 갱신·보정 기록 표와 같은 내용 — 표는 뷰가 라이브로 다시 그린다.
+    //
+    // FAQ를 이 섹션에서 떼어낸 이유: 예전에는 표와 FAQ가 한 덩어리로 live:true였다.
+    // 그래서 하이드레이션 때 프리렌더 FAQ가 통째로 지워졌는데, 화면에 남은 대응물은
+    // 아코디언이었고 radix 아코디언은 접힌 패널을 DOM에서 아예 언마운트한다.
+    // 결과: FAQPage 스키마는 4문항을 신고하는데 답변 4개가 innerHTML 기준으로 부재.
+    // (card #53이 같은 결함을 "화면이 이미 커버함" 분류를 걷어내 해소했다.)
     {
       id: "trends-log",
       live: true,
@@ -1166,7 +1172,15 @@ ${
 
 `
           : ""
-      }      <h2 class="${H2}">자주 묻는 질문 (FAQ)</h2>
+      }`,
+    },
+    // live:false — 뷰가 <SeoRichContent>로 이 문구를 그대로 다시 렌더한다.
+    // 화면 FAQ = 프리렌더 FAQ = FAQPage 스키마가 한 소스에서 나오므로,
+    // 스키마가 DOM에 없는 답변을 신고하는 상태가 구조적으로 불가능해진다.
+    {
+      id: "trends-faq",
+      live: false,
+      html: `      <h2 class="${H2}">자주 묻는 질문 (FAQ)</h2>
       ${buildFaqSectionHtml(getTrendsFaqItems())}
 
 `,
@@ -1190,6 +1204,9 @@ ${
 }
 
 function buildAboutContent() {
+  // 날짜는 가격 시드에서만 읽는다. /about이 자기 문장에 날짜를 하드코딩하면
+  // 이 페이지 혼자 옛 날짜를 들고 남는다 — 지금 고치고 있는 결함이 바로 그 종류다.
+  const data = loadData();
   return [{ id: "about", live: false, html: `
       <h1 class="${H1}">서비스 소개 — OTT Watcher</h1>
 
@@ -1230,11 +1247,18 @@ function buildAboutContent() {
 
       <h2 class="${H2}">3. 데이터 출처 및 검증 방법</h2>
       <p class="${P}">
-        가격 데이터는 공개된 Google/YouTube 공식 페이지와 각 국가의 공식 요금표를 수집해 정기적으로 갱신합니다.
+        가격 데이터는 공개된 Google/YouTube 공식 페이지와 각 국가의 공식 요금표를 사람이 확인해 반영합니다.
+        자동 수집 수단이 없으므로 상시 최신을 보장하지 않으며, 정해진 갱신 주기도 두고 있지 않습니다.
+        대신 실제로 조사한 날짜를 '요금 조사일'로 표기합니다 — 현재 요금 조사일은 ${data.lastUpdated}입니다.
         모든 가격은 <a href="https://www.youtube.com/premium" target="_blank" rel="noopener noreferrer">YouTube Premium 공식 페이지</a> 등
         각국 공식 요금 페이지와 직접 대조해 검증한 뒤 게재하며,
         요금제·결제 관련 공식 안내는 <a href="https://support.google.com/youtube" target="_blank" rel="noopener noreferrer">YouTube 고객센터</a>에서 확인할 수 있습니다.
-        환율은 공개 환율 API를 통해 자동 갱신되며, 본 사이트는 자체 원화 환산 로직을 적용합니다.
+      </p>
+      <p class="${P}">
+        원화 환산에 쓰는 환율은 공개 환율 API(open.er-api.com)에서 받아온 스냅샷이며,
+        기준일은 ${data.exchangeRateDate}입니다. 요금 조사일과 환율 기준일은 성격이 다른 날짜라
+        각 페이지에 따로 표기하며, 화면에 보이는 원화 값은 프리렌더·하이드레이션 모두
+        이 스냅샷 한 벌에서 계산합니다. 실시간 시세나 일 단위 가격 시계열은 제공하지 않습니다.
       </p>
 
       <h2 class="${H2}">4. 이용 시 주의사항</h2>

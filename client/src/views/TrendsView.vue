@@ -8,8 +8,8 @@ import { formatNumber, countryFlag } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
+import { getFaqItems } from "@/lib/seoContent";
 import changelogSeed from "../../../data/reports/changelog.json";
 
 type ChangelogEntry = {
@@ -97,45 +97,30 @@ const changelogEntries = computed<ChangelogEntry[]>(() => {
 });
 
 // ─── FAQ (화면 텍스트 = FAQPage 스키마 텍스트 동일 소스) ─────────────────────
-// seo-content.mjs의 getTrendsFaqItems()와 문구가 같아야 한다
-// (화면 텍스트 = FAQPage 스키마 텍스트 = 프리렌더 HTML).
-const faqItems = computed<{ q: string; a: string }[]>(() => {
-  if (!trends.value) return [];
-  const fxDate = trends.value.exchangeRateDate || trends.value.asOf || "-";
-  const surveyDate = trends.value.asOf || "-";
+//
+// 이 문구를 뷰에 사본으로 두면 안 된다. 예전에는 여기에 같은 4문항을 다시 적어 두고
+// 아코디언으로 렌더했는데, 아코디언은 접힌 패널을 DOM에서 언마운트하므로 스키마가
+// 신고한 답변 4개가 실제 DOM에는 0개였다. 지금은 아래 <SeoRichContent>가 렌더하는
+// 프리렌더 산문 FAQ가 유일한 화면 표현이고, 스키마도 같은 함수에서 나온다.
+// (HomeView.vue가 루트 허브에서 쓰는 것과 같은 배선이다.)
+const faqItems = getFaqItems("/youtube-premium/trends");
 
-  return [
-    {
-      q: "이 페이지에서 가격 변동 추이를 볼 수 있나요?",
-      a: `아직 볼 수 없습니다. 변동을 보여주려면 같은 국가를 서로 다른 시점에 두 번 이상 조사한 이력이 있어야 하는데, 현재는 요금 조사 1회분(${surveyDate} 기준)만 확보돼 있습니다. 그래서 이 페이지는 시점 간 변동 대신 같은 시점의 국가 간 가격 격차를 보여줍니다. 두 번째 조사가 쌓이면 시점별 비교표가 이 자리에 나타납니다.`,
-    },
-    {
-      q: "가격 데이터는 어떻게, 얼마나 자주 수집되나요?",
-      a: `현지 통화 정가는 자동 수집 수단이 없어 사람이 공식 요금 안내를 확인해 반영합니다. 현재 요금 조사일은 ${surveyDate}입니다. 원화 환산에 쓰는 환율만 공개 환율 API에서 자동으로 가져오며 기준일은 ${fxDate}입니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.`,
-    },
-    {
-      q: "과거 특정 시점의 공식 요금도 확인할 수 있나요?",
-      a: "아니요. 본 페이지는 Google/YouTube의 공식 가격 변경 이력 아카이브가 아니며, 과거 요금 이력을 보관하고 있지 않습니다. 특정 시점의 공식 요금이나 인상 공지는 YouTube 고객센터 등 공식 채널에서 확인해야 정확합니다.",
-    },
-    {
-      q: "환율이 바뀌면 순위도 바뀌나요?",
-      a: "네. 원화 환산 최저가 순위는 환율에 따라 달라질 수 있습니다. 현지 요금이 그대로여도 해당 통화가 원화 대비 강세면 환산 가격이 올라 순위가 밀리고, 약세면 내려갑니다. 순위와 함께 현지 통화 가격을 같이 확인하는 것이 안전합니다.",
-    },
-  ];
-});
+// FAQ 답변에 <strong> 같은 인라인 태그가 섞일 수 있다. 스키마에는 보이는 텍스트만 넣는다.
+function stripTags(html: string): string {
+  return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
 
-const seoJsonLd = computed<Record<string, unknown> | undefined>(() => {
-  if (!faqItems.value.length) return undefined;
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqItems.value.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
-    })),
-  };
-});
+const seoJsonLd = faqItems.length
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: stripTags(item.q),
+        acceptedAnswer: { "@type": "Answer", text: stripTags(item.a) },
+      })),
+    }
+  : undefined;
 
 useSEO({
   title: pageTitle,
@@ -438,9 +423,13 @@ watch(serviceSlug, async () => {
     </div>
 
     <!--
-      프리렌더에만 있던 해설(변동 읽는 법·대륙별 평균·비싼 국가·가격 격차·관련 링크)을
+      프리렌더에만 있던 해설(변동 읽는 법·대륙별 평균·비싼 국가·가격 격차·FAQ·관련 링크)을
       화면에도 렌더한다. 위 카드들이 라이브로 보여주는 표는 seo-content.mjs에서
       live:true로 표시돼 여기서 제외된다.
+
+      FAQ도 여기서 나온다(trends-faq 섹션). 별도 아코디언 카드를 두면 같은 4문항이
+      두 번 노출되고, 아코디언은 접힌 답변을 DOM에서 언마운트해 FAQPage 스키마가
+      "DOM에 없는 답변"을 신고하게 된다 — 실제로 그 상태로 배포돼 있었다.
 
       조건 분기 바깥에 두는 이유: 이 문구는 커밋된 시드에서 나오므로 API가 죽어도
       보여줄 수 있어야 하고(로딩·에러 화면이 빈 페이지가 되지 않는다),
@@ -449,22 +438,6 @@ watch(serviceSlug, async () => {
     <Card class="mt-4 retro-panel overflow-hidden">
       <CardContent class="px-4 py-3">
         <SeoRichContent route="/youtube-premium/trends" embedded />
-      </CardContent>
-    </Card>
-
-    <Card v-if="faqItems.length" class="mt-4 retro-panel overflow-hidden">
-      <div class="retro-titlebar">
-        <h2 class="retro-title">자주 묻는 질문</h2>
-      </div>
-      <CardContent class="px-4 py-2">
-        <Accordion type="multiple" class="w-full">
-          <AccordionItem v-for="(item, i) in faqItems" :key="i" :value="`trends-faq-${i}`">
-            <article>
-              <AccordionTrigger class="text-caption">{{ item.q }}</AccordionTrigger>
-              <AccordionContent>{{ item.a }}</AccordionContent>
-            </article>
-          </AccordionItem>
-        </Accordion>
       </CardContent>
     </Card>
   </div>

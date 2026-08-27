@@ -114,7 +114,10 @@ function routeToMeta(route, countryMap) {
   if (route === "/about") {
     return {
       title: "소개 | 유튜브 프리미엄 가격 비교",
-      description: "유튜브 프리미엄 가격 비교 서비스의 데이터 출처와 갱신 주기를 안내합니다.",
+      // AboutView.vue의 useSEO description과 같은 문자열이어야 한다.
+      // 이 자리에 있던 "갱신 주기를 안내합니다"는 존재하지 않는 주기를 예고했다.
+      description:
+        "유튜브 프리미엄 가격 비교 서비스의 데이터 출처와 요금 조사일·환율 기준일 표기 방식을 안내합니다.",
       heading: "서비스 소개",
       jsonLd: {
         "@context": "https://schema.org",
