@@ -376,12 +376,12 @@ defineExpose({ selectedRightCountryCode });
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
                 <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">현지 요금</p>
-                <p class="text-caption font-bold mt-1 tabular-nums">{{ fmtUsd(selectedCompareCountry.usd) }}</p>
+                <p class="text-display font-bold mt-1 tabular-nums">{{ fmtUsd(selectedCompareCountry.usd) }}</p>
                 <p class="mt-0.5 text-[0.6rem] leading-tight text-muted-foreground/70">{{ fmtLocalPrice(selectedCompareCountry.localMonthly, selectedCompareCountry.currency) }}</p>
               </div>
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
                 <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">원화 환산</p>
-                <p class="text-caption font-bold mt-1 tabular-nums">{{ fmtKrw(selectedCompareCountry.krw) }}</p>
+                <p class="text-display font-bold mt-1 tabular-nums">{{ fmtKrw(selectedCompareCountry.krw) }}</p>
               </div>
             </div>
           </div>
@@ -420,12 +420,12 @@ defineExpose({ selectedRightCountryCode });
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
                 <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">현지 요금</p>
-                <p class="text-caption font-bold mt-1 tabular-nums">{{ fmtUsd(rightCompareRow.usd) }}</p>
+                <p class="text-display font-bold mt-1 tabular-nums">{{ fmtUsd(rightCompareRow.usd) }}</p>
                 <p class="mt-0.5 text-[0.6rem] leading-tight text-muted-foreground/70">{{ fmtLocalPrice(rightCompareRow.localMonthly, rightCompareRow.currency) }}</p>
               </div>
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
                 <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">원화 환산</p>
-                <p class="text-caption font-bold mt-1 tabular-nums">{{ fmtKrw(rightCompareRow.krw) }}</p>
+                <p class="text-display font-bold mt-1 tabular-nums">{{ fmtKrw(rightCompareRow.krw) }}</p>
               </div>
             </div>
           </div>
