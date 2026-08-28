@@ -41,6 +41,8 @@ const config: Config = {
 
       // 5단계 폰트 계층 (샤키샤키 동일)
       fontSize: {
+        // 전 앱 공통 결과 히어로 금액 스케일 (26px/700) — 결과 히어로 문법 수렴 1단계
+        display: ["1.625rem", { lineHeight: "1.2", fontWeight: "700" }],
         h1: ["1.5rem", { lineHeight: "1.3", fontWeight: "700" }],
         h2: ["1.25rem", { lineHeight: "1.35", fontWeight: "600" }],
         heading: ["1.125rem", { lineHeight: "1.4", fontWeight: "600" }],
