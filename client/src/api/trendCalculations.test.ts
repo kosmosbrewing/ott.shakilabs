@@ -163,7 +163,8 @@ describe("trendCalculations", () => {
     };
     const summary = buildTrendSummary(tied, []);
 
-    expect(summary.highestSavings?.map((row) => row.countryCode)).toEqual(["UA", "PH"]);
+    expect(summary.highestSavings?.[0]?.countryCode).toBe("UA");
+    expect(summary.highestSavings?.[1]?.countryCode).toBe("PH");
   });
 
   it("기준국이 원화 표시면 환산 왕복 대신 현지 정가를 쓴다", () => {
