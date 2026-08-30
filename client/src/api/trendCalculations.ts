@@ -11,12 +11,20 @@ export type HistorySnapshot = {
   prices: HistoryItem[];
 };
 
+// 원화 표시 국가는 환산 왕복(KRW→USD→KRW: 14,900→14,897) 오차를 피해
+// 현지 정가를 그대로 쓴다 — 수식상 상쇄돼야 할 항이라 환산을 거칠 이유가 없다.
+function directKrw(country: PricesResponse["prices"][number]): number | null {
+  return country.currency === "KRW" ? getNumber(country.plans?.individual?.monthly) : null;
+}
+
 export function buildTrendRows(priceData: PricesResponse): TrendRow[] {
   const baseCountry = priceData.prices.find((country) => country.countryCode === priceData.baseCountry);
-  const baseKrw = getNumber(baseCountry?.converted?.individual?.krw);
+  const baseKrw = baseCountry
+    ? directKrw(baseCountry) ?? getNumber(baseCountry.converted?.individual?.krw)
+    : null;
 
   return priceData.prices.map((country) => {
-    const currentKrw = getNumber(country.converted?.individual?.krw);
+    const currentKrw = directKrw(country) ?? getNumber(country.converted?.individual?.krw);
     const savingsPercent =
       baseKrw && currentKrw != null && baseKrw > 0
         ? Math.round(((baseKrw - currentKrw) / baseKrw) * 100)
@@ -161,9 +169,12 @@ export function buildTrendSummary(
     .sort((a, b) => (a.krw ?? Infinity) - (b.krw ?? Infinity))
     .slice(0, 10);
 
+  // 정렬은 원값(krw)으로 한다. 반올림된 savingsPercent로 정렬하면 76==76 같은
+  // 동률이 생겨 시드(입력) 순서로 낙착되고, 실제로 더 싼 나라가 뒤로 밀린다.
+  // 기준국이 동일하므로 krw 오름차순 == 미반올림 절약률 내림차순. 표시만 반올림 유지.
   const highestSavings = rows
     .filter((row) => row.krw != null && (row.savingsPercent ?? 0) > 0)
-    .sort((a, b) => (b.savingsPercent ?? 0) - (a.savingsPercent ?? 0))
+    .sort((a, b) => (a.krw ?? Infinity) - (b.krw ?? Infinity))
     .slice(0, 10);
 
   const biggestDrops = rows

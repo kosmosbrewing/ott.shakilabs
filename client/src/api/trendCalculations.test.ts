@@ -138,6 +138,55 @@ describe("trendCalculations", () => {
     expect(summary.previousSnapshotDate).toBe("2026-03-08");
   });
 
+  it("절약률 순위는 반올림 동률이어도 원값(krw)이 싼 나라를 앞세운다", () => {
+    // 76%==76% 같은 반올림 동률이 시드 순서로 낙착되던 회귀 방지:
+    // PH(3575)와 UA(3506)는 둘 다 76%로 반올림되지만 UA가 실제로 더 싸다.
+    const tied: PricesResponse = {
+      ...basePriceData,
+      prices: [
+        basePriceData.prices[0],
+        {
+          country: "필리핀",
+          countryCode: "PH",
+          currency: "PHP",
+          plans: { individual: { monthly: 149 } },
+          converted: { individual: { krw: 3575, usd: 2.5 } },
+        },
+        {
+          country: "우크라이나",
+          countryCode: "UA",
+          currency: "UAH",
+          plans: { individual: { monthly: 99 } },
+          converted: { individual: { krw: 3506, usd: 2.4 } },
+        },
+      ],
+    };
+    const summary = buildTrendSummary(tied, []);
+
+    expect(summary.highestSavings?.[0]?.countryCode).toBe("UA");
+    expect(summary.highestSavings?.[1]?.countryCode).toBe("PH");
+  });
+
+  it("기준국이 원화 표시면 환산 왕복 대신 현지 정가를 쓴다", () => {
+    // converted.krw(14,897)가 아니라 plans.monthly(14,900)가 기준이어야 한다
+    const roundTrip: PricesResponse = {
+      ...basePriceData,
+      prices: [
+        {
+          country: "한국",
+          countryCode: "KR",
+          currency: "KRW",
+          plans: { individual: { monthly: 14900 } },
+          converted: { individual: { krw: 14897, usd: 10.75 } },
+        },
+        basePriceData.prices[1],
+      ],
+    };
+    const rows = buildTrendRows(roundTrip);
+
+    expect(rows.find((row) => row.countryCode === "KR")?.krw).toBe(14900);
+  });
+
   it("타임라인은 기준국을 맨 앞에 두고 나머지는 변동률 오름차순으로 정렬한다", () => {
     const rows = buildTrendRows(basePriceData);
     const changes = buildCountryChanges(rows, snapshots, "2026-03-15");

@@ -19,8 +19,28 @@ let _services = null;
  * 데이터 주입 — Node는 fs로 읽은 JSON을, 브라우저는 Vite가 번들한 JSON을 넘긴다.
  * 두 소비자 모두 모듈 로드 직후 1회만 호출한다.
  */
+// 런타임 priceTransforms.normalizePricesResponse와 같은 보정: 원화 표시 국가의
+// converted.krw를 현지 정가로 덮는다. 시드의 converted.krw는 KRW→USD→KRW 왕복이라
+// 14,900이 14,897로 어긋난 채 정적 콘텐츠(절약률·비교표)에 새어 나가고 있었다.
+function normalizeKrwSeed(priceSeed) {
+  if (!priceSeed || !Array.isArray(priceSeed.prices)) return priceSeed;
+  return {
+    ...priceSeed,
+    prices: priceSeed.prices.map((country) => {
+      if (String(country?.currency || "").toUpperCase() !== "KRW" || !country.plans) return country;
+      const converted = { ...(country.converted || {}) };
+      for (const [planId, plan] of Object.entries(country.plans)) {
+        const monthly = Number(plan?.monthly);
+        if (!Number.isFinite(monthly)) continue;
+        converted[planId] = { ...(converted[planId] || {}), krw: monthly };
+      }
+      return { ...country, converted };
+    }),
+  };
+}
+
 export function configureSeoContent({ priceSeed, history, changelog, services }) {
-  _data = priceSeed;
+  _data = normalizeKrwSeed(priceSeed);
   _history = history;
   _changelog = changelog;
   _services = services;
@@ -59,7 +79,8 @@ function computeCatalogStats() {
     .map((p) => ({ ...p, krw: p.converted.individual.krw }))
     .sort((a, b) => a.krw - b.krw);
   const kr = data.prices.find((p) => p.countryCode === "KR");
-  const krKrw = kr?.converted?.individual?.krw ?? null;
+  // 기준국(KRW)은 환산 왕복(14,900→14,897) 오차를 피해 현지 정가를 그대로 쓴다
+  const krKrw = kr?.plans?.individual?.monthly ?? kr?.converted?.individual?.krw ?? null;
   const cheapest = priced[0] || null;
   const priciest = priced[priced.length - 1] || null;
   const continents = new Set(data.prices.map((p) => p.continent).filter(Boolean));
@@ -389,8 +410,10 @@ function buildCountryContent(countryCode) {
   if (!row) return null;
 
   const kr = data.prices.find((p) => p.countryCode === "KR");
-  const krKrw = kr?.converted?.individual?.krw || 14897;
-  const countryKrw = row.converted?.individual?.krw ?? null;
+  // 기준국(KRW)은 환산 없이 현지 정가 — 하드코딩 폴백(14897)은 왕복 오차의 화석이라 제거
+  const krKrw = kr?.plans?.individual?.monthly ?? kr?.converted?.individual?.krw ?? null;
+  const countryKrw = (row.currency === "KRW" ? row.plans?.individual?.monthly : null)
+    ?? row.converted?.individual?.krw ?? null;
   const savings = countryKrw ? computeSavings(countryKrw, krKrw) : null;
 
   const countryName = row.country;
@@ -755,7 +778,7 @@ function buildHomeContent() {
     .map((p) => ({ ...p, krw: p.converted.individual.krw }))
     .sort((a, b) => a.krw - b.krw);
   const kr = data.prices.find((p) => p.countryCode === "KR");
-  const krKrw = kr?.converted?.individual?.krw || 14897;
+  const krKrw = kr?.plans?.individual?.monthly ?? kr?.converted?.individual?.krw ?? null;
 
   const top20 = prices.slice(0, 20);
   const rowsHtml = top20
@@ -882,7 +905,7 @@ function buildTrendsContent() {
     .map((p) => ({ ...p, krw: p.converted.individual.krw }))
     .sort((a, b) => a.krw - b.krw);
   const kr = data.prices.find((p) => p.countryCode === "KR");
-  const krKrw = kr?.converted?.individual?.krw || 14897;
+  const krKrw = kr?.plans?.individual?.monthly ?? kr?.converted?.individual?.krw ?? null;
 
   const fmtSignedPercent = (value) =>
     value == null ? "-" : `${value > 0 ? "+" : ""}${value}%`;
