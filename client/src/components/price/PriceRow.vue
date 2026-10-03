@@ -79,10 +79,11 @@ const surveyMark = computed(() => surveyCellMark(props.item, props.selectedPlan)
         <!-- 국기는 항상 표시 -->
         <span class="text-[18px]">{{ flag }}</span>
         <span class="text-caption">{{ item.country }}</span>
-        <span v-if="isBase" class="text-[0.62rem] font-bold text-muted-foreground border border-border/60 px-1 py-0.5 leading-none">내 요금</span>
+        <!-- 배지·조사 표기도 보조 글자 하한 13px(0.62rem=9.9px였다) -->
+        <span v-if="isBase" class="text-[0.8125rem] font-bold text-muted-foreground border border-border/60 px-1 py-0.5 leading-none">내 요금</span>
         <span
           v-if="surveyMark"
-          class="text-[0.62rem] font-normal leading-none text-muted-foreground/70 whitespace-nowrap"
+          class="text-[0.8125rem] font-normal leading-none text-muted-foreground whitespace-nowrap"
           :data-survey="surveyMark.status"
         >{{ surveyMark.text }}</span>
       </RouterLink>

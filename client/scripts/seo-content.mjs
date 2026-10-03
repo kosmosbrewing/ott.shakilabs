@@ -183,6 +183,10 @@ function computeTrendStats() {
 // 양쪽에 그대로 들어가므로, 색상은 반드시 테마 변수(hsl(var(--...)))를 타야 한다.
 // JS를 꺼도 빌드된 CSS는 <link>로 로드되므로 정적 HTML도 동일하게 스타일된다.
 export const ARTICLE = "sp-article";
+// 프리렌더 article의 바깥 프레임 — 뷰와 같은 패키지 컨테이너(72rem·여백 clamp)다.
+// JS 끔 화면과 수화 직전 첫 페인트도 헤더와 같은 x에서 시작해야 수화 때 본문이 옆으로 뛰지 않는다.
+// --prose는 글줄(p·h·ul)만 42rem으로 묶고 표는 프레임 폭을 그대로 쓴다.
+export const PRERENDER_FRAME = "sh-container sh-container--prose";
 const H1 = "sp-h1";
 const H2 = "sp-h2";
 const H3 = "sp-h3";
@@ -1375,15 +1379,10 @@ function buildLandingContent() {
   return [{ id: "landing", live: false, html: `
       <h1 class="${H1}">OTT 구독료 국가별 가격 비교</h1>
 
+      <!-- 첫 화면 도입은 두 줄까지만 둔다. 예전에는 세 문장짜리 두 문단(약 280자)이 서비스 표를
+           밀어내 390px 첫 화면이 전부 안내 문장이었다. 나머지 문장은 지우지 않고 표 바로 아래로 옮겼다. -->
       <p class="${P}">
         같은 OTT 서비스라도 어느 나라 계정으로 결제하느냐에 따라 청구되는 금액이 크게 달라집니다.
-        이곳은 그 차이를 <strong>같은 기준으로 환산해</strong> 확인할 수 있도록 만든 비교 서비스의 시작 페이지입니다.
-        어떤 서비스를 비교할 수 있는지, 가격을 어떤 방식으로 환산하는지, 어느 페이지부터 보면 되는지를 안내합니다.
-      </p>
-
-      <p class="${P}">
-        나라별 요금표 자체가 필요하다면 곧바로 <a href="/ott/youtube-premium">유튜브 프리미엄 전체 가격 비교</a>로 이동하세요.
-        이 페이지는 <em>비교 기준과 데이터 출처</em>를 설명하는 안내 페이지이며, 순위표는 각 서비스 페이지에 있습니다.
       </p>
 
       <h2 class="${H2}">비교할 수 있는 서비스</h2>
@@ -1398,6 +1397,16 @@ function buildLandingContent() {
         </thead>
         <tbody>${serviceRowsHtml}</tbody>
       </table></div>
+
+      <p class="${P}">
+        이곳은 그 차이를 <strong>같은 기준으로 환산해</strong> 확인할 수 있도록 만든 비교 서비스의 시작 페이지입니다.
+        어떤 서비스를 비교할 수 있는지, 가격을 어떤 방식으로 환산하는지, 어느 페이지부터 보면 되는지를 안내합니다.
+      </p>
+
+      <p class="${P}">
+        나라별 요금표 자체가 필요하다면 곧바로 <a href="/ott/youtube-premium">유튜브 프리미엄 전체 가격 비교</a>로 이동하세요.
+        이 페이지는 <em>비교 기준과 데이터 출처</em>를 설명하는 안내 페이지이며, 순위표는 각 서비스 페이지에 있습니다.
+      </p>
 
       <h2 class="${H2}">이 비교가 다루지 않는 것</h2>
       <ul class="${UL}">
@@ -2401,6 +2410,6 @@ export function buildRichContent(route) {
   const articleId = sections[0].id;
   const body = sections.map((section) => section.html).join("\n");
   return `
-    <article data-seo-prerender="${articleId}" class="${ARTICLE}">${body}
+    <article data-seo-prerender="${articleId}" class="${ARTICLE} ${PRERENDER_FRAME}">${body}
     </article>`;
 }

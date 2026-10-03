@@ -40,9 +40,11 @@ const currentService = computed(() =>
   services.value.find((service) => service.slug === serviceSlug.value)
 );
 
+// 프리렌더 H1·routeToMeta heading과 같은 한글 표기. 영문 "YouTube Premium"은 대문자 변환과 겹쳐
+// "YOUTUBE PREMIUM …"으로 보였다.
 const trendHeading = computed(() => {
   if (serviceSlug.value === "youtube-premium") {
-    return "YouTube Premium 국가별 가격 격차";
+    return "유튜브 프리미엄 국가별 가격 격차";
   }
   return `${currentService.value?.name || serviceSlug.value} 국가별 가격 격차`;
 });
@@ -172,23 +174,23 @@ watch(serviceSlug, async () => {
 </script>
 
 <template>
-  <div class="container py-6">
+  <!-- 본문 프레임은 패키지 sh-container(72rem) — 헤더·2차 내비와 같은 x에서 시작한다. -->
+  <div class="sh-container sh-container--tool py-6">
+    <!-- H1은 상태 분기 바깥에 하나만 둔다(예전엔 분기마다 하나씩, 데이터 화면에선 카드 제목 30px/900
+         대문자였다). 크기는 도구 H1 공통 20px GmarketSans/700 — 아래 카드 제목(h2)보다 커야 한다.
+         카드 제목줄의 "TOP 10" 표식은 제목과 함께 빠졌다(아래 두 표 제목이 각각 TOP 10을 말한다). -->
+    <h1 class="text-h1 font-title mb-4">{{ trendHeading }}</h1>
+
     <div v-if="loading">
-      <h1 class="sr-only">{{ trendHeading }}</h1>
       <LoadingSpinner message="트렌드 데이터를 불러오는 중..." />
     </div>
 
     <div v-else-if="error" class="text-center py-20">
-      <h1 class="sr-only">{{ trendHeading }}</h1>
       <p class="text-destructive text-body">{{ error }}</p>
     </div>
 
     <div v-else-if="trends" class="third-rate-board">
       <section class="retro-panel overflow-hidden mb-4">
-        <div class="retro-titlebar">
-          <h1 class="retro-title">{{ trendHeading }}</h1>
-          <span class="retro-kbd">TOP 10</span>
-        </div>
         <div class="retro-panel-content flex items-center justify-between flex-wrap gap-3">
           <p class="text-caption text-muted-foreground">
             요금 조사: {{ surveySentence }} · 환율 기준일: {{ trends.exchangeRateDate || "-" }} ·
@@ -205,8 +207,11 @@ watch(serviceSlug, async () => {
           <div class="retro-titlebar">
             <h2 class="retro-title">최저가 TOP 10 (개인)</h2>
           </div>
-          <CardContent>
-            <Table class="w-max min-w-full whitespace-nowrap">
+          <!-- 모바일에서는 카드 안쪽 여백을 표가 쓴다. 루트 16px·보조 글자 13px에서 이 4열 표의 최소 폭이
+               329px라 390px 카드(318px)에서 12px, 360px에서 39px 가로 스크롤이 생겼다. 표를 카드 폭에
+               붙이고 칸 여백을 8px로 줄이면 313px — 360px에서도 스크롤 없이 들어간다. -->
+          <CardContent class="px-0 sm:px-5">
+            <Table class="w-max min-w-full whitespace-nowrap max-sm:[&_td]:px-2 max-sm:[&_th]:px-2">
               <caption class="sr-only">개인 요금제 최저가 상위 10개 국가</caption>
               <TableHeader class="sticky top-0 z-10 bg-background">
                 <TableRow>
@@ -240,8 +245,8 @@ watch(serviceSlug, async () => {
           <div class="retro-titlebar">
             <h2 class="retro-title">한국 대비 절약률 TOP 10</h2>
           </div>
-          <CardContent>
-            <Table class="w-max min-w-full whitespace-nowrap">
+          <CardContent class="px-0 sm:px-5">
+            <Table class="w-max min-w-full whitespace-nowrap max-sm:[&_td]:px-2 max-sm:[&_th]:px-2">
               <caption class="sr-only">한국 대비 절약률 상위 10개 국가</caption>
               <TableHeader class="sticky top-0 z-10 bg-background">
                 <TableRow>
@@ -440,12 +445,13 @@ watch(serviceSlug, async () => {
 </template>
 
 <style scoped>
+/* 카드 제목(h2)은 페이지 H1(20px)보다 작게, 대문자 변환 없이. 예전 clamp(…, 2rem)/900·uppercase는
+   1280에서 30px 대문자 제목이 되어 H1보다 컸다. */
 .third-rate-board :deep(.retro-title) {
-  font-size: clamp(1.25rem, 2.6vw, 2rem);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  text-shadow: 1px 1px 0 rgb(203 213 225 / 0.9);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .third-rate-board :deep(.retro-kbd) {

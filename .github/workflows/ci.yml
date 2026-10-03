@@ -47,6 +47,11 @@ jobs:
       - name: Validate hydration parity
         run: npm run validate:parity
 
+      # 셸 기준(루트 16px·캔버스 바탕·sh-container 프레임·보이는 H1 20px·보조 글자 13px 이상)을
+      # 계산된 스타일로 확인한다. 클래스 grep으로는 루트 크기·미디어 규칙이 만든 실제 픽셀을 못 본다.
+      - name: Validate design shell
+        run: npm run validate:design
+
       - name: Generate production SBOM
         run: npm run sbom:prod
 

@@ -352,7 +352,13 @@ watch(serviceSlug, async (slug) => {
 </script>
 
 <template>
-  <div class="text-resize-layout container py-6">
+  <!-- 본문 프레임은 패키지 sh-container(72rem) — 헤더·2차 내비와 같은 x에서 시작한다(예전 960px는 52px 안쪽). -->
+  <div class="text-resize-layout sh-container sh-container--tool py-6">
+    <!-- 화면에 보이는 진짜 H1(20px GmarketSans/700). 예전에는 1×1 sr-only로 숨겨 두고 카드 제목(h2)이
+         30px로 제목 노릇을 했다 — 보이는 제목과 문서 제목이 달랐다. 문구는 그대로이고, 로딩·오류 분기
+         바깥에 두어 어느 상태에서도 H1이 정확히 하나다. -->
+    <h1 class="text-h1 font-title mb-4">유튜브 프리미엄 국가별 요금 비교 — 원화 환산 순위</h1>
+
     <!-- 로딩 -->
     <div
       v-if="loading || (!priceData && !error)"
@@ -422,9 +428,6 @@ watch(serviceSlug, async (slug) => {
 
     <!-- 가격 데이터 -->
     <div v-else-if="priceData" class="third-rate-board">
-      <!-- SEO h1 — 시각적 숨김, 크롤러 인식 -->
-      <h1 class="sr-only">유튜브 프리미엄 국가별 요금 비교 — 원화 환산 순위</h1>
-
       <!-- VS 비교 + 공유 -->
       <CalculatorInteractionTracker
         calculator-id="youtube_premium_compare"
@@ -623,12 +626,13 @@ watch(serviceSlug, async (slug) => {
 </template>
 
 <style scoped>
+/* 카드 제목(h2)은 페이지 H1(20px)보다 작아야 한다. 예전 clamp(…, 2rem)/900은 1280에서 30px로
+   H1 자리를 차지했다. */
 .third-rate-board :deep(.retro-title) {
-  font-size: clamp(1.25rem, 2.6vw, 2rem);
-  font-weight: 900;
-  letter-spacing: 0.04em;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: normal;
   text-transform: none;
-  text-shadow: 1px 1px 0 rgb(203 213 225 / 0.9);
 }
 
 .third-rate-board :deep(.retro-kbd) {

@@ -160,7 +160,8 @@ watch(
 </script>
 
 <template>
-  <div class="container py-6">
+  <!-- 본문 프레임은 패키지 sh-container(72rem) — 헤더·2차 내비와 같은 x에서 시작한다. -->
+  <div class="sh-container sh-container--tool py-6">
     <!-- 로딩 -->
     <LoadingSpinner v-if="loading" message="가격 정보를 불러오는 중..." />
 
@@ -190,7 +191,8 @@ watch(
             <span class="text-[2rem] leading-none shrink-0">{{ flag }}</span>
             <div class="min-w-0">
               <p class="text-tiny text-muted-foreground/70 leading-none mb-0.5">{{ currentService?.name || serviceSlug }}</p>
-              <h1 class="retro-title !text-[1rem] leading-snug">{{ countryData.country }}</h1>
+              <!-- 도구 H1 공통 20px GmarketSans/700(16px/600 카드 제목 크기였다) -->
+              <h1 class="text-h1 font-title leading-snug">{{ countryData.country }}</h1>
             </div>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">

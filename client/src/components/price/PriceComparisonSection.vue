@@ -374,14 +374,17 @@ defineExpose({ selectedRightCountryCode });
               </div>
               <span class="retro-kbd uppercase tracking-wide group-hover:text-primary shrink-0">선택</span>
             </div>
+            <!-- 캡션("현지 요금"·"1,700 NGN")은 보조 글자 하한 13px. 0.6rem(9px)이던 시절에는 금액 옆 현지
+                 통화 표기가 읽히지 않았다. 대문자·자간 확장은 한글에 효과가 없어 뺐다. 이 카드는
+                 .third-rate-board의 .text-caption 확대(굵게 14~17px) 대상이 아니도록 임의값을 쓴다. -->
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
-                <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">현지 요금</p>
+                <p class="text-[0.8125rem] leading-snug text-muted-foreground font-medium">현지 요금</p>
                 <p class="text-display font-bold mt-1 tabular-nums"><CountUpAmount :value="fmtUsd(selectedCompareCountry.usd)" /></p>
-                <p class="mt-0.5 text-[0.6rem] leading-tight text-muted-foreground/70">{{ fmtLocalPrice(selectedCompareCountry.localMonthly, selectedCompareCountry.currency) }}</p>
+                <p class="mt-0.5 text-[0.8125rem] leading-snug text-muted-foreground tabular-nums">{{ fmtLocalPrice(selectedCompareCountry.localMonthly, selectedCompareCountry.currency) }}</p>
               </div>
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
-                <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">원화 환산</p>
+                <p class="text-[0.8125rem] leading-snug text-muted-foreground font-medium">원화 환산</p>
                 <p class="text-display font-bold mt-1 tabular-nums"><CountUpAmount :value="fmtKrw(selectedCompareCountry.krw)" /></p>
               </div>
             </div>
@@ -420,12 +423,12 @@ defineExpose({ selectedRightCountryCode });
             </div>
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
-                <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">현지 요금</p>
+                <p class="text-[0.8125rem] leading-snug text-muted-foreground font-medium">현지 요금</p>
                 <p class="text-display font-bold mt-1 tabular-nums"><CountUpAmount :value="fmtUsd(rightCompareRow.usd)" /></p>
-                <p class="mt-0.5 text-[0.6rem] leading-tight text-muted-foreground/70">{{ fmtLocalPrice(rightCompareRow.localMonthly, rightCompareRow.currency) }}</p>
+                <p class="mt-0.5 text-[0.8125rem] leading-snug text-muted-foreground tabular-nums">{{ fmtLocalPrice(rightCompareRow.localMonthly, rightCompareRow.currency) }}</p>
               </div>
               <div class="bg-background/60 border border-border/40 rounded px-2.5 py-2">
-                <p class="text-[0.6rem] uppercase tracking-wider text-muted-foreground font-medium">원화 환산</p>
+                <p class="text-[0.8125rem] leading-snug text-muted-foreground font-medium">원화 환산</p>
                 <p class="text-display font-bold mt-1 tabular-nums"><CountUpAmount :value="fmtKrw(rightCompareRow.krw)" /></p>
               </div>
             </div>
