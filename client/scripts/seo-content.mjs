@@ -1,3 +1,4 @@
+import { splitLongParagraphs } from "./split-long-paragraphs.mjs";
 // OttWatcher SEO 리치 콘텐츠 — 프리렌더(scripts)와 뷰(src)가 공유하는 단일 소스.
 //
 // 왜 공유하나: 프리렌더 블록은 하이드레이션 때 removePrerenderFallback()이 제거한다.
@@ -2358,7 +2359,7 @@ function buildCommunityContent() {
  *
  * 이 구분이 "JS 끔 자수 ≈ JS 켬 자수"를 구조적으로 보장한다.
  */
-export function buildSections(route) {
+function buildSectionsRaw(route) {
   if (route === "/") {
     return buildLandingContent();
   }
@@ -2412,4 +2413,9 @@ export function buildRichContent(route) {
   return `
     <article data-seo-prerender="${articleId}" class="${ARTICLE} ${PRERENDER_FRAME}">${body}
     </article>`;
+}
+
+// v8b(2026-10-03): 섹션 HTML의 250자 초과 <p>를 문장 경계에서 나눈다 — 프리렌더·런타임(SeoRichContent v-html)이 같은 함수를 쓰므로 패리티 유지
+export function buildSections(route) {
+  return buildSectionsRaw(route).map((section) => ({ ...section, html: splitLongParagraphs(section.html) }));
 }

@@ -172,7 +172,7 @@ watch(
             class="block px-5 py-1 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
           >
             <!-- 닉네임 · 날짜 -->
-            <div class="flex items-center gap-1 !text-[11px] text-muted-foreground">
+            <div class="flex items-center gap-1 !text-caption text-muted-foreground">
               <span class="font-semibold text-foreground">{{ post.nickname || "익명 유저" }}</span>
               <span>·</span>
               <span>{{ formatTime(post.createdAt) }}</span>
@@ -182,7 +182,7 @@ watch(
               <p class="flex-1 !text-xs text-foreground line-clamp-1">
                 {{ toPreviewTitle(post) }}
               </p>
-              <span class="shrink-0 flex items-center gap-2 !text-[10px] text-muted-foreground tabular-nums">
+              <span class="shrink-0 flex items-center gap-2 !text-caption text-muted-foreground tabular-nums">
                 <span>추천 {{ post.likeCount ?? 0 }}</span>
                 <span>답글 {{ post.commentCount ?? 0 }}</span>
               </span>
@@ -198,7 +198,7 @@ watch(
 
     <!-- 글쓰기 -->
     <div class="border-t border-border/60 px-4 pt-3 pb-3">
-      <label :for="postContentId" class="block !text-[11px] font-semibold text-muted-foreground mb-1.5">익명 글쓰기</label>
+      <label :for="postContentId" class="block !text-caption font-semibold text-muted-foreground mb-1.5">익명 글쓰기</label>
       <div class="border border-border rounded">
         <textarea
           :id="postContentId"
@@ -212,18 +212,18 @@ watch(
           class="w-full resize-none bg-transparent px-2.5 py-2 !text-xs outline-none placeholder:text-muted-foreground/60"
         />
         <div class="flex items-center justify-between border-t border-border/60 px-2.5 py-1.5">
-          <span class="!text-[11px] text-muted-foreground tabular-nums">{{ contentLength }}/{{ MAX_LENGTH }}</span>
+          <span class="!text-caption text-muted-foreground tabular-nums">{{ contentLength }}/{{ MAX_LENGTH }}</span>
           <button
             type="button"
             :disabled="!communityEnabled || contentLength === 0 || postSubmitting"
-            class="!text-[11px] font-semibold text-primary disabled:opacity-40 hover:underline"
+            class="!text-caption font-semibold text-primary disabled:opacity-40 hover:underline"
             @click="submitPost"
           >
             {{ postSubmitting ? '등록 중...' : '등록' }}
           </button>
         </div>
       </div>
-      <p :id="postFeedbackId" class="!text-[11px] mt-1" :class="postError ? 'text-destructive' : 'text-muted-foreground'">
+      <p :id="postFeedbackId" class="!text-caption mt-1" :class="postError ? 'text-destructive' : 'text-muted-foreground'">
         {{ postError || "익명으로 등록됩니다." }}
       </p>
     </div>

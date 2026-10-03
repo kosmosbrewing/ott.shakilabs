@@ -7,6 +7,8 @@
  * you the scope of the fix, whereas throwing on the first one hides the rest.
  */
 import fs from "node:fs";
+import { validateNoTinyTextUtilities } from "./validate-no-tiny-text.mjs";
+import { validateParagraphLength } from "./validate-paragraph-length.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -712,3 +714,7 @@ process.stdout.write(
     `(${sitemapRoutes.length} in sitemap + ${countryRoutes.length} canonicalized variants), ` +
     `router<->sitemap parity both ways\n`
 );
+
+// v8b(2026-10-03): 13px 미만 글자 소스 게이트 + 빌드 HTML 문단 ≤250자 게이트
+validateNoTinyTextUtilities({ projectRoot: path.resolve(__dirname, "..") });
+validateParagraphLength({ distRoot: DIST_DIR });

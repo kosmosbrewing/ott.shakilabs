@@ -47,7 +47,7 @@ function handleAction(action: "kakao" | "link"): void {
                 aria-hidden="true"
                 class="h-6 w-6 object-contain"
               />
-              <span class="text-[0.72rem] font-bold text-center leading-tight whitespace-nowrap">카카오톡 공유</span>
+              <span class="text-caption font-bold text-center leading-tight whitespace-nowrap">카카오톡 공유</span>
             </button>
 
             <!-- 링크 복사 -->
@@ -56,7 +56,7 @@ function handleAction(action: "kakao" | "link"): void {
               @click="handleAction('link')"
             >
               <Link class="h-6 w-6 text-muted-foreground" />
-              <span class="text-[0.72rem] font-bold text-center leading-tight whitespace-nowrap">링크 복사</span>
+              <span class="text-caption font-bold text-center leading-tight whitespace-nowrap">링크 복사</span>
             </button>
           </div>
         </div>
