@@ -170,7 +170,7 @@ async function handleVote(countryCode: string): Promise<void> {
                       <span>{{ resolveCountryName(item) }}</span>
                       <span
                         v-if="item.countryCode === votedCountry"
-                        class="text-[0.65rem] text-primary font-bold border border-primary/40 rounded px-1 py-0.5 leading-none"
+                        class="text-caption text-primary font-bold border border-primary/40 rounded px-1 py-0.5 leading-none"
                       >MY</span>
                     </span>
                     <span class="flex items-center gap-2 text-xs">
@@ -186,7 +186,7 @@ async function handleVote(countryCode: string): Promise<void> {
                     >
                       <span
                         v-if="idx < 3 && item.voteCount > 0"
-                        class="text-[0.6rem] font-bold leading-none"
+                        class="text-caption font-bold leading-none"
                         :class="item.countryCode === votedCountry ? 'text-primary-foreground' : 'text-primary'"
                       >{{ idx + 1 }}</span>
                     </div>

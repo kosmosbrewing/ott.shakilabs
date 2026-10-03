@@ -166,7 +166,7 @@ async function submitForm(): Promise<void> {
           </div>
           <button
             type="button"
-            class="inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-0.5 !text-[11px] font-semibold transition-colors"
+            class="inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-0.5 !text-caption font-semibold transition-colors"
             :class="liked ? 'border-primary/60 bg-primary/10 text-primary' : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary'"
             :disabled="toggling"
             @click="toggle"
@@ -197,7 +197,7 @@ async function submitForm(): Promise<void> {
               </div>
               <button
                 type="button"
-                class="inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-0.5 !text-[11px] font-semibold transition-colors"
+                class="inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-0.5 !text-caption font-semibold transition-colors"
                 :class="getCommentLike(comment.id).liked
                   ? 'border-primary/60 bg-primary/10 text-primary'
                   : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary'"
