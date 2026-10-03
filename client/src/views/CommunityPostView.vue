@@ -7,6 +7,8 @@ import { useSEO } from "@/composables/useSEO";
 import { toggleCommentLike } from "@/api";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { ThumbsUp } from "lucide-vue-next";
+import { COMMUNITY_ENABLED } from "@/lib/features";
+import { COMMUNITY_POST_META, appPageTitle } from "../../scripts/page-meta.mjs";
 
 const route = useRoute();
 const postId = computed(() => {
@@ -25,7 +27,8 @@ const {
   hasMoreComments,
   loadMoreComments,
   onSubmit,
-} = useCommunityPost(postId);
+} = useCommunityPost(() => (COMMUNITY_ENABLED ? postId.value : ""));
+// 꺼져 있으면 빈 ID를 넘겨 요청 자체를 만들지 않는다(lib/features.ts). 화면은 아래 첫 분기가 맡는다.
 const content = ref("");
 
 // 좋아요 composable
@@ -85,16 +88,13 @@ async function onToggleCommentLike(commentId: string): Promise<void> {
 }
 
 const pageTitle = computed(() => {
-  if (!post.value) return "커뮤니티 댓글 보기 | OTT 가격 비교";
+  if (!post.value) return COMMUNITY_POST_META.title;
   const normalizedTitle = (post.value.title || "").trim();
-  if (normalizedTitle) {
-    return `${normalizedTitle} | 커뮤니티`;
-  }
-  return `${post.value.nickname || "익명 유저"}의 글 | 커뮤니티 댓글`;
+  return appPageTitle(normalizedTitle || `${post.value.nickname || "익명 유저"}의 글`);
 });
 
 const pageDescription = computed(() => {
-  if (!post.value?.content) return "커뮤니티 게시글과 댓글을 확인해보세요.";
+  if (!post.value?.content) return COMMUNITY_POST_META.description;
   return post.value.content.slice(0, 120);
 });
 
@@ -126,6 +126,17 @@ async function submitForm(): Promise<void> {
 
 <template>
   <div class="container max-w-xl py-8 space-y-4">
+    <div v-if="!COMMUNITY_ENABLED" class="retro-panel overflow-hidden">
+      <div class="retro-panel-content space-y-2">
+        <h1 class="text-body font-semibold text-foreground">커뮤니티</h1>
+        <p class="text-body text-muted-foreground">커뮤니티 게시판은 현재 운영하지 않습니다.</p>
+        <RouterLink to="/youtube-premium" class="inline-block text-sm text-primary hover:underline">
+          유튜브 프리미엄 국가별 요금 보기 →
+        </RouterLink>
+      </div>
+    </div>
+
+    <template v-else>
     <RouterLink to="/community" class="retro-button-subtle inline-flex !px-2 !py-1 !text-xs">
       ← 커뮤니티
     </RouterLink>
@@ -242,5 +253,6 @@ async function submitForm(): Promise<void> {
         </form>
       </div>
     </section>
+    </template>
   </div>
 </template>

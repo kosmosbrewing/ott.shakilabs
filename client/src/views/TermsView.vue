@@ -6,10 +6,11 @@
  */
 import { useSEO } from "@/composables/useSEO";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
+import { TERMS_META } from "../../scripts/page-meta.mjs";
 
 useSEO({
-  title: "이용약관 | OTT 가격 비교",
-  description: "OTT Watcher 서비스 이용약관입니다. 서비스 이용 조건, 데이터 정확성, 광고 안내 등을 확인하세요.",
+  title: TERMS_META.title,
+  description: TERMS_META.description,
 });
 </script>
 

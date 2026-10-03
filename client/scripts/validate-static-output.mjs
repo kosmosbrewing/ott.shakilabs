@@ -20,6 +20,7 @@ import {
 import { getCrawlHintRoutes } from "./seo-routes.mjs";
 import { parseRouterRoutes, expandRoute, buildServeMatcher } from "./router-routes.mjs";
 import { findUngeneratedUtilities } from "./validate-utilities.mjs";
+import { APP_NAME, BRAND_SUFFIX, HOME_TITLE, MAX_PAGE_TITLE_CHARS } from "./page-meta.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,6 +61,66 @@ const countryRouteSet = new Set(countryRoutes);
 const ownRouteSet = new Set(prerenderRoutes);
 
 const titlesByRoute = new Map();
+
+// 함대 제목 레시피(2026-10-02, 10-03 수정) 게이트 — 소스가 아니라 산출물을 본다.
+// 셸 <title>과 라우트 제목이 합쳐지거나 차트 SVG <title>(0.3.42에서 제거)이 되돌아와도 여기서 걸린다.
+//   도구 페이지: `<페이지 제목> | ShakiLabs` (가운데 앱 이름 금지)
+//   홈: `<앱 이름> | ShakiLabs` / 사이트 공통 페이지: `<페이지 제목> · <앱 이름> | ShakiLabs`
+const APP_PAGE_ROUTES = new Set(["/about", "/privacy", "/terms", "/community"]);
+
+function validateTitleRecipe(html, route) {
+  const titleTagCount = html.match(/<title\b/gi)?.length ?? 0;
+  assert(titleTagCount === 1, `Expected exactly one <title> tag for ${route}, found ${titleTagCount}`);
+
+  const title = titleOf(html);
+  if (route === "/") {
+    assert(title === HOME_TITLE, `Home title must be "${HOME_TITLE}", got "${title}"`);
+  } else {
+    assert(title.endsWith(BRAND_SUFFIX), `Title must end with "${BRAND_SUFFIX}" for ${route}: ${title}`);
+    const appSuffix = ` · ${APP_NAME}${BRAND_SUFFIX}`;
+    const pageTitle = APP_PAGE_ROUTES.has(route)
+      ? title.endsWith(appSuffix) ? title.slice(0, -appSuffix.length) : null
+      : title.slice(0, -BRAND_SUFFIX.length);
+    assert(pageTitle !== null, `Site page ${route} must carry the app name: "<page> ${appSuffix.trim()}", got "${title}"`);
+    if (pageTitle !== null) {
+      assert(pageTitle.length > 0 && !pageTitle.includes(" | "),
+        `Title must not carry a middle segment for ${route}: ${title}`);
+      assert(pageTitle.length <= MAX_PAGE_TITLE_CHARS,
+        `Page title too long for ${route}: ${pageTitle.length} chars (max ${MAX_PAGE_TITLE_CHARS})`);
+    }
+  }
+
+  const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1]?.trim();
+  assert(description, `Missing meta description for ${route}`);
+}
+
+// 커뮤니티 격리 게이트(2026-10-02) — 백엔드에 community 라우트가 없어 위젯이 "Failed to fetch"를 띄웠다.
+// 게시판은 운영하지 않으므로 (a) 다른 페이지에서 링크하지 않고 (b) /community는 noindex이며
+// (c) 허브에 비교하지 않는 서비스를 "준비 중"으로 늘어놓지 않는다. 라우트 자체는 404로 바꾸지 않는다.
+function validateNoDeadFeatures(html, route) {
+  if (route === "/community") {
+    assert(/<meta\s+name="robots"\s+content="noindex/i.test(html), "/community must be noindex");
+  } else {
+    assert(!/href="\/ott\/community/i.test(html), `${route} links to the unoperated /community board`);
+  }
+  assert(!html.includes("준비 중"), `${route} still advertises a "준비 중" (not available) item`);
+  assert(!html.includes("Failed to fetch"), `${route} ships a fetch error string`);
+}
+
+// 범위 붕괴 게이트(2026-10-03) — 메인 문서가 "한국 가격의 15~15% 수준"이라고 썼다(14.5%·15.4%를
+// 정수로 반올림). 숫자가 시드에서 나와도 반올림 자릿수가 범위를 무너뜨릴 수 있으므로 산출물 전체를 본다.
+const RANGE_PATTERN = /(\d[\d,.]*)\s*~\s*(\d[\d,.]*)\s*(%|원|개국|배)/g;
+
+function validateNoCollapsedRanges(html, route) {
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ");
+  for (const match of text.matchAll(RANGE_PATTERN)) {
+    assert(match[1] !== match[2], `Collapsed range "${match[0]}" in ${route} — both ends are the same value`);
+  }
+}
 
 function validateRoute(route) {
   const file = routeToFile(route);
@@ -102,11 +163,18 @@ function validateRoute(route) {
   // Internal links written without the router base ("/privacy" instead of
   // "/ott/privacy") resolve to the wrong host path in static HTML.
   for (const match of html.matchAll(/<a\s+[^>]*href="(\/[^"#?]*)/gi)) {
+    // 전역 헤더 로고(ShGlobalHeader 정적 쌍둥이)는 포털 홈 shakilabs.com/ 으로 가는 링크라
+    // base 없는 "/"가 맞다. 이 앱의 루트 라우트("/")와 문자열이 같을 뿐이다.
+    if (/class="sh-global-header__brand"/.test(match[0])) continue;
     const href = match[1].replace(/\/$/, "") || "/";
     if (ownRouteSet.has(href)) {
       failures.push(`Unprefixed internal link in ${route}: href="${href}" (missing /ott base)`);
     }
   }
+
+  validateTitleRecipe(html, route);
+  validateNoDeadFeatures(html, route);
+  validateNoCollapsedRanges(html, route);
 
   titlesByRoute.set(route, titleOf(html));
 }

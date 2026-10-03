@@ -11,6 +11,15 @@
   ],
   "headers": [
     {
+      "source": "/community",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
       "source": "/community/:postId",
       "headers": [
         {

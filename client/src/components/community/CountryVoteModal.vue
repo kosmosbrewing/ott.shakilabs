@@ -100,7 +100,7 @@ async function handleVote(countryCode: string): Promise<void> {
         <div class="absolute inset-0 bg-black/60" @click="emit('close')" />
         <div class="relative z-10 w-full max-w-md sm:max-w-lg mx-4 max-h-[80vh] overflow-hidden retro-panel border border-border">
           <div class="retro-titlebar flex items-center justify-between">
-            <h3 class="retro-title !text-[1rem]">YouTube Premium 최적 국가 투표</h3>
+            <h3 class="retro-title !text-[1rem]">YouTube Premium 국가별 요금 비교</h3>
             <button class="retro-kbd text-xs" @click="emit('close')">ESC</button>
           </div>
 
@@ -113,8 +113,13 @@ async function handleVote(countryCode: string): Promise<void> {
             <!-- 투표 전: 국가 그리드 (API 에러 시에도 투표 가능하도록) -->
             <div v-else-if="!hasVoted || isRevoting">
               <p v-if="error" class="text-xs text-destructive mb-2">{{ error }}</p>
-              <p class="text-sm text-muted-foreground mb-4">
-                가장 구독하기 좋다고 생각하는 국가에 투표해 주세요.
+              <!-- "어디서 구독하면 좋은가"를 묻던 문구는 우회 가입 권유로 읽혔다. 요금 수준에 대한 의견만 묻고,
+                   실제 가입 조건(거주 국가 요금)을 같은 자리에 적는다. -->
+              <p class="text-sm text-muted-foreground mb-1">
+                요금 수준이 가장 합리적이라고 생각하는 국가를 골라 주세요.
+              </p>
+              <p class="text-xs text-muted-foreground mb-4">
+                투표는 의견일 뿐이며, 구독은 실제 거주 국가의 요금으로만 할 수 있습니다(YouTube 약관).
               </p>
               <p v-if="isRevoting" class="text-xs text-muted-foreground mb-3">
                 재투표 시 기존 선택이 새 국가로 변경됩니다.

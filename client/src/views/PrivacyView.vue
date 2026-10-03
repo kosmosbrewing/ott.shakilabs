@@ -6,11 +6,12 @@
  */
 import { useSEO } from "@/composables/useSEO";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
+import { PRIVACY_META } from "../../scripts/page-meta.mjs";
 
+// 프리렌더와 설명이 달랐다(크롤러는 한 줄짜리, 화면은 이 문장) — 같은 모듈로 맞춘다.
 useSEO({
-  title: "개인정보처리방침 | OTT 가격 비교",
-  description:
-    "OTT Watcher 개인정보처리방침입니다. 수집 항목, Google Analytics·AdSense 등 제3자 서비스, 쿠키와 맞춤 광고 거부 방법을 안내합니다.",
+  title: PRIVACY_META.title,
+  description: PRIVACY_META.description,
 });
 </script>
 

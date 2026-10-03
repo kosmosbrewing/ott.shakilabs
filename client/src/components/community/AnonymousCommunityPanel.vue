@@ -3,6 +3,7 @@ import { computed, ref, useId, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { fetchCommunityPosts, fetchPopularPosts, submitCommunityPost, type CommunityPost } from "@/api";
 import { LoadingSpinner } from "@/components/ui/loading";
+import { COMMUNITY_ENABLED } from "@/lib/features";
 
 const props = defineProps<{
   serviceSlug: string;
@@ -10,7 +11,8 @@ const props = defineProps<{
 
 const COMMUNITY_SERVICE_SLUG =
   import.meta.env.VITE_COMMUNITY_SERVICE_SLUG || "global-community";
-const communityEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_COMMUNITY_API === "true";
+// 프로덕션이라고 켜지지 않는다 — 백엔드가 없는 빌드에서 오류 문구를 띄우던 원인(lib/features.ts)
+const communityEnabled = COMMUNITY_ENABLED;
 
 type TabType = "latest" | "popular";
 const activeTab = ref<TabType>("latest");
@@ -154,7 +156,7 @@ watch(
     <!-- 목록 -->
     <div class="relative">
       <p v-if="!communityEnabled" class="retro-panel-content !text-xs text-muted-foreground">
-        로컬 단독 실행에서는 커뮤니티를 불러오지 않습니다.
+        커뮤니티 게시판은 현재 운영하지 않습니다.
       </p>
 
       <!-- 초기 로딩 (글이 아직 없을 때) -->

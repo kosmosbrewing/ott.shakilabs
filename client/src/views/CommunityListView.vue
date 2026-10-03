@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { submitCommunityPost, fetchPopularPosts, type CommunityPost } from "@/api";
 import { useCommunityList } from "@/composables/useCommunityList";
 import { isPostLiked } from "@/composables/useLike";
 import { useSEO } from "@/composables/useSEO";
 import { LoadingSpinner } from "@/components/ui/loading";
+import { COMMUNITY_ENABLED } from "@/lib/features";
+import { COMMUNITY_META } from "../../scripts/page-meta.mjs";
 
 const COMMUNITY_SERVICE_SLUG =
   import.meta.env.VITE_COMMUNITY_SERVICE_SLUG || "global-community";
-const communityEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_COMMUNITY_API === "true";
+// 백엔드에 community 라우트가 없어 꺼 둔다(lib/features.ts). 라우트는 404로 바꾸지 않고
+// noindex + 사이트맵 제외 + 다른 페이지 링크 0으로만 둔다 — 색인 이력이 없어 끊으면 충분하다.
+const communityEnabled = COMMUNITY_ENABLED;
 
 const router = useRouter();
 const { posts, loading, error, hasMore, refresh, loadMore } = useCommunityList(20);
@@ -25,8 +29,9 @@ const submitting = ref(false);
 const formError = ref("");
 
 useSEO({
-  title: computed(() => "커뮤니티 | OTT 가격 비교"),
-  description: computed(() => "OTT 가격 정보 공유 커뮤니티"),
+  title: COMMUNITY_META.title,
+  description: COMMUNITY_META.description,
+  noindex: true,
 });
 
 function formatTime(iso: string | undefined): string {
@@ -121,7 +126,7 @@ onMounted(() => {
 <template>
   <div class="container max-w-xl py-6 space-y-2">
     <!-- 탭 + 글쓰기 버튼 -->
-    <div class="flex items-center justify-between px-1">
+    <div v-if="communityEnabled" class="flex items-center justify-between px-1">
       <div class="flex gap-3">
         <button
           class="!text-xs font-semibold transition-colors pb-0.5"
@@ -150,9 +155,13 @@ onMounted(() => {
 
     <!-- 게시글 목록 -->
     <section class="retro-panel overflow-hidden">
-      <p v-if="!communityEnabled" class="px-4 py-4 !text-sm text-muted-foreground">
-        로컬 단독 실행에서는 커뮤니티를 불러오지 않습니다. 백엔드 연결 후 다시 확인해 주세요.
-      </p>
+      <div v-if="!communityEnabled" class="px-4 py-4 space-y-2">
+        <h1 class="!text-base font-semibold text-foreground">커뮤니티</h1>
+        <p class="!text-sm text-muted-foreground">커뮤니티 게시판은 현재 운영하지 않습니다.</p>
+        <RouterLink to="/youtube-premium" class="inline-block !text-sm text-primary hover:underline">
+          유튜브 프리미엄 국가별 요금 보기 →
+        </RouterLink>
+      </div>
 
       <!-- 최신글 -->
       <template v-else-if="activeTab === 'latest'">

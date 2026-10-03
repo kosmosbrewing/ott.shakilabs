@@ -4,7 +4,6 @@ import { useRoute, RouterLink } from "vue-router";
 import { usePrices } from "@/composables/usePrices";
 import { useServices } from "@/composables/useServices";
 import { useSEO } from "@/composables/useSEO";
-import { useHeadlineMessages } from "@/composables/useHeadlineMessages";
 import { fetchTrends, type TrendsResponse, type CountryPrice } from "@/api";
 import { formatNumber, countryFlag } from "@/lib/utils";
 import { getSiteUrl } from "@/lib/site";
@@ -24,6 +23,8 @@ import RelatedServices from "@/components/common/RelatedServices.vue";
 import { Vote } from "lucide-vue-next";
 import { useMyPlan } from "@/composables/useMyPlan";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
+import { COMMUNITY_ENABLED } from "@/lib/features";
+import { SERVICE_META } from "@/lib/pageMeta";
 
 const route = useRoute();
 const { services, loadServices } = useServices();
@@ -38,13 +39,18 @@ const {
 } = usePrices();
 const { selectedPlan: myPlanId, hasChosen: myPlanChosen } = useMyPlan();
 
-const { setMessages } = useHeadlineMessages();
-
 const showTrendTop10 = false;
 const trendData = ref<TrendsResponse | null>(null);
 const trendLoading = ref(false);
 const showVoteModal = ref(false);
 const showAdPreview = import.meta.env.DEV;
+// 사이드바 광고 슬롯이 설정되지 않은 빌드에서 커뮤니티·투표까지 끄면 오른쪽 340px 칸에
+// 빈 상자 하나만 남는다. 그때는 칸을 접어 순위표가 폭을 쓰게 한다(AdSlot.vue와 같은 판정).
+const sidebarAdConfigured = Boolean(
+  (import.meta.env.VITE_ADSENSE_PUBLISHER_ID || "").trim() &&
+    (import.meta.env.VITE_ADSENSE_SLOT_SIDEBAR || "").trim()
+);
+const showSidebar = COMMUNITY_ENABLED || sidebarAdConfigured || showAdPreview;
 
 // 투표 모달용 국가 목록: 가격 데이터에서 추출
 const voteCountries = computed(() => {
@@ -65,15 +71,6 @@ const currentService = computed(() =>
   services.value.find((s) => s.slug === serviceSlug.value)
 );
 
-const SEO_MAP: Record<string, { title: string; description: string }> = {
-  "youtube-premium": {
-    title: "유튜브 프리미엄 글로벌 가격 비교 · 나라별 구독료 최저가 순위",
-    description:
-      // scripts/prerender.mjs의 youtubePremiumMeta와 같은 문자열이어야 한다.
-      "유튜브 프리미엄(YouTube Premium) 국가별·나라별 구독료를 한눈에 비교. 최저가 국가 순위와 한국 대비 절약률. 요금 조사일과 환율 기준일을 함께 표기합니다.",
-  },
-};
-
 const serviceName = computed(() => currentService.value?.name || serviceSlug.value);
 const loadingServiceName = computed(() => {
   if (currentService.value?.name) return currentService.value.name;
@@ -89,17 +86,12 @@ const loadingServiceName = computed(() => {
 const loadingCompareTitle = computed(() => `${loadingServiceName.value} 글로벌 가격 비교`);
 const loadingRankTitle = computed(() => `${loadingServiceName.value} 글로벌 랭킹`);
 
-const pageTitle = computed(() =>
-  SEO_MAP[serviceSlug.value]?.title ||
-  `${serviceName.value} 글로벌 가격 비교 · 나라별 구독료 최저가 순위`
-);
+// 제목·설명은 프리렌더(scripts/prerender.mjs)와 같은 함수(scripts/page-meta.mjs)에서 나온다.
+// 라우터가 받는 서비스 슬러그는 활성 서비스(유튜브 프리미엄) 하나뿐이다.
+const pageTitle = SERVICE_META.title;
+const pageDescription = SERVICE_META.description;
 
-const pageDescription = computed(() =>
-  SEO_MAP[serviceSlug.value]?.description ||
-  `${serviceName.value} 국가별·나라별 구독 요금을 비교하고 최저가 국가와 절약률을 확인하세요. 현재 환율 기준.`
-);
-
-// ─── 가격 요약 (SEO JSON-LD + 헤드라인 메시지 공유) ─────────────────────────
+// ─── 가격 요약 (SEO JSON-LD + FAQ 공유) ─────────────────────────────────────
 
 type SummaryPriceRow = {
   countryCode: string;
@@ -297,11 +289,6 @@ function fmtKrw(val: number | null | undefined): string {
   return `${formatNumber(Math.round(val))}원`;
 }
 
-function fmtUsd(val: number | null | undefined): string {
-  if (val == null) return "-";
-  return `$${val.toFixed(2)}`;
-}
-
 function fmtDeltaKrw(value: number | null | undefined): string {
   if (value == null) return "-";
   const sign = value > 0 ? "+" : "";
@@ -309,56 +296,6 @@ function fmtDeltaKrw(value: number | null | undefined): string {
 }
 
 const usdToKrwRate = computed<number | null>(() => priceData.value?.krwRate ?? null);
-
-// ─── 헤드라인 메시지 (환율 변동 시 자동 갱신) ───────────────────────────────
-
-watch(
-  [summaryPriceRows, baseCountrySummary, serviceName, priceData],
-  ([rows, base, name, data]) => {
-    if (!rows.length || !name) return;
-
-    const sorted = [...rows].sort((a, b) => a.krw - b.krw);
-    const [cheapest, second, third] = sorted;
-    const mostExpensive = sorted[sorted.length - 1];
-    const baseKrw = base?.krw ?? null;
-
-    const savings =
-      cheapest && baseKrw && baseKrw > 0
-        ? Math.round(((baseKrw - cheapest.krw) / baseKrw) * 100)
-        : 0;
-    const savingsAmt = cheapest && baseKrw ? Math.round(baseKrw - cheapest.krw) : 0;
-    const cups = Math.floor(savingsAmt / 5000);
-    const underKorea = baseKrw != null ? rows.filter((r) => r.krw < baseKrw).length : 0;
-
-    const baseEntry = data?.prices.find(
-      (p) => p.countryCode.toUpperCase() === (data.baseCountry ?? "").toUpperCase()
-    );
-    const liteKrw = toNumber(baseEntry?.converted?.["lite"]?.krw);
-
-    const msgs: string[] = [];
-    if (cheapest) msgs.push(`최저가 🥇 ${cheapest.country} — 월 ${fmtKrw(cheapest.krw)}`);
-    if (savings > 0 && cheapest) msgs.push(`한국 ${fmtKrw(baseKrw!)} vs ${cheapest.country} ${fmtKrw(cheapest.krw)} — ${savings}% 차이 🫠`);
-    if (mostExpensive && mostExpensive.countryCode !== cheapest?.countryCode && baseKrw != null && mostExpensive.krw > baseKrw) {
-      msgs.push(`${countryFlag(mostExpensive.countryCode)} ${mostExpensive.country}는 월 ${fmtKrw(mostExpensive.krw)}. 한국이 저렴해 보이는 순간 😅`);
-    }
-    if (savingsAmt > 0) msgs.push(`최저가로 바꾸면 매달 ${fmtKrw(savingsAmt)} 절약`);
-    if (second) msgs.push(`🥈 ${second.country} — 월 ${fmtKrw(second.krw)}`);
-    if (savings > 0) msgs.push(`최대 ${savings}% 저렴, 월 ${fmtKrw(savingsAmt)} 아끼는 나라가 있어요`);
-    if (cups >= 2) msgs.push(`절약액 = 커피 ${cups}잔 ☕ 매달 공짜`);
-    if (third) msgs.push(`🥉 ${third.country} — 월 ${fmtKrw(third.krw)}`);
-    if (savingsAmt > 0) {
-      const yearSavings = savingsAmt * 12;
-      const chickens = Math.floor(yearSavings / 22000);
-      msgs.push(chickens > 0 ? `1년이면 ${fmtKrw(yearSavings)} 차이. 치킨 ${chickens}마리값 🍗` : `1년이면 ${fmtKrw(yearSavings)} 차이`);
-    }
-    if (liteKrw != null) msgs.push(`프리미엄 라이트 월 ${fmtKrw(Math.round(liteKrw))} — 유튜브 뮤직 빼면 이 가격 🎵`);
-    if (cheapest?.usd != null) msgs.push(`${cheapest.country} 달러 기준 ${fmtUsd(cheapest.usd)}/월`);
-    if (underKorea > 0) msgs.push(`${underKorea}개국이 한국보다 저렴합니다`);
-
-    setMessages(msgs);
-  },
-  { immediate: true }
-);
 
 // ─── 트렌드 ─────────────────────────────────────────────────────────────────
 
@@ -477,7 +414,7 @@ watch(serviceSlug, async (slug) => {
     <!-- 가격 데이터 -->
     <div v-else-if="priceData" class="third-rate-board">
       <!-- SEO h1 — 시각적 숨김, 크롤러 인식 -->
-      <h1 class="sr-only">YouTube Premium 글로벌 가격 비교 — 나라별 구독료 최저가 순위</h1>
+      <h1 class="sr-only">유튜브 프리미엄 국가별 요금 비교 — 원화 환산 순위</h1>
 
       <!-- VS 비교 + 공유 -->
       <CalculatorInteractionTracker
@@ -518,8 +455,11 @@ watch(serviceSlug, async (slug) => {
         </CardContent>
       </Card>
 
-      <!-- 가격 테이블 + 익명 커뮤니티 -->
-      <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <!-- 가격 테이블 (+ 사이드바: 광고·커뮤니티가 있을 때만) -->
+      <section
+        class="grid grid-cols-1 gap-4"
+        :class="showSidebar ? 'lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_340px]' : ''"
+      >
         <div class="space-y-4">
           <Card id="ranking" class="retro-panel overflow-hidden">
             <div class="retro-titlebar">
@@ -539,6 +479,16 @@ watch(serviceSlug, async (slug) => {
                 <span>· 환율 기준 {{ priceData.exchangeRateDate }}</span>
                 <span v-if="usdToKrwRate">· $1 = ₩{{ formatNumber(usdToKrwRate) }}</span>
               </div>
+              <!-- 약관·현지 결제 조건을 순위표 바로 아래에 둔다. 예전에는 페이지 맨 아래 해설과
+                   접힌 FAQ 안에만 있어, 순위만 보고 나가는 사람은 볼 수 없었다. -->
+              <p
+                role="note"
+                class="mt-3 rounded-sm border border-border bg-muted/40 px-3 py-2 text-sm leading-relaxed text-foreground"
+              >
+                <strong>요금은 각 나라의 정가이며, 해외 요금으로 가입하는 방법을 안내하는 표가 아닙니다.</strong>
+                요금은 접속 위치가 아니라 결제 수단 발행 국가와 계정 청구 국가로 정해지고, YouTube 약관은
+                실제 거주 국가의 요금을 내도록 요구합니다. VPN·해외 주소로 가입하면 결제가 거부되거나 구독이 취소될 수 있습니다.
+              </p>
             </CardContent>
           </Card>
 
@@ -593,15 +543,15 @@ watch(serviceSlug, async (slug) => {
           </Card>
         </div>
 
-        <aside class="space-y-4">
-          <div class="retro-panel overflow-hidden">
+        <aside v-if="showSidebar" class="space-y-4">
+          <div v-if="sidebarAdConfigured || showAdPreview" class="retro-panel overflow-hidden">
             <div class="retro-panel-content">
               <AdSlot position="sidebar" :preview="showAdPreview" />
             </div>
           </div>
 
-          <!-- 국가 투표 카드 -->
-          <div class="retro-panel overflow-hidden">
+          <!-- 국가 투표 카드 — 커뮤니티 백엔드가 있을 때만 -->
+          <div v-if="COMMUNITY_ENABLED" class="retro-panel overflow-hidden">
             <div class="retro-panel-content">
               <button
                 type="button"
@@ -610,19 +560,20 @@ watch(serviceSlug, async (slug) => {
               >
                 <Vote class="h-5 w-5 shrink-0 text-primary" />
                 <div>
-                  <p class="!text-xs font-bold text-foreground">YouTube Premium 최적 국가 투표</p>
-                  <p class="text-caption text-muted-foreground">어떤 나라에서 구독하는 게 가장 좋을까요?</p>
+                  <p class="!text-xs font-bold text-foreground">YouTube Premium 국가별 요금 비교</p>
+                  <p class="text-caption text-muted-foreground">요금 수준이 가장 합리적으로 보이는 나라는 어디인가요?</p>
                 </div>
               </button>
             </div>
           </div>
 
-          <AnonymousCommunityPanel :service-slug="serviceSlug" />
+          <AnonymousCommunityPanel v-if="COMMUNITY_ENABLED" :service-slug="serviceSlug" />
         </aside>
       </section>
 
       <!-- 국가 투표 모달 -->
       <CountryVoteModal
+        v-if="COMMUNITY_ENABLED"
         :show="showVoteModal"
         :service-slug="serviceSlug"
         :countries="voteCountries"
