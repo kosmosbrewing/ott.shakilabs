@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { useSEO } from "@/composables/useSEO";
+import { NOT_FOUND_META } from "../../scripts/page-meta.mjs";
 
 const router = useRouter();
+
+// 앱 이름을 남기는 레시피 — "페이지를 찾을 수 없습니다 | ShakiLabs"는 12개 앱이 똑같아진다.
+// 없는 주소가 색인되지 않게 noindex.
+useSEO({
+  title: NOT_FOUND_META.title,
+  description: NOT_FOUND_META.description,
+  noindex: true,
+});
 
 function goHome(): void {
   router.push("/");

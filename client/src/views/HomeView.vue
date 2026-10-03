@@ -11,6 +11,7 @@ import { useSEO } from "@/composables/useSEO";
 import { getSiteUrl } from "@/lib/site";
 import { getFaqItems } from "@/lib/seoContent";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
+import { HOME_META } from "@/lib/pageMeta";
 
 const siteUrl = getSiteUrl();
 
@@ -23,19 +24,19 @@ function stripTags(html: string): string {
   return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
+// 옛 제목은 수록하지 않는 넷플릭스와 "최저가"를 약속했다. 제목·설명은 프리렌더와 같은 모듈에서 나온다.
 useSEO({
-  title: "OTT 구독료 국가별 가격 비교 | 유튜브 프리미엄·넷플릭스 나라별 최저가",
-  description:
-    "OTT 구독료를 국가별로 비교하는 방법과 기준을 안내합니다. 비교 대상 서비스, 환율 환산 방식, 요금제 용어를 확인하고 원하는 서비스의 나라별 가격표로 이동하세요.",
+  title: HOME_META.title,
+  description: HOME_META.description,
   ogImage: `${siteUrl}/og-image.png`,
   jsonLd: {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebSite",
-        name: "OTT 구독료 국가별 가격 비교",
+        name: "OTT 구독료 비교",
         url: siteUrl,
-        description: "유튜브 프리미엄·넷플릭스 등 OTT 서비스 국가별·나라별 구독료 최저가 비교",
+        description: "유튜브 프리미엄 국가별 구독료를 원화로 환산해 비교",
         potentialAction: {
           "@type": "SearchAction",
           target: `${siteUrl}/?q={search_term_string}`,

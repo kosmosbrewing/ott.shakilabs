@@ -308,7 +308,9 @@ function getLandingFaqItems() {
     },
     {
       q: "지금 비교할 수 있는 서비스는 무엇인가요?",
-      a: `현재는 유튜브 프리미엄 ${stats.countryCount}개국 데이터가 공개되어 있습니다. 넷플릭스 등 다른 OTT는 국가별 요금제 구성이 서로 달라 같은 기준으로 정렬할 수 있을 때 순차적으로 추가합니다. 비교 대상이 아닌 서비스는 목록에 "준비 중"으로 표시합니다.`,
+      // 예전 답은 "순차적으로 추가"를 약속하고 비교하지 않는 서비스를 "준비 중" 행으로 늘어놓았다.
+      // 지키지 않은 약속이라 지운다 — 있는 것만 말한다.
+      a: `현재는 유튜브 프리미엄 ${stats.countryCount}개국 요금을 비교합니다. 넷플릭스 등 다른 OTT는 국가별 요금제 구성이 서로 달라 같은 기준으로 정렬할 수 없어 싣지 않습니다.`,
     },
     {
       q: "전체 비교표와 국가 상세 페이지는 무엇이 다른가요?",
@@ -892,7 +894,7 @@ function buildLandingDatasetSection() {
       <h3 class="${H3}">"개인 플랜"은 서비스마다 다른 물건을 가리킵니다</h3>
       <p class="${P}">
         서비스 등록부에는 ${services.length}개 서비스가 올라와 있고 그중 비교 가능한 것은 ${services.filter((x) => x.active).length}개입니다.
-        나머지가 준비 중인 이유는 데이터를 못 구해서가 아니라 축이 맞지 않아서입니다.
+        나머지를 순위표에 넣지 않는 이유는 데이터를 못 구해서가 아니라 축이 맞지 않아서입니다.
         등록부의 individual 자리에 들어가는 상품이 서비스마다 다르기 때문입니다 —
         ${services
           .filter((x) => (x.plans || []).some((plan) => plan.id === "individual"))
@@ -1285,17 +1287,15 @@ function buildLandingContent() {
   const services = loadServices().services || [];
   const rate = Number(data.krwRate);
 
+  // 비교할 수 있는 서비스만 싣는다. 비활성 서비스를 "준비 중" 행으로 늘어놓으면 허브가
+  // 없는 기능의 목록이 된다(외부 점검 2026-09-27) — 등록부(data/services.json)는 그대로 둔다.
   const serviceRowsHtml = services
+    .filter((service) => service.active)
     .map((service) => {
-      const isActive = Boolean(service.active);
       const planNames = (service.plans || []).map((plan) => plan.name).join(" · ");
-      const nameCell = isActive
-        ? `<a href="/ott/${service.slug}">${service.name}</a>`
-        : service.name;
-      const coverage = isActive ? `${stats.countryCount}개국` : "-";
-      const status = isActive
-        ? '<strong class="sp-down">비교 가능</strong>'
-        : '<span class="sp-muted">준비 중</span>';
+      const nameCell = `<a href="/ott/${service.slug}">${service.name}</a>`;
+      const coverage = `${stats.countryCount}개국`;
+      const status = '<strong class="sp-down">비교 가능</strong>';
       return `<tr>
           <td class="${TD}">${nameCell}</td>
           <td class="${TD}">${status}</td>
@@ -1333,10 +1333,16 @@ function buildLandingContent() {
         </thead>
         <tbody>${serviceRowsHtml}</tbody>
       </table></div>
-      <p class="${P}">
-        "준비 중"으로 표시된 서비스는 국가별 요금제 구성이 서로 달라 같은 기준으로 정렬하기 어려운 상태입니다.
-        비교 가능한 형태로 정리되는 대로 순차적으로 공개합니다.
-      </p>
+
+      <h2 class="${H2}">이 비교가 다루지 않는 것</h2>
+      <ul class="${UL}">
+        <li class="${LI}"><strong>다른 구독 서비스</strong> — ${services.filter((service) => !service.active).map((service) => service.name).join("·")}는 서비스 등록부에는 있지만
+          광고형·연간 결제·학생 요금처럼 요금제 구성이 서비스와 나라마다 달라 "개인 플랜"끼리 한 줄에 세울 수 없습니다. 그래서 순위표에 싣지 않습니다.</li>
+        <li class="${LI}"><strong>실시간 가격</strong> — 요금은 조사일(${data.lastUpdated}) 기준 정가입니다. 그 뒤 바뀐 요금은 다음 조사 전까지 반영되지 않고,
+          환율만 기준일(${data.exchangeRateDate})에 맞춰 갱신합니다.</li>
+        <li class="${LI}"><strong>해외 요금으로 가입하는 방법</strong> — 요금은 결제 수단 발행 국가와 계정 청구 국가로 정해지고,
+          대부분의 약관은 실제 거주 국가의 요금을 요구합니다. 다른 나라 요금으로 가입하는 방법은 안내하지 않습니다.</li>
+      </ul>
 
       <h2 class="${H2}">가격을 환산하는 방식</h2>
       <p class="${P}">
@@ -1455,7 +1461,7 @@ function buildHomeContent() {
         거주 국가에 따라 실제 부담하는 비용이 이 표 안에서만 <strong>${(prices[prices.length - 1].krw / prices[0].krw).toFixed(1)}배</strong> 차이가 납니다.
       </p>
 
-      <h2 class="${H2}">가장 저렴한 국가 TOP 20</h2>
+      <h2 class="${H2}">국가별 요금 순위 — 낮은 순 20개국</h2>
       <div class="sp-table-scroll"><table class="${TABLE}">
         <thead>
           <tr>
@@ -2229,17 +2235,9 @@ function buildCommunityContent() {
       <h1 class="${H1}">OTT 구독료 커뮤니티</h1>
 
       <p class="${P}">
-        OTT Watcher 커뮤니티는 유튜브 프리미엄 등 OTT 구독료 정보를 공유하고, 절약 팁과 이용 경험을 나누는 공간입니다.
-        국가별 가격 변동, 합법적인 절약 방법, 요금제 선택 경험 등을 함께 공유해보세요.
+        커뮤니티 게시판은 현재 운영하지 않습니다.
+        유튜브 프리미엄 국가별 요금과 가격 격차는 아래 관련 페이지에서 확인할 수 있습니다.
       </p>
-
-      <h2 class="${H2}">주요 주제</h2>
-      <ul class="${UL}">
-        <li class="${LI}"><strong>가격 변동 소식</strong> — 국가별 가격 인상·인하 정보</li>
-        <li class="${LI}"><strong>요금제 선택 후기</strong> — 개인 플랜·Lite 플랜 전환 경험담</li>
-        <li class="${LI}"><strong>해외 거주자 팁</strong> — 국가별 결제·VAT 주의사항</li>
-        <li class="${LI}"><strong>국가별 제공 요금제</strong> — 가족·학생 플랜을 제공하는 국가와 그 조건</li>
-      </ul>
 
       <h2 class="${H2}">주의사항</h2>
       <p class="${P}">
@@ -2255,7 +2253,6 @@ function buildCommunityContent() {
       </ul>
 
       <p class="${P}">
-        커뮤니티 참여는 현재 준비 중이며, 곧 익명 게시판 형태로 오픈 예정입니다.
         문의: <a href="mailto:skdba1313@gmail.com">skdba1313@gmail.com</a>
       </p>` }];
 }

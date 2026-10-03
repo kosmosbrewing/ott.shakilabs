@@ -10,6 +10,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { LoadingSpinner } from "@/components/ui/loading";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 import { getFaqItems } from "@/lib/seoContent";
+import { trendsMeta } from "../../scripts/page-meta.mjs";
 import changelogSeed from "../../../data/reports/changelog.json";
 
 type ChangelogEntry = {
@@ -46,15 +47,8 @@ const trendHeading = computed(() => {
   return `${currentService.value?.name || serviceSlug.value} 국가별 가격 격차`;
 });
 
-const pageTitle = computed(() => {
-  const serviceName = currentService.value?.name || serviceSlug.value;
-  return `${serviceName} 국가별 가격 격차 · 최저가 순위 | OTT 가격 비교`;
-});
-
-const pageDescription = computed(() => {
-  const serviceName = currentService.value?.name || serviceSlug.value;
-  return `${serviceName} 국가별 구독료를 같은 시점 기준으로 비교. 최저가·절약률 순위, 대륙별 평균, 원화 환산 시 주의할 점. 실시간 시세·가격 변동 시계열은 제공하지 않습니다.`;
-});
+// 제목·설명은 프리렌더(routeToMeta)와 같은 모듈에서 나온다 — 라우터가 받는 슬러그는 유튜브 프리미엄뿐이다.
+const { title: pageTitle, description: pageDescription } = trendsMeta();
 
 // ─── 수집 시점별 타임라인 ────────────────────────────────────────────────────
 const timelineRows = computed<TrendTimelineRow[]>(() => trends.value?.timeline ?? []);

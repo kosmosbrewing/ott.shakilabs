@@ -7,9 +7,20 @@ import {
   getAllPrerenderRoutes,
   getCountryEntries,
   canonicalPathFor,
+  loadPriceSeed,
 } from "./seo-routes.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent, getFaqItems } from "./prerender-content.mjs";
+import {
+  homeMeta,
+  serviceMeta,
+  trendsMeta,
+  countryMeta,
+  ABOUT_META,
+  PRIVACY_META,
+  TERMS_META,
+  COMMUNITY_META,
+} from "./page-meta.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,19 +100,17 @@ function buildFallbackHtml(meta) {
   ].join("\n");
 }
 
-function routeToMeta(route, countryMap) {
+// 제목·설명은 뷰(useSEO)와 같은 모듈(page-meta.mjs)에서 나온다 — 두 쪽이 문자열을 따로 들면 갈린다.
+// 숫자(국가 수·조사일)는 같은 커밋 시드에서 계산한다(src/lib/pageMeta.ts와 같은 규칙).
+function routeToMeta(route, countryMap, seed) {
+  const countryCount = countryMap.size;
   const youtubePremiumMeta = {
-    title: "유튜브 프리미엄 글로벌 가격 비교 · 나라별 구독료 최저가 순위",
-    description:
-      // ServicePriceView.vue의 SEO_MAP과 같은 문자열이어야 한다(둘이 갈리면 크롤러와 화면이 다른 설명을 본다).
-      "유튜브 프리미엄(YouTube Premium) 국가별·나라별 구독료를 한눈에 비교. 최저가 국가 순위와 한국 대비 절약률. 요금 조사일과 환율 기준일을 함께 표기합니다.",
+    ...serviceMeta({ countryCount, surveyDate: seed.lastUpdated }),
     heading: "유튜브 프리미엄 국가별·나라별 가격 비교",
   };
 
   const defaultMeta = {
-    title: "OTT 구독료 국가별 가격 비교 | 유튜브 프리미엄·넷플릭스 나라별 최저가",
-    description:
-      "유튜브 프리미엄(YouTube Premium), 넷플릭스 등 OTT 서비스 국가별·나라별 구독료를 현재 환율 기준으로 비교. 최저가 국가 순위와 절약률.",
+    ...homeMeta({ countryCount }),
     heading: "OTT 서비스 국가별·나라별 구독료 가격 비교",
     jsonLd: {
       "@context": "https://schema.org",
@@ -113,11 +122,7 @@ function routeToMeta(route, countryMap) {
 
   if (route === "/about") {
     return {
-      title: "소개 | 유튜브 프리미엄 가격 비교",
-      // AboutView.vue의 useSEO description과 같은 문자열이어야 한다.
-      // 이 자리에 있던 "갱신 주기를 안내합니다"는 존재하지 않는 주기를 예고했다.
-      description:
-        "유튜브 프리미엄 가격 비교 서비스의 데이터 출처와 요금 조사일·환율 기준일 표기 방식을 안내합니다.",
+      ...ABOUT_META,
       heading: "서비스 소개",
       jsonLd: {
         "@context": "https://schema.org",
@@ -130,8 +135,7 @@ function routeToMeta(route, countryMap) {
 
   if (route === "/privacy") {
     return {
-      title: "개인정보처리방침 | 유튜브 프리미엄 가격 비교",
-      description: "유튜브 프리미엄 가격 비교 서비스 개인정보처리방침",
+      ...PRIVACY_META,
       heading: "개인정보처리방침",
       jsonLd: {
         "@context": "https://schema.org",
@@ -144,8 +148,7 @@ function routeToMeta(route, countryMap) {
 
   if (route === "/terms") {
     return {
-      title: "이용약관 | OTT 가격 비교",
-      description: "OTT Watcher 서비스 이용약관입니다. 서비스 이용 조건, 데이터 정확성, 광고 안내 등을 확인하세요.",
+      ...TERMS_META,
       heading: "이용약관",
       jsonLd: {
         "@context": "https://schema.org",
@@ -158,8 +161,9 @@ function routeToMeta(route, countryMap) {
 
   if (route === "/community") {
     return {
-      title: "커뮤니티 | OTT 가격 비교",
-      description: "OTT 가격 정보 공유 커뮤니티",
+      ...COMMUNITY_META,
+      // 백엔드가 없어 운영하지 않는 게시판 — 색인하지 않는다(라우트는 404로 바꾸지 않고 링크만 끊는다).
+      noindex: true,
       heading: "커뮤니티",
       jsonLd: {
         "@context": "https://schema.org",
@@ -175,9 +179,7 @@ function routeToMeta(route, countryMap) {
   // stay distinct from /youtube-premium or the two compete as duplicates.
   if (route === "/") {
     return {
-      title: "OTT 구독료 국가별 가격 비교 | 유튜브 프리미엄·넷플릭스 나라별 최저가",
-      description:
-        "OTT 구독료를 국가별로 비교하는 방법과 기준을 안내합니다. 비교 대상 서비스, 환율 환산 방식, 요금제 용어를 확인하고 원하는 서비스의 나라별 가격표로 이동하세요.",
+      ...homeMeta({ countryCount }),
       heading: "OTT 구독료 국가별 가격 비교",
       jsonLd: {
         "@context": "https://schema.org",
@@ -202,9 +204,7 @@ function routeToMeta(route, countryMap) {
 
   if (route === `/${SERVICE_SLUG}/trends`) {
     return {
-      title: "유튜브 프리미엄 국가별 가격 격차 · 최저가 순위 | OTT 가격 비교",
-      description:
-        "유튜브 프리미엄 국가별 구독료를 같은 시점 기준으로 비교. 최저가·절약률 순위, 대륙별 평균, 원화 환산 시 주의할 점. 실시간 시세·가격 변동 시계열은 제공하지 않습니다.",
+      ...trendsMeta(),
       heading: "유튜브 프리미엄 국가별 가격 격차",
       jsonLd: {
         "@context": "https://schema.org",
@@ -219,10 +219,12 @@ function routeToMeta(route, countryMap) {
     const code = route.split("/").at(-1) || "";
     const country = countryMap.get(code);
     const countryName = country?.country || code.toUpperCase();
-    const krwText = country?.krw != null ? `월 ₩${Intl.NumberFormat("ko-KR").format(country.krw)}` : "국가 상세 요금";
     return {
-      title: `유튜브 프리미엄 ${countryName} 가격 · 나라별 구독료 비교 | OTT 가격 비교`,
-      description: `유튜브 프리미엄 ${countryName} ${krwText} 정보를 확인하고 한국 대비 절약 여부를 비교하세요. 국가별 요금제 상세 가격 비교.`,
+      ...countryMeta({
+        country: countryName,
+        krw: country?.krw ?? null,
+        isBaseCountry: code.toUpperCase() === String(seed.baseCountry || "").toUpperCase(),
+      }),
       heading: `${countryName} 유튜브 프리미엄 가격`,
       jsonLd: {
         "@context": "https://schema.org",
@@ -277,8 +279,8 @@ function routeToOgImage(route) {
   return `${SITE_URL}/og-image.png`;
 }
 
-function buildRouteHtml(templateHtml, route, countryMap) {
-  const meta = routeToMeta(route, countryMap);
+function buildRouteHtml(templateHtml, route, countryMap, seed) {
+  const meta = routeToMeta(route, countryMap, seed);
   const ogImage = routeToOgImage(route);
 
   let html = templateHtml;
@@ -304,10 +306,14 @@ function buildRouteHtml(templateHtml, route, countryMap) {
   html = updateMetaTag(html, 'name="twitter:title"', meta.title);
   html = updateMetaTag(html, 'name="twitter:description"', meta.description);
   html = updateMetaTag(html, 'name="twitter:image"', ogImage);
+  if (meta.noindex) {
+    html = updateMetaTag(html, 'name="robots"', "noindex,nofollow");
+  }
   html = injectJsonLd(html, meta.jsonLd);
 
   // 기존 prerender 요소 제거 (재빌드 대비)
   html = html.replace(/\n?\s*<header data-seo-prerender[\s\S]*?<\/header>/i, "");
+  html = html.replace(/\n?\s*<nav data-seo-prerender[\s\S]*?<\/nav>/i, "");
   html = html.replace(/\n?\s*<article data-seo-prerender[\s\S]*?<\/article>/i, "");
   html = html.replace(/\n?\s*<footer data-seo-prerender[\s\S]*?<\/footer>/i, "");
   html = html.replace(/\n?\s*<div data-seo-prerender[\s\S]*?<\/div>/i, "");
@@ -359,12 +365,13 @@ function main() {
 
   const template = fs.readFileSync(DIST_INDEX, "utf-8");
   const countryMap = new Map(getCountryEntries().map((entry) => [entry.countryCode, entry]));
+  const seed = loadPriceSeed();
   const routes = getAllPrerenderRoutes();
 
   for (const route of routes) {
     const outPath = toOutputPath(route);
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    const html = buildRouteHtml(template, route, countryMap);
+    const html = buildRouteHtml(template, route, countryMap, seed);
     fs.writeFileSync(outPath, html, "utf-8");
   }
 

@@ -9,13 +9,14 @@ import {
   type ServiceInfo,
   type ServicePlan,
 } from "@/api";
-import { formatNumber, calcSavingsPercent, countryFlag } from "@/lib/utils";
+import { formatNumber, countryFlag } from "@/lib/utils";
 import { getSiteUrl } from "@/lib/site";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 import { LoadingSpinner } from "@/components/ui/loading";
 import SavingsBadge from "@/components/price/SavingsBadge.vue";
 import { ArrowLeft } from "lucide-vue-next";
+import { countryPageMeta } from "@/lib/pageMeta";
 
 const route = useRoute();
 const { services, loadServices } = useServices();
@@ -94,25 +95,12 @@ const planPrices = computed<PlanPriceRow[]>(() => {
   });
 });
 
-// SEO
-const pageTitle = computed(() => {
-  const svc = currentService.value?.name || serviceSlug.value;
-  const country = countryData.value?.country || countryCode.value.toUpperCase();
-  return `${svc} ${country} 가격 · 나라별 구독료 비교 | OTT 가격 비교`;
-});
-
-const pageDescription = computed(() => {
-  const svc = currentService.value?.name || serviceSlug.value;
-  const country = countryData.value?.country || countryCode.value.toUpperCase();
-  const krw = countryData.value?.converted?.individual?.krw;
-  const savings = krw && baseCountryPrice.value?.converted?.individual?.krw
-    ? calcSavingsPercent(krw, baseCountryPrice.value.converted.individual.krw)
-    : 0;
-  if (savings > 0) {
-    return `${svc} ${country} 월 ₩${formatNumber(Math.round(krw))} — 한국 대비 ${savings}% 절약. 국가별 요금제 상세 가격 비교.`;
-  }
-  return `${svc} ${country} 구독 요금 상세 정보. 개인/가족/학생 요금제별 나라별 가격 비교.`;
-});
+// SEO — 제목·설명은 프리렌더(routeToMeta)와 같은 모듈·같은 원화 규칙에서 나온다.
+// 예전 설명은 이 데이터에 없는 "학생 요금제"를 말했고, 제목은 크롤러("유튜브 프리미엄")와
+// 화면("YouTube Premium")이 서로 달랐다.
+const seoMeta = computed(() => countryPageMeta(countryCode.value));
+const pageTitle = computed(() => seoMeta.value.title);
+const pageDescription = computed(() => seoMeta.value.description);
 
 // BreadcrumbList는 prerender(scripts/prerender.mjs)가 국가 라우트마다 <head>에 이미 주입하고,
 // 그 스크립트는 하이드레이션 후에도 남는다. 여기서 같은 그래프를 다시 내면 한 페이지에
