@@ -105,8 +105,9 @@ const maskNumbers = (text) => text.replace(/[0-9][0-9,.]*/g, "#");
 // =========================================================================
 describe("리터럴 앵커: 시드 값 자체", () => {
   it("가격 시드의 헤더 값", () => {
-    // 2026-10-03 재조사 회차. 국가별 확인 여부는 각 행의 survey 필드(price-survey.test.mjs가 검사)
-    expect(RAW_SEED.lastUpdated).toBe("2026-10-03");
+    // 전수 조사일. 2026-10-03 공식 출처 재확인은 일부 칸뿐이라 행마다 survey.recheckedAt에만 있다
+    // (price-survey.test.mjs가 형식·문장을 검사)
+    expect(RAW_SEED.lastUpdated).toBe("2026-02-20");
     expect(RAW_SEED.exchangeRateDate).toBe("2026-08-22");
     expect(RAW_SEED.krwRate).toBe(1385.741836);
     expect(RAW_SEED.baseCountry).toBe("KR");
@@ -152,7 +153,18 @@ describe("리터럴 앵커: 시드 값 자체", () => {
     expect(D.currencyStructure(data).totalPairs).toBe(946);
     expect(D.currencyStructure(data).sameCurrencyPairs).toBe(15);
     expect(D.globalSpread(data).spread).toBe(17.7);
-    expect(D.surveyDateGapDays(data)).toBe(42);
+    expect(D.surveyDateGapDays(data)).toBe(183);
+    // 요금 조사 회차 — 가격표 문장 "N개국 재확인 … 나머지 M개국"이 이 값에서 나온다
+    expect(D.surveyRounds(data)).toMatchObject({
+      fullSurveyDate: "2026-02-20",
+      recheckDate: "2026-10-03",
+      recheckedCountries: 11,
+      partialCountries: 9,
+      recheckedCells: 14,
+      retainedCountries: 33,
+      retainedCells: 83,
+      updatedCells: 3,
+    });
     expect(D.planCombinations(data)).toHaveLength(5);
     expect(D.familyMultiples(data).count).toBe(43);
     expect(D.fxRankThresholds(data).asymmetryRatio).toBe(82.2);

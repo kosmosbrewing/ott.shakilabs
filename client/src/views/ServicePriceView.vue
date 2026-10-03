@@ -19,6 +19,7 @@ import CountryVoteModal from "@/components/community/CountryVoteModal.vue";
 import PriceComparisonSection from "@/components/price/PriceComparisonSection.vue";
 import ServiceSEOSection from "@/components/price/ServiceSEOSection.vue";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
+import { getSurveyProvenance } from "@/lib/seoContent";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import { Vote } from "lucide-vue-next";
 import { useMyPlan } from "@/composables/useMyPlan";
@@ -69,6 +70,13 @@ const serviceSlug = computed(() => {
 
 const currentService = computed(() =>
   services.value.find((s) => s.slug === serviceSlug.value)
+);
+
+// 요금 조사 문장 — 전수 조사일과 공식 출처 재확인일을 국가 행의 survey 블록에서 세어 만든다.
+// 재확인하지 못한 값에 재확인 날짜가 붙지 않도록, 날짜 하나(lastUpdated)로 줄여 쓰지 않는다.
+// 시드가 youtube-premium 하나뿐이라 그 서비스에서만 쓴다.
+const surveySentence = computed(() =>
+  serviceSlug.value === "youtube-premium" ? getSurveyProvenance() : null
 );
 
 const serviceName = computed(() => currentService.value?.name || serviceSlug.value);
@@ -250,8 +258,9 @@ const seoJsonLd = computed<Record<string, unknown> | undefined>(() => {
     {
       "@type": "Dataset",
       name: `${currentServiceName} 국가별 구독 가격 데이터`,
-      // 정가는 사람이 조사해 반영하므로 "최신"이라 단언하지 않는다. 조사 시점은 dateModified가 들고 있다.
-      description: `${currentServiceName} ${selectedPlanLabel.value} 요금제의 국가별 월 구독료를 현지 통화, 한국 원(KRW), 미국 달러(USD)로 환산하여 비교할 수 있는 데이터셋입니다. 각 서비스의 공식 공개 요금을 사람이 확인해 반영한 정가이며, 조사 시점은 dateModified에 표기합니다.`,
+      // 정가는 사람이 조사해 반영하므로 "최신"이라 단언하지 않는다. dateModified는 전수 조사일이고,
+      // 일부 칸만 다시 확인한 재확인일은 description의 요금 조사 문장에만 범위와 함께 적는다.
+      description: `${currentServiceName} ${selectedPlanLabel.value} 요금제의 국가별 월 구독료를 현지 통화, 한국 원(KRW), 미국 달러(USD)로 환산하여 비교할 수 있는 데이터셋입니다. 사람이 조사해 반영한 정가이며, 요금 조사 시점: ${surveySentence.value ?? priceData.value?.lastUpdated ?? "-"}.`,
       url: `${siteUrl}/${serviceSlug.value}`,
       dateModified: priceData.value?.lastUpdated || undefined,
       variableMeasured: ["월 구독료 (현지 통화)", "월 구독료 (KRW)", "월 구독료 (USD)"],
@@ -475,7 +484,8 @@ watch(serviceSlug, async (slug) => {
               />
               <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-caption font-normal text-muted-foreground leading-tight">
                 <span>총 {{ filteredPrices.length }}개국</span>
-                <span>· 요금 조사 {{ priceData.lastUpdated }}</span>
+                <span v-if="surveySentence" data-survey-provenance>· 요금 조사: {{ surveySentence }}</span>
+                <span v-else>· 요금 조사 {{ priceData.lastUpdated }}</span>
                 <span>· 환율 기준 {{ priceData.exchangeRateDate }}</span>
                 <span v-if="usdToKrwRate">· $1 = ₩{{ formatNumber(usdToKrwRate) }}</span>
               </div>
@@ -594,7 +604,7 @@ watch(serviceSlug, async (slug) => {
         :base-usd="baseCountrySummary?.usd ?? null"
         :savings-percent="summarySavingsPercent"
         :exchange-rate-date="priceData.exchangeRateDate || '최근 기준일'"
-        :last-updated="priceData.lastUpdated || '최근 업데이트'"
+        :survey-summary="surveySentence || `요금 조사일 ${priceData.lastUpdated || '-'}`"
         :base-country-code="(priceData.baseCountry || '').toUpperCase()"
       />
 

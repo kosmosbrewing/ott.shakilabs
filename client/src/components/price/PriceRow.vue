@@ -7,6 +7,7 @@ import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import SavingsBadge from "./SavingsBadge.vue";
 import { formatNumber, countryFlag } from "@/lib/utils";
+import { surveyCellMark } from "@/lib/seoContent";
 
 const props = defineProps<{
   item: CountryPrice;
@@ -54,6 +55,9 @@ const formattedKrw = computed(() => {
 });
 
 const flag = computed(() => countryFlag(props.item.countryCode));
+
+// 이 칸의 조사 상태 — 공식 출처로 재확인한 칸만 재확인 날짜를 단다(프리렌더 표와 같은 함수)
+const surveyMark = computed(() => surveyCellMark(props.item, props.selectedPlan));
 </script>
 
 <template>
@@ -76,6 +80,11 @@ const flag = computed(() => countryFlag(props.item.countryCode));
         <span class="text-[18px]">{{ flag }}</span>
         <span class="text-caption">{{ item.country }}</span>
         <span v-if="isBase" class="text-[0.62rem] font-bold text-muted-foreground border border-border/60 px-1 py-0.5 leading-none">내 요금</span>
+        <span
+          v-if="surveyMark"
+          class="text-[0.62rem] font-normal leading-none text-muted-foreground/70 whitespace-nowrap"
+          :data-survey="surveyMark.status"
+        >{{ surveyMark.text }}</span>
       </RouterLink>
     </TableCell>
 

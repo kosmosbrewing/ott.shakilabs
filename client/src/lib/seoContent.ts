@@ -12,6 +12,9 @@ import {
   buildSections,
   buildViewSections,
   getFaqItems,
+  getSurveyProvenance,
+  surveyCellMark,
+  surveyCountryLabel,
   type SeoContentSection,
 } from "../../scripts/seo-content.mjs";
 import priceSeed from "../../../data/prices/youtube-premium.json";
@@ -21,5 +24,5 @@ import services from "../../../data/services.json";
 
 configureSeoContent({ priceSeed, history, changelog, services });
 
-export { buildSections, buildViewSections, getFaqItems };
+export { buildSections, buildViewSections, getFaqItems, getSurveyProvenance, surveyCellMark, surveyCountryLabel };
 export type { SeoContentSection };

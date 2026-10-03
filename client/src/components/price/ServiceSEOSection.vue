@@ -17,7 +17,8 @@ const props = defineProps<{
   baseUsd: number | null;
   savingsPercent: number;
   exchangeRateDate: string;
-  lastUpdated: string;
+  /** 요금 조사 표기 — 전수 조사일·재확인 범위를 담은 문장(날짜 하나로 줄이지 않는다) */
+  surveySummary: string;
   baseCountryCode: string;
 }>();
 
@@ -75,7 +76,7 @@ const faqItems = computed<FaqItem[]>(() => {
     },
     // llms.txt·프리렌더 FAQ와 같은 사실을 말해야 한다: 정가는 수동 조사, 환율만 API.
     // "내부 모니터링"·"정기 반영"은 상시 감시와 정기 스케줄을 주장하는데 둘 다 존재하지 않는다.
-    { q: "가격 데이터는 어떻게 수집하고 업데이트하나요?", a: `현지 통화 정가는 자동 수집 수단이 없어, 서비스 공식 요금 안내를 사람이 확인해 반영합니다. 그래서 상시 최신을 보장하지 않으며 실제로 조사한 날짜를 요금 조사일로 표기합니다.\n현재 요금 조사일은 ${props.lastUpdated}, 환율 기준일은 ${props.exchangeRateDate}입니다.\n원화 환산에 쓰는 환율만 공개 환율 API에서 가져옵니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.` },
+    { q: "가격 데이터는 어떻게 수집하고 업데이트하나요?", a: `현지 통화 정가는 자동 수집 수단이 없어 사람이 조사해 반영합니다. 그래서 상시 최신을 보장하지 않으며 실제로 조사한 날짜를 표기합니다.\n현재 요금 조사는 ${props.surveySummary}이고, 환율 기준일은 ${props.exchangeRateDate}입니다.\n원화 환산에 쓰는 환율만 공개 환율 API에서 가져옵니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.` },
   ];
 
   const serviceSpecificFaqMap: Record<string, FaqItem[]> = {

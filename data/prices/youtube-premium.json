@@ -1,6 +1,6 @@
 {
   "serviceId": "youtube-premium",
-  "lastUpdated": "2026-10-03",
+  "lastUpdated": "2026-02-20",
   "exchangeRateDate": "2026-08-22",
   "krwRate": 1385.741836,
   "baseCurrency": "USD",
@@ -32,9 +32,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "verified",
         "label": "확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://www.youtube.com/premium?hl=ko"
@@ -79,9 +80,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "verified",
         "label": "확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://one.google.com/intl/en_us/about/google-ai-plans/",
@@ -94,6 +96,11 @@
             "https://one.google.com/intl/en_us/about/google-ai-plans/",
             "https://blog.google/products-and-platforms/products/google-one/google-ai-subscriptions/"
           ]
+        },
+        "previous": {
+          "individual": 13.99,
+          "family": 22.99,
+          "lite": 7.99
         }
       }
     },
@@ -131,9 +138,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/gb/product/google_home_speaker?hl=en-GB"
@@ -142,8 +150,7 @@
         "unverified": [
           "family",
           "lite"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -180,15 +187,14 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family",
           "lite"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -233,9 +239,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/in/product/pixel_11?hl=en-IN",
@@ -246,8 +253,7 @@
           "family",
           "lite",
           "duo"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -276,14 +282,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -320,9 +325,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/tw/product/pixel_11?hl=zh-TW",
@@ -332,8 +338,7 @@
         "unverified": [
           "family",
           "duo"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -370,15 +375,14 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family",
           "duo"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -407,14 +411,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -443,14 +446,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -479,14 +481,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -515,14 +516,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -551,14 +551,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -587,14 +586,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -623,14 +621,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -659,14 +656,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -695,14 +691,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -739,9 +734,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/fr/product/google_home_speaker?hl=fr"
@@ -750,8 +746,7 @@
         "unverified": [
           "family",
           "duo"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -780,14 +775,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -816,14 +810,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -852,9 +845,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/ie/collection/offers?hl=en-GB",
@@ -863,8 +857,7 @@
         },
         "unverified": [
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -893,14 +886,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -929,9 +921,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/ch/product/google_home_speaker?hl=de"
@@ -939,8 +932,7 @@
         },
         "unverified": [
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -969,9 +961,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/se/product/pixel_11?hl=sv",
@@ -980,8 +973,7 @@
         },
         "unverified": [
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1010,9 +1002,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/dk/product/pixel_11?hl=da"
@@ -1020,8 +1013,7 @@
         },
         "unverified": [
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1050,9 +1042,10 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "partial",
         "label": "부분 확인",
+        "surveyedAt": "2026-02-20",
+        "recheckedAt": "2026-10-03",
         "verified": {
           "individual": [
             "https://store.google.com/no/product/pixel_11?hl=no"
@@ -1060,8 +1053,7 @@
         },
         "unverified": [
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1090,14 +1082,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1126,14 +1117,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1162,14 +1152,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1198,14 +1187,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1242,15 +1230,14 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family",
           "lite"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1279,14 +1266,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1315,14 +1301,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1351,14 +1336,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1387,14 +1371,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1423,14 +1406,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1459,14 +1441,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1495,14 +1476,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1531,14 +1511,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1567,14 +1546,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1603,14 +1581,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1639,14 +1616,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1675,14 +1651,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     },
     {
@@ -1711,14 +1686,13 @@
         }
       },
       "survey": {
-        "checkedAt": "2026-10-03",
         "status": "unverified",
         "label": "미확인",
+        "surveyedAt": "2026-02-20",
         "unverified": [
           "individual",
           "family"
-        ],
-        "retainedFrom": "2026-02-20"
+        ]
       }
     }
   ]

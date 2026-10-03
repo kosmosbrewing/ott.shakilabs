@@ -615,7 +615,17 @@ function validateSingleSourceProvenance() {
   }
 
   // ③ 표시된 날짜와 순위.
-  const allowedDates = new Set([surveyDate, fxDate]);
+  // 재확인일은 국가 행의 survey.recheckedAt에만 있다 — 시드에 없는 날짜는 여전히 막는다.
+  const recheckDates = [
+    ...new Set((seed?.prices ?? []).map((row) => row?.survey?.recheckedAt).filter(Boolean)),
+  ];
+  for (const d of recheckDates) {
+    assert(
+      /^\d{4}-\d{2}-\d{2}$/.test(d) && d > surveyDate,
+      `data/prices: survey.recheckedAt must be an ISO date after lastUpdated, got ${JSON.stringify(d)}`
+    );
+  }
+  const allowedDates = new Set([surveyDate, fxDate, ...recheckDates]);
   for (const route of PROVENANCE_ROUTES) {
     const file = routeToFile(route);
     if (!fs.existsSync(file)) continue;
@@ -626,7 +636,7 @@ function validateSingleSourceProvenance() {
     assert(
       stray.length === 0,
       `${route} publishes provenance dates that are not in the price seed: ${stray.join(", ")} ` +
-        `(seed says survey=${surveyDate}, fx=${fxDate})`
+        `(seed says survey=${surveyDate}, fx=${fxDate}, recheck=${recheckDates.join("/") || "-"})`
     );
   }
 

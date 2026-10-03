@@ -175,6 +175,14 @@
   margin-top: -8px;
 }
 
+/* 표 행의 조사 상태("재확인 10-03" / "02-20 값 유지") — 경고가 아니라 출처 메모라 작고 흐리게 */
+.sp-survey-mark {
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
 /* 홈 상단 CTA — 심사자·첫 방문자가 바로 요금표로 들어갈 수 있는 진입점 */
 .sp-cta {
   display: flex;

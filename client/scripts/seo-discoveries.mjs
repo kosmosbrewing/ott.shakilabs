@@ -6,8 +6,8 @@
  * 그래서 본문에 나가는 모든 수치는 여기서 계산해 주입한다.
  *
  * 정직성 제약(이 파일이 절대 하지 않는 것):
- *  - 시점 간 가격 변동을 만들지 않는다. 요금 조사는 1회분(lastUpdated)뿐이라
- *    "올랐다/내렸다/추세"를 계산할 근거가 없다.
+ *  - 시점 간 가격 변동을 만들지 않는다. 전수 조사는 1회분(lastUpdated)뿐이고 그 뒤 재확인은
+ *    일부 칸뿐이라(행마다 survey 블록) "올랐다/내렸다/추세"를 계산할 근거가 없다.
  *  - 요금 조사일과 환율 기준일을 하나로 묶지 않는다. 성격이 다른 두 관측이다.
  *  - 환율 시나리오는 "가정"으로만 계산한다. 관측된 환율 변동이 아니다.
  *
@@ -604,4 +604,90 @@ export function savingsDenominatorAsymmetry(data) {
     maxSavingsPercent: round1(((baseKrw - cheapest.krw) / baseKrw) * 100),
     maxMarkupPercent: round1((priciest.krw / cheapest.krw - 1) * 100),
   };
+}
+
+// ---------------------------------------------------------------------------
+// 요금 조사 회차 — 국가 행의 survey 블록이 유일한 출처다.
+//
+// 왜 여기서 세나: 전수 조사일(surveyedAt)과 공식 출처 재확인일(recheckedAt)은 칸마다 다르다.
+// 문장에 "11개국 재확인" 같은 숫자를 손으로 쓰면 다음 재확인 때 산문만 옛 숫자로 남고,
+// 재확인하지 못한 값까지 새 날짜로 읽히게 된다(2026-10-03 회차에서 실제로 그럴 뻔했다).
+// ---------------------------------------------------------------------------
+
+const PLAN_LABEL = { individual: "개인", family: "패밀리", lite: "라이트", duo: "듀오", student: "학생" };
+
+/** "2026-02-20" → "02-20". 표 안의 작은 표시용(연도는 문장에 이미 있다). */
+export const monthDay = (date) => String(date || "").slice(5);
+
+function onlyValue(values, field) {
+  const set = [...new Set(values.filter(Boolean))];
+  if (set.length > 1) {
+    throw new Error(`survey.${field}가 회차 하나로 모이지 않는다: ${set.join(", ")}`);
+  }
+  return set[0] ?? null;
+}
+
+/** 회차 요약 — 전부 survey 블록에서 센다. */
+export function surveyRounds(data) {
+  const rows = data.prices;
+  const rechecked = rows.filter((r) => r.survey?.recheckedAt);
+  const updated = rows
+    .filter((r) => r.survey?.previous && Object.keys(r.survey.previous).length > 0)
+    .map((r) => ({ code: r.countryCode, country: r.country, cells: Object.keys(r.survey.previous).length }));
+  return {
+    fullSurveyDate: onlyValue(rows.map((r) => r.survey?.surveyedAt), "surveyedAt"),
+    recheckDate: onlyValue(rows.map((r) => r.survey?.recheckedAt), "recheckedAt"),
+    countryCount: rows.length,
+    recheckedCountries: rechecked.length,
+    // 재확인 국가 중 일부 요금제만 확인된 나라 — 나머지 칸은 전수 조사 값 그대로다
+    partialCountries: rechecked.filter((r) => (r.survey.unverified || []).length > 0).length,
+    recheckedCells: rechecked.reduce((n, r) => n + Object.keys(r.survey.verified || {}).length, 0),
+    retainedCountries: rows.length - rechecked.length,
+    retainedCells: rows.reduce((n, r) => n + (r.survey?.unverified || []).length, 0),
+    updated,
+    updatedCells: updated.reduce((n, u) => n + u.cells, 0),
+  };
+}
+
+/**
+ * 가격표 페이지의 요금 조사 문장. 숫자는 전부 surveyRounds에서 온다.
+ * 예: "2026-02-20 전수 조사 · 2026-10-03 공식 출처로 11개국 재확인(미국 3개 값 갱신, 9개국은 일부 요금제만), 나머지 33개국은 02-20 값"
+ */
+export function surveyProvenanceSentence(data) {
+  const r = surveyRounds(data);
+  if (!r.recheckDate) return `${r.fullSurveyDate} 전수 조사`;
+  const details = [
+    r.updated.length > 0
+      ? `${r.updated.map((u) => `${u.country} ${u.cells}개`).join("·")} 값 갱신`
+      : "값 변동 없음",
+  ];
+  if (r.partialCountries > 0) details.push(`${r.partialCountries}개국은 일부 요금제만`);
+  return (
+    `${r.fullSurveyDate} 전수 조사 · ${r.recheckDate} 공식 출처로 ${r.recheckedCountries}개국 재확인(${details.join(", ")}), ` +
+    `나머지 ${r.retainedCountries}개국은 ${monthDay(r.fullSurveyDate)} 값`
+  );
+}
+
+/** 표 한 칸의 조사 상태 — 재확인한 칸만 재확인 날짜를 단다. */
+export function surveyCellMark(row, planId) {
+  const survey = row?.survey;
+  if (!survey || row?.plans?.[planId]?.monthly == null) return null;
+  if (survey.verified?.[planId] && survey.recheckedAt) {
+    return { status: "rechecked", text: `재확인 ${monthDay(survey.recheckedAt)}` };
+  }
+  return { status: "retained", text: `${monthDay(survey.surveyedAt)} 값 유지` };
+}
+
+/** 국가 상세 페이지의 조사 표기 — 재확인 날짜는 재확인한 요금제에만 붙인다. */
+export function surveyCountryLabel(row) {
+  const survey = row?.survey;
+  if (!survey?.surveyedAt) return null;
+  const base = `요금 조사 ${survey.surveyedAt}`;
+  const verified = Object.keys(survey.verified || {});
+  if (!survey.recheckedAt || verified.length === 0) return base;
+  const scope =
+    (survey.unverified || []).length === 0
+      ? "전 요금제"
+      : `${verified.map((p) => PLAN_LABEL[p] || p).join("·")} 요금제만`;
+  return `${base} · ${survey.recheckedAt} 공식 출처 재확인(${scope})`;
 }
