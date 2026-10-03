@@ -32,7 +32,7 @@ function buildOtherServicesBlock() {
     })
     .filter(Boolean)
     .join("");
-  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0;font-size:12px;line-height:2;">
+  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0;font-size:13px;line-height:2;">
         <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#334155;">다른 서비스</p>
         ${rows}
       </nav>`;
@@ -169,7 +169,7 @@ export function buildPrerenderFooter() {
         </div>
       </nav>
       ${buildOtherServicesBlock()}
-      <div style="padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;line-height:1.8;">
+      <div style="padding-top:16px;border-top:1px solid #e2e8f0;font-size:13px;color:#64748b;line-height:1.8;">
         <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:#64748b;">skdba1313@gmail.com</a></p>
         <p style="margin:0 0 6px;">
           <a href="/blog" style="color:#64748b;margin-right:12px;">블로그</a>
