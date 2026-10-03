@@ -107,6 +107,21 @@ function validateNoDeadFeatures(html, route) {
   assert(!html.includes("Failed to fetch"), `${route} ships a fetch error string`);
 }
 
+// 범위 붕괴 게이트(2026-10-03) — 메인 문서가 "한국 가격의 15~15% 수준"이라고 썼다(14.5%·15.4%를
+// 정수로 반올림). 숫자가 시드에서 나와도 반올림 자릿수가 범위를 무너뜨릴 수 있으므로 산출물 전체를 본다.
+const RANGE_PATTERN = /(\d[\d,.]*)\s*~\s*(\d[\d,.]*)\s*(%|원|개국|배)/g;
+
+function validateNoCollapsedRanges(html, route) {
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ");
+  for (const match of text.matchAll(RANGE_PATTERN)) {
+    assert(match[1] !== match[2], `Collapsed range "${match[0]}" in ${route} — both ends are the same value`);
+  }
+}
+
 function validateRoute(route) {
   const file = routeToFile(route);
   // Country routes are absent from the sitemap but must still exist on disk:
@@ -159,6 +174,7 @@ function validateRoute(route) {
 
   validateTitleRecipe(html, route);
   validateNoDeadFeatures(html, route);
+  validateNoCollapsedRanges(html, route);
 
   titlesByRoute.set(route, titleOf(html));
 }

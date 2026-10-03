@@ -27,6 +27,7 @@ import {
   buildRichContent,
   getFaqItems,
   normalizeKrwSeed,
+  formatShareRange,
 } from "./seo-content.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -770,5 +771,36 @@ describe("분량과 중복", () => {
   it("소제목은 세 페이지에 걸쳐 중복되지 않는다", () => {
     const all = TOOL_ROUTES.flatMap(headingsOf);
     expect(new Set(all).size).toBe(all.length);
+  });
+});
+
+// =========================================================================
+// 범위 표기 — "A~B" 양 끝이 같은 값으로 뭉개지지 않는다 (2026-10-03)
+// 메인 문서가 "한국 가격의 15~15% 수준"이라고 썼다: 인도 14.5%·튀르키예 15.4%를 정수로 반올림해
+// 양 끝이 같아졌다. 숫자는 시드에서 나와 맞았지만 범위라는 서술이 무너졌다.
+// =========================================================================
+describe("범위 표기", () => {
+  const RANGE = /(\d[\d,.]*)\s*~\s*(\d[\d,.]*)\s*(%|원|개국|배)/g;
+
+  it("formatShareRange는 양 끝이 갈라지는 자릿수를 고르고, 같은 값은 범위로 쓰지 않는다", () => {
+    expect(formatShareRange(2162 / 14900, 2300 / 14900)).toBe("14.5~15.4%");
+    expect(formatShareRange(0.2, 0.1)).toBe("10~20%");
+    expect(formatShareRange(0.15012, 0.15041)).toBe("15.01~15.04%");
+    expect(formatShareRange(0.15, 0.15)).toBe("약 15%");
+  });
+
+  it("메인 문서의 '한국 가격의 A~B% 수준'은 A < B이고, 현재 시드에서는 14.5~15.4%다", () => {
+    const why = stripTags(buildSections("/youtube-premium").find((s) => s.id === "home-why").html);
+    const m = why.match(/한국 가격의 ([\d.]+)~([\d.]+)% 수준/);
+    expect(m, why.slice(0, 200)).not.toBeNull();
+    // 관계: 정렬된 2·3위라 아래 끝이 위 끝보다 작아야 한다(같으면 범위가 아니다)
+    expect(Number(m[1])).toBeLessThan(Number(m[2]));
+    // 리터럴 앵커: 시드가 바뀌면 여기가 먼저 red가 되어 문장을 다시 보게 한다
+    expect(m[0]).toBe("한국 가격의 14.5~15.4% 수준");
+  });
+
+  it.each(TOOL_ROUTES)("%s 본문에 양 끝이 같은 범위(15~15% 같은)가 없다", (route) => {
+    const collapsed = [...textOf(route).matchAll(RANGE)].filter((m) => m[1] === m[2]).map((m) => m[0]);
+    expect(collapsed).toEqual([]);
   });
 });

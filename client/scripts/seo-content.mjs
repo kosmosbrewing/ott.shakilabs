@@ -698,6 +698,23 @@ function josa(word, withFinal, withoutFinal) {
   return `${word}${hasFinalConsonant(word) ? withFinal : withoutFinal}`;
 }
 
+/**
+ * 두 비율을 "A~B%" 범위로 쓴다. 양 끝이 갈라지는 가장 짧은 자릿수(0→1→2)를 고른다.
+ *
+ * 왜: 메인 문서가 "한국 가격의 15~15% 수준"이라고 썼다(인도 14.5%·튀르키예 15.4%가 정수 반올림에서
+ * 같은 값으로 뭉개졌다). 자릿수를 고정하면 시드가 바뀔 때마다 같은 사고가 다시 난다.
+ * 두 값이 정말 같으면 범위가 아니므로 "약 X%" 하나로 쓴다.
+ */
+export function formatShareRange(lowRatio, highRatio) {
+  const [lo, hi] = [lowRatio, highRatio].map((r) => r * 100).sort((a, b) => a - b);
+  for (const digits of [0, 1, 2]) {
+    const a = lo.toFixed(digits);
+    const b = hi.toFixed(digits);
+    if (a !== b) return `${a}~${b}%`;
+  }
+  return `약 ${lo.toFixed(0)}%`;
+}
+
 /** 루트 허브: 데이터의 생김새 — 커버리지·요금제·통화·표기 관습. */
 function buildLandingDatasetSection() {
   const data = loadData();
@@ -1482,8 +1499,8 @@ function buildHomeContent() {
       html: `      <h2 class="${H2}">왜 국가별 가격이 다를까요?</h2>
       <p class="${P}">
         유튜브 프리미엄은 국가별로 구매력 평가(PPP), 부가세율, 환율, 경쟁 서비스 가격을 종합해 차등 가격 정책을 운영합니다.
-        예를 들어 ${prices[1].country}는 월 ${formatKrw(prices[1].krw)}, ${prices[2].country}는 ${formatKrw(prices[2].krw)}로
-        한국 가격의 ${Math.round((prices[1].krw / krKrw) * 100)}~${Math.round((prices[2].krw / krKrw) * 100)}% 수준입니다.
+        예를 들어 ${josa(prices[1].country, "은", "는")} 월 ${formatKrw(prices[1].krw)}, ${josa(prices[2].country, "은", "는")} ${formatKrw(prices[2].krw)}로
+        한국 가격의 ${formatShareRange(prices[1].krw / krKrw, prices[2].krw / krKrw)} 수준입니다.
         반면 표 안의 ${prices.filter((p) => p.krw > krKrw).length}개국은 한국보다 비쌉니다.
       </p>
       <ul class="${UL}">
