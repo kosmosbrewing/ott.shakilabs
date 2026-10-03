@@ -133,6 +133,8 @@
 }
 
 @media (max-width: 400px) {
+  /* 작은 글자 하한선. 루트가 14px이던 시절에는 12px로 끌어올리는 규칙이었지만, 루트 16px에서는
+     오히려 13px 토큰(caption·tiny)을 12px로 깎는다 — 하한을 함대 기준 13px로 맞춘다. */
   .text-caption,
   .text-tiny,
   .text-xs,
@@ -141,12 +143,12 @@
   [class*="text-[10px]"],
   [class*="text-[11px]"],
   [class~="!text-xs"] {
-    font-size: 12px !important;
+    font-size: 0.8125rem !important;
     line-height: 1.4 !important;
   }
 
   .sh-text--label {
-    font-size: 12px !important;
+    font-size: 0.8125rem !important;
   }
 
   main button,

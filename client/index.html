@@ -71,7 +71,10 @@
     <style>
       /* 더스티 파스텔 톤 — ShakiLabs 브랜드 밴드 */
       :root {
-        --background: 212 36% 97%;
+        /* v3 §2.1 color.canvas #F7F7F5 — 다른 11개 앱과 같은 바탕이다. 예전 값(212 36% 97%,
+           rgb(245,247,250))은 이 앱만 푸른 회색이라 앱을 옮길 때마다 바탕이 바뀌어 보였다.
+           목표 hex에서 HSL을 역산한 값이라 반올림하지 않는다(`60 9% 96%`는 #F6F6F4가 된다). */
+        --background: 60 11.11% 96.47%;
         --foreground: 222 28% 18%;
         --muted: 210 28% 94%;
         --muted-foreground: 220 12% 42%;
@@ -136,16 +139,14 @@
 
       html {
         scroll-behavior: auto;
-        font-size: 15px;
+        /* 본문 기준은 함대 공통 16px이다. 15px(모바일 14px)로 두면 rem으로 정한 패키지 셸이
+           전부 같이 줄어든다 — 헤더 폭 72rem이 1080px이 되고 2차 내비가 46px/13.1px로 내려앉아
+           다른 앱과 셸이 어긋났다. 모바일 축소 규칙도 같은 이유로 없앴다(390px에서 보조 글자가 12px). */
+        font-size: 16px;
       }
 
       #app:not(:empty) ~ [data-seo-prerender] {
         display: none;
-      }
-
-      @media (max-width: 640px) {
-        /* 모바일에서는 전체 타이포를 한 단계 축소 */
-        html { font-size: 14px; }
       }
 
       body {

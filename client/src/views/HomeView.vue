@@ -57,7 +57,9 @@ useSEO({
 </script>
 
 <template>
-  <div class="container py-6">
+  <!-- 문서형 화면도 도구 화면과 같은 프레임(패키지 sh-container, 72rem)에서 시작한다.
+       --prose는 글줄만 42rem으로 묶어 읽는 폭을 지키고, 제목·본문의 시작 x는 헤더와 같다. -->
+  <div class="sh-container sh-container--prose py-6">
     <SeoRichContent route="/" />
   </div>
 </template>

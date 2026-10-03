@@ -20,6 +20,7 @@ declare module "*seo-content.mjs" {
   }
 
   export const ARTICLE: string;
+  export const PRERENDER_FRAME: string;
   export function configureSeoContent(data: SeoContentData): void;
   export function buildSections(route: string): SeoContentSection[];
   export function buildViewSections(route: string): SeoContentSection[];
