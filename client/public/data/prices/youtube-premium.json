@@ -1,6 +1,6 @@
 {
   "serviceId": "youtube-premium",
-  "lastUpdated": "2026-02-20",
+  "lastUpdated": "2026-10-03",
   "exchangeRateDate": "2026-08-22",
   "krwRate": 1385.741836,
   "baseCurrency": "USD",
@@ -30,6 +30,19 @@
           "usd": 6.13,
           "krw": 8495
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "verified",
+        "label": "확인",
+        "verified": {
+          "individual": [
+            "https://www.youtube.com/premium?hl=ko"
+          ],
+          "lite": [
+            "https://www.youtube.com/premiumlite?hl=ko"
+          ]
+        }
       }
     },
     {
@@ -39,30 +52,48 @@
       "currency": "USD",
       "plans": {
         "individual": {
-          "monthly": 13.99,
+          "monthly": 15.99,
           "yearly": null
         },
         "family": {
-          "monthly": 22.99,
+          "monthly": 26.99,
           "yearly": null
         },
         "lite": {
-          "monthly": 7.99,
+          "monthly": 8.99,
           "yearly": null
         }
       },
       "converted": {
         "individual": {
-          "usd": 13.99,
-          "krw": 19387
+          "usd": 15.99,
+          "krw": 22158
         },
         "family": {
-          "usd": 22.99,
-          "krw": 31858
+          "usd": 26.99,
+          "krw": 37401
         },
         "lite": {
-          "usd": 7.99,
-          "krw": 11072
+          "usd": 8.99,
+          "krw": 12458
+        }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "verified",
+        "label": "확인",
+        "verified": {
+          "individual": [
+            "https://one.google.com/intl/en_us/about/google-ai-plans/",
+            "https://store.google.com/us/collection/offers?hl=en-US"
+          ],
+          "family": [
+            "https://one.google.com/intl/en_us/about/google-ai-plans/"
+          ],
+          "lite": [
+            "https://one.google.com/intl/en_us/about/google-ai-plans/",
+            "https://blog.google/products-and-platforms/products/google-one/google-ai-subscriptions/"
+          ]
         }
       }
     },
@@ -98,6 +129,21 @@
           "usd": 10.9,
           "krw": 15105
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/gb/product/google_home_speaker?hl=en-GB"
+          ]
+        },
+        "unverified": [
+          "family",
+          "lite"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -132,6 +178,17 @@
           "usd": 6.44,
           "krw": 8924
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family",
+          "lite"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -174,6 +231,23 @@
           "usd": 2.29,
           "krw": 3173
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/in/product/pixel_11?hl=en-IN",
+            "https://store.google.com/in/product/pixel_11_pro?hl=en-IN"
+          ]
+        },
+        "unverified": [
+          "family",
+          "lite",
+          "duo"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -200,6 +274,16 @@
           "usd": 14.34,
           "krw": 19872
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -234,6 +318,22 @@
           "usd": 9.4,
           "krw": 13026
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/tw/product/pixel_11?hl=zh-TW",
+            "https://store.google.com/tw/product/pixel_11_pro?hl=zh-TW"
+          ]
+        },
+        "unverified": [
+          "family",
+          "duo"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -268,6 +368,17 @@
           "usd": 16.33,
           "krw": 22629
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family",
+          "duo"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -294,6 +405,16 @@
           "usd": 22.04,
           "krw": 30542
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -320,6 +441,16 @@
           "usd": 10.99,
           "krw": 15229
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -346,6 +477,16 @@
           "usd": 10.37,
           "krw": 14370
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -372,6 +513,16 @@
           "usd": 7.87,
           "krw": 10906
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -398,6 +549,16 @@
           "usd": 6.14,
           "krw": 8508
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -424,6 +585,16 @@
           "usd": 5.74,
           "krw": 7954
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -450,6 +621,16 @@
           "usd": 13.34,
           "krw": 18486
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -476,6 +657,16 @@
           "usd": 13.33,
           "krw": 18472
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -502,6 +693,16 @@
           "usd": 35.03,
           "krw": 48543
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -536,6 +737,21 @@
           "usd": 23.35,
           "krw": 32357
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/fr/product/google_home_speaker?hl=fr"
+          ]
+        },
+        "unverified": [
+          "family",
+          "duo"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -562,6 +778,16 @@
           "usd": 30.36,
           "krw": 42071
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -588,6 +814,16 @@
           "usd": 30.36,
           "krw": 42071
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -614,6 +850,21 @@
           "usd": 30.36,
           "krw": 42071
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/ie/collection/offers?hl=en-GB",
+            "https://store.google.com/ie/product/google_home_speaker?hl=en-GB"
+          ]
+        },
+        "unverified": [
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -640,6 +891,16 @@
           "usd": 30.36,
           "krw": 42071
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -666,6 +927,20 @@
           "usd": 42.33,
           "krw": 58658
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/ch/product/google_home_speaker?hl=de"
+          ]
+        },
+        "unverified": [
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -692,6 +967,21 @@
           "usd": 29.46,
           "krw": 40824
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/se/product/pixel_11?hl=sv",
+            "https://store.google.com/se/collection/offers?hl=sv"
+          ]
+        },
+        "unverified": [
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -718,6 +1008,20 @@
           "usd": 40.49,
           "krw": 56109
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/dk/product/pixel_11?hl=da"
+          ]
+        },
+        "unverified": [
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -744,6 +1048,20 @@
           "usd": 28.93,
           "krw": 40090
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "partial",
+        "label": "부분 확인",
+        "verified": {
+          "individual": [
+            "https://store.google.com/no/product/pixel_11?hl=no"
+          ]
+        },
+        "unverified": [
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -770,6 +1088,16 @@
           "usd": 16.26,
           "krw": 22532
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -796,6 +1124,16 @@
           "usd": 18.85,
           "krw": 26121
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -822,6 +1160,16 @@
           "usd": 4.07,
           "krw": 5640
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -848,6 +1196,16 @@
           "usd": 11.07,
           "krw": 15340
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -882,6 +1240,17 @@
           "usd": 1.04,
           "krw": 1441
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family",
+          "lite"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -908,6 +1277,16 @@
           "usd": 4.54,
           "krw": 6291
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -934,6 +1313,16 @@
           "usd": 10.41,
           "krw": 14426
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -960,6 +1349,16 @@
           "usd": 18.85,
           "krw": 26121
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -986,6 +1385,16 @@
           "usd": 11.44,
           "krw": 15853
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1012,6 +1421,16 @@
           "usd": 15.91,
           "krw": 22047
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1038,6 +1457,16 @@
           "usd": 3.14,
           "krw": 4351
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1064,6 +1493,16 @@
           "usd": 2.07,
           "krw": 2868
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1090,6 +1529,16 @@
           "usd": 11.88,
           "krw": 16463
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1116,6 +1565,16 @@
           "usd": 11.9,
           "krw": 16490
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1142,6 +1601,16 @@
           "usd": 16.7,
           "krw": 23142
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1168,6 +1637,16 @@
           "usd": 12.1,
           "krw": 16767
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1194,6 +1673,16 @@
           "usd": 11.23,
           "krw": 15562
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     },
     {
@@ -1220,6 +1709,16 @@
           "usd": 17.93,
           "krw": 24846
         }
+      },
+      "survey": {
+        "checkedAt": "2026-10-03",
+        "status": "unverified",
+        "label": "미확인",
+        "unverified": [
+          "individual",
+          "family"
+        ],
+        "retainedFrom": "2026-02-20"
       }
     }
   ]

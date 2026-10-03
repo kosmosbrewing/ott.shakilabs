@@ -105,7 +105,8 @@ const maskNumbers = (text) => text.replace(/[0-9][0-9,.]*/g, "#");
 // =========================================================================
 describe("리터럴 앵커: 시드 값 자체", () => {
   it("가격 시드의 헤더 값", () => {
-    expect(RAW_SEED.lastUpdated).toBe("2026-02-20");
+    // 2026-10-03 재조사 회차. 국가별 확인 여부는 각 행의 survey 필드(price-survey.test.mjs가 검사)
+    expect(RAW_SEED.lastUpdated).toBe("2026-10-03");
     expect(RAW_SEED.exchangeRateDate).toBe("2026-08-22");
     expect(RAW_SEED.krwRate).toBe(1385.741836);
     expect(RAW_SEED.baseCountry).toBe("KR");
@@ -134,6 +135,9 @@ describe("리터럴 앵커: 시드 값 자체", () => {
     expect(of("네덜란드").plans.individual.monthly).toBe(13.99);
     expect(of("네덜란드").plans.family.monthly).toBe(25.99);
     expect(of("베트남").plans.individual.monthly).toBe(79000);
+    // 2026-10-03 공식 확인으로 인상 반영(13.99→15.99). 트렌드 본문이 "월 2만원 이상" 예시로 부른다
+    expect(of("미국").plans.individual.monthly).toBe(15.99);
+    expect(of("미국").converted.individual.krw).toBe(22158);
   });
 
   it("파생 집계값", () => {
@@ -148,14 +152,15 @@ describe("리터럴 앵커: 시드 값 자체", () => {
     expect(D.currencyStructure(data).totalPairs).toBe(946);
     expect(D.currencyStructure(data).sameCurrencyPairs).toBe(15);
     expect(D.globalSpread(data).spread).toBe(17.7);
-    expect(D.surveyDateGapDays(data)).toBe(183);
+    expect(D.surveyDateGapDays(data)).toBe(42);
     expect(D.planCombinations(data)).toHaveLength(5);
     expect(D.familyMultiples(data).count).toBe(43);
     expect(D.fxRankThresholds(data).asymmetryRatio).toBe(82.2);
     expect(D.fxRankThresholds(data).within20).toHaveLength(6);
     expect(D.baseNeighborhood(data).rankAsc).toBe(28);
     expect(D.adjacentGaps(data).big).toHaveLength(9);
-    expect(D.litePlans(data).ranks).toEqual([2, 3, 28, 32, 40, 41]);
+    // 미국 개인 요금 인상(2026-10-03 확인)으로 미국 행이 32위 → 35위
+    expect(D.litePlans(data).ranks).toEqual([2, 3, 28, 35, 40, 41]);
   });
 });
 
@@ -498,6 +503,18 @@ describe("관계: 트렌드 페이지가 주장하는 것", () => {
     for (const tie of ties.ties) {
       expect(tie.genuine).toBe(true);
       expect(new Set(tie.members.map((m) => m.local)).size).toBe(1);
+    }
+  });
+
+  it("'월 2만원 이상'으로 이름을 부른 나라는 전부 실제로 2만원 이상이다", () => {
+    // 본문: "미국·영국·북유럽·스위스·호주 등 N개국은 월 2만원 이상" — 예시가 하나라도
+    // 2만원 아래면 문장이 거짓이 된다(2026-02-20 시드의 미국 19,387원이 그 상태였다).
+    const named = ["US", "GB", "SE", "DK", "NO", "CH", "AU"];
+    const rows = D.individualsByKrw(data);
+    for (const code of named) {
+      const row = rows.find((r) => r.code === code);
+      expect(row, `${code} 행이 있어야 한다`).toBeDefined();
+      expect(row.krw, `${code}는 2만원 이상이어야 한다`).toBeGreaterThanOrEqual(20000);
     }
   });
 
