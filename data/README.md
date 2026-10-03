@@ -7,12 +7,41 @@
 
 | 파일 | 근거 |
 |---|---|
-| `prices/youtube-premium.json`의 `plans.*.monthly` (44개국) | 전부 실제 공표가 형태의 라운드 넘버다 (US 13.99/22.99, GB 12.99/19.99, AU 22.99/39.99, IN 149/299, JP 1280/2280, KR 14900). 국가별 family/individual 배수가 제각각(mean 1.90, **cv 0.115**, min 1.52 max 2.41)이라 파생 상수가 아니다. |
+| `prices/youtube-premium.json`의 `plans.*.monthly` (44개국) | 전부 실제 공표가 형태의 라운드 넘버다 (US 15.99/26.99, GB 12.99/19.99, AU 22.99/39.99, IN 149/299, JP 1280/2280, KR 14900). 국가별 family/individual 배수가 제각각(mean 1.90, **cv 0.114**, min 1.52 max 2.41)이라 파생 상수가 아니다. |
 | `exchange-rates.json` 및 각 prices 파일의 `converted.*` | `scripts/fetch-exchange-rates.ts`가 공개 무료 API(open.er-api.com)에서 실제로 가져온다. |
 
 `plans.*.monthly`는 **사람이 손으로 채운 상수**다. 자동 수집 스크립트는 존재하지 않는다.
 갱신하려면 사람이 조사하고 `lastUpdated`를 **실제 조사한 날짜**로 바꿔야 한다.
 조사하지 않은 채 날짜만 오늘로 바꾸는 것은 하지 않은 조사를 했다고 주장하는 것이다.
+
+### 요금 조사 회차와 `survey` 필드 (2026-10-03 재확인부터)
+
+`lastUpdated`는 **전수 조사일**(44개국 전부를 조사한 날, 현재 2026-02-20)이다. 일부 칸만 다시 확인한 날짜로
+올리지 않는다 — 올리면 재확인하지 못한 값까지 그 날짜에 확인한 것처럼 읽힌다.
+칸별 상태는 국가 행의 `survey`가 유일한 출처이고, 화면 문장·행 표시·국가 상세 표기는 전부 여기서 계산한다
+(`client/scripts/seo-discoveries.mjs`의 `surveyRounds`·`surveyProvenanceSentence`·`surveyCellMark`·`surveyCountryLabel`).
+
+| 필드 | 뜻 |
+|---|---|
+| `survey.surveyedAt` | 전수 조사일 — 모든 행, `lastUpdated`와 같아야 한다 |
+| `survey.recheckedAt` + `verified` | `{ 플랜: [출처 URL, ...] }` — 그 날 **유튜브·구글 소유 도메인**에서 현행 요금을 확인한 칸. 재확인한 칸이 있는 행에만 있다 |
+| `survey.unverified` | 공식 출처로 확인하지 못해 전수 조사 값을 **그대로 둔** 칸 (추정값으로 채우지 않는다) |
+| `survey.previous` | `{ 플랜: 전수 조사 값 }` — 재확인 결과 값이 달라 갱신한 칸 |
+| `survey.status` / `label` | `verified`=확인 · `partial`=부분 확인 · `unverified`=미확인 |
+
+화면 표기: 가격표 하단·FAQ·소개 페이지에 "2026-02-20 전수 조사 · 2026-10-03 공식 출처로 N개국 재확인(…), 나머지 M개국은 02-20 값"
+문장이 실리고(숫자는 계산값), 순위표 행마다 "재확인 10-03" / "02-20 값 유지"가 작게 붙는다.
+`client/scripts/price-survey.test.mjs`가 문장의 숫자를 survey 블록에서 따로 센 값과 대조하고, 시드를 바꾸면 문장이 따라 움직이는지까지 본다.
+
+확인 규칙: ① 출처는 당일 실제로 열어 본 공식 페이지이거나 직전 회차 이후 게시된 공식 글이어야 한다.
+② 공식 출처끼리 값이 다르면 미확인. ③ Google Store 기기 혜택의 YouTube Premium 체험 약관은 공식이지만
+낡은 값·템플릿 복사가 실제로 확인돼(이탈리아 2018년 출시가, 캐나다·싱가포르·네덜란드·벨기에 문구 충돌)
+**약관 하나만으로는 값을 바꾸지 않는다** — 직전 회차 값과 일치할 때만 확인으로 인정한다.
+youtube.com/premium은 접속 IP 국가의 가격만 보여 주고 `gl=` 파라미터를 무시하므로, 한국 밖 요금은 직접 볼 수 없다.
+
+2026-10-03 재확인 결과: 11개국 14칸 확인(전 요금제 KR·US / 개인 요금만 GB FR IE CH SE DK NO IN TW), 나머지 33개국은 전수 조사 값.
+값이 바뀐 칸은 미국 3칸뿐이다(개인 13.99→15.99, 패밀리 22.99→26.99, 라이트 7.99→8.99).
+이 회차는 `history/`에 append하지 않았다 — 전수 조사 값에 출처 기록이 없어 "변동"의 출발점을 관측으로 주장할 수 없기 때문이다.
 
 ## 🚫 발행 금지 — 파생 합성값
 
@@ -28,7 +57,7 @@
 | disney-plus | mean 1.3408, sd 0.0025, cv 0.0018 | 상수 배수 |
 | amazon-prime-video | mean 1.2699, sd 0.0021, cv 0.0016 | 상수 배수 |
 | spotify | mean 1.6216, sd 0.0035, cv 0.0022 | 상수 배수 |
-| *(대조군)* youtube-premium | mean 1.8962, **sd 0.2180, cv 0.1149** | 실제 공표가 |
+| *(대조군)* youtube-premium (n=43) | mean 1.8973, **sd 0.2169, cv 0.1143** | 실제 공표가 |
 
 추가로, 실제 정가라면 불가능한 일치가 있다:
 

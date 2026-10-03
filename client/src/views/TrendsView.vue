@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
-import { getFaqItems } from "@/lib/seoContent";
+import { getFaqItems, getSurveyProvenance } from "@/lib/seoContent";
 import { trendsMeta } from "../../scripts/page-meta.mjs";
 import changelogSeed from "../../../data/reports/changelog.json";
 
@@ -98,6 +98,8 @@ const changelogEntries = computed<ChangelogEntry[]>(() => {
 // 프리렌더 산문 FAQ가 유일한 화면 표현이고, 스키마도 같은 함수에서 나온다.
 // (HomeView.vue가 루트 허브에서 쓰는 것과 같은 배선이다.)
 const faqItems = getFaqItems("/youtube-premium/trends");
+// 요금 조사 표기 — 전수 조사일과 재확인 범위(국가 행의 survey 블록에서 계산)
+const surveySentence = getSurveyProvenance();
 
 // FAQ 답변에 <strong> 같은 인라인 태그가 섞일 수 있다. 스키마에는 보이는 텍스트만 넣는다.
 function stripTags(html: string): string {
@@ -189,7 +191,7 @@ watch(serviceSlug, async () => {
         </div>
         <div class="retro-panel-content flex items-center justify-between flex-wrap gap-3">
           <p class="text-caption text-muted-foreground">
-            요금 조사일: {{ trends.asOf || "-" }} · 환율 기준일: {{ trends.exchangeRateDate || "-" }} ·
+            요금 조사: {{ surveySentence }} · 환율 기준일: {{ trends.exchangeRateDate || "-" }} ·
             같은 시점 기준 국가 간 비교(실시간 시계열 아님)
           </p>
           <div class="flex items-center gap-2 text-caption">

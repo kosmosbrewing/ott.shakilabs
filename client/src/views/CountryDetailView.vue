@@ -11,6 +11,7 @@ import {
 } from "@/api";
 import { formatNumber, countryFlag } from "@/lib/utils";
 import { getSiteUrl } from "@/lib/site";
+import { surveyCountryLabel } from "@/lib/seoContent";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import SeoRichContent from "@/components/seo/SeoRichContent.vue";
 import { LoadingSpinner } from "@/components/ui/loading";
@@ -46,6 +47,11 @@ const countryData = computed<CountryPrice | null>(() => {
 
 // 국기 이모지
 const flag = computed(() => countryFlag(countryData.value?.countryCode));
+
+// 이 나라의 요금 조사 표기 — 재확인 날짜는 공식 출처로 다시 확인한 요금제에만 붙는다
+const countrySurveyLabel = computed(
+  () => surveyCountryLabel(countryData.value) ?? `요금 조사 ${priceData.value?.lastUpdated ?? "-"}`
+);
 
 // 이 국가의 전체 순위 (개인 요금제 KRW 기준)
 const rank = computed<number | null>(() => {
@@ -195,7 +201,7 @@ watch(
         </div>
         <div class="retro-panel-content text-right">
           <p class="text-tiny text-muted-foreground">
-            데이터 기준 {{ priceData.lastUpdated }} · 환율 기준 {{ priceData.exchangeRateDate }}
+            {{ countrySurveyLabel }} · 환율 기준 {{ priceData.exchangeRateDate }}
           </p>
         </div>
       </section>

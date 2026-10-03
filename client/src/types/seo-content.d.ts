@@ -25,4 +25,14 @@ declare module "*seo-content.mjs" {
   export function buildViewSections(route: string): SeoContentSection[];
   export function buildRichContent(route: string): string | null;
   export function getFaqItems(route: string): { q: string; a: string }[];
+
+  /** 가격표 페이지의 요금 조사 문장 — 숫자·날짜는 국가 행의 survey 블록에서 계산한다. */
+  export function getSurveyProvenance(): string;
+  /** 표 한 칸의 조사 상태. 재확인한 칸만 재확인 날짜를 단다. */
+  export function surveyCellMark(
+    row: unknown,
+    planId: string
+  ): { status: "rechecked" | "retained"; text: string } | null;
+  /** 국가 상세의 조사 표기 — 재확인 날짜는 재확인한 요금제에만 붙는다. */
+  export function surveyCountryLabel(row: unknown): string | null;
 }

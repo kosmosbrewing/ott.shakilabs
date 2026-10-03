@@ -199,6 +199,40 @@ function formatKrw(value) {
   return `₩${Math.round(value).toLocaleString("ko-KR")}`;
 }
 
+// --- 요금 조사 표기 — 숫자·날짜는 전부 국가 행의 survey 블록에서 온다(seo-discoveries.mjs) ---
+// 전수 조사일과 재확인일을 섞으면 재확인하지 못한 값까지 새 날짜로 읽힌다.
+
+/** 가격표 페이지의 요금 조사 문장(뷰의 표 하단과 같은 문장). */
+export function getSurveyProvenance() {
+  return D.surveyProvenanceSentence(loadData());
+}
+
+/** 표 칸의 조사 상태 표시("재확인 10-03" / "02-20 값 유지"). */
+export const surveyCellMark = D.surveyCellMark;
+
+/** 국가 상세의 조사 표기 — 재확인 날짜는 재확인한 요금제에만 붙는다. */
+export const surveyCountryLabel = D.surveyCountryLabel;
+
+/** 제목용 짧은 표기 — 재확인 회차가 있으면 "일부 재확인"으로 범위를 한정한다. */
+function surveyHeadline(data) {
+  const r = D.surveyRounds(data);
+  return r.recheckDate
+    ? `${r.fullSurveyDate} 전수 조사 · ${r.recheckDate} 일부 재확인`
+    : `요금 조사 ${r.fullSurveyDate} 기준`;
+}
+
+/** "사람이 확인한 날"이 어느 값까지인지 — 공식 출처로 다시 확인한 칸만 그렇게 부른다. */
+function surveyScopeSentence(data) {
+  const r = D.surveyRounds(data);
+  const head = `${r.fullSurveyDate}은 ${r.countryCount}개국 현지 통화 정가를 전수 조사한 날이고`;
+  if (!r.recheckDate) return `${head}, 그 뒤 다시 확인한 값은 없습니다.`;
+  return (
+    `${head}, 그중 공식 출처와 직접 대조해 사람이 다시 확인한 것은 ` +
+    `${r.recheckDate}의 ${r.recheckedCountries}개국 ${r.recheckedCells}개 값뿐입니다` +
+    `(나머지 ${r.retainedCells}개 값은 ${r.fullSurveyDate} 값 그대로).`
+  );
+}
+
 function formatUsd(value) {
   return `$${Number(value).toFixed(2)}`;
 }
@@ -263,7 +297,7 @@ function getHomeFaqItems() {
       q: "데이터는 얼마나 자주 업데이트되나요?",
       // 두 날짜는 성격이 다르다. 요금 조사는 자동 수집 수단이 없어 사람이 하고,
       // 환율만 API로 자동 갱신된다. 하나로 뭉뚱그리면 "요금도 매일 갱신된다"로 읽힌다.
-      a: `가격 기준일과 환율 기준일은 서로 다르며 따로 표기합니다. <strong>요금 조사일: ${data.lastUpdated}</strong> — 현지 통화 정가는 Google의 가격 정책 변경 공지를 사람이 확인한 뒤 반영하므로, 이 날짜는 실제로 요금을 조사한 날짜입니다. <strong>환율 기준일: ${data.exchangeRateDate}</strong> — 원화 환산에 쓰는 환율은 공개 환율 API에서 자동으로 가져옵니다. 미리 렌더된 페이지의 원화 값은 배포 시점 환율로 계산돼 있어, 지금 보고 계신 시점의 환율과는 차이가 날 수 있습니다.`,
+      a: `가격 기준일과 환율 기준일은 서로 다르며 따로 표기합니다. <strong>요금 조사: ${getSurveyProvenance()}</strong> — ${surveyScopeSentence(data)} <strong>환율 기준일: ${data.exchangeRateDate}</strong> — 원화 환산에 쓰는 환율은 공개 환율 API에서 자동으로 가져옵니다. 미리 렌더된 페이지의 원화 값은 배포 시점 환율로 계산돼 있어, 지금 보고 계신 시점의 환율과는 차이가 날 수 있습니다.`,
     },
     {
       q: "광고 제거 외에 유튜브 프리미엄의 혜택은?",
@@ -327,7 +361,7 @@ function getCountryFaqItems(countryCode) {
   if (!row) return [];
 
   const countryName = row.country;
-  const lastUpdated = data.lastUpdated || "";
+  const surveyLabel = surveyCountryLabel(row) || `요금 조사 ${data.lastUpdated}`;
   return [
     {
       q: `${countryName} 가격으로 구독하려면 어떻게 해야 하나요?`,
@@ -347,7 +381,7 @@ function getCountryFaqItems(countryCode) {
     },
     {
       q: `${countryName} 가격은 자주 바뀌나요?`,
-      a: `국가별 가격은 환율·물가·부가세 변동에 따라 조정되며, Google이 주기적으로 가격 정책을 재검토합니다. 본 페이지의 가격은 ${lastUpdated} 기준이며, 실제 결제 시점에 따라 다를 수 있으므로 Google Play·YouTube 공식 페이지에서 최종 확인하세요.`,
+      a: `국가별 가격은 환율·물가·부가세 변동에 따라 조정되며, Google이 주기적으로 가격 정책을 재검토합니다. 본 페이지의 가격은 ${surveyLabel} 기준이며, 실제 결제 시점에 따라 다를 수 있으므로 Google Play·YouTube 공식 페이지에서 최종 확인하세요.`,
     },
   ];
 }
@@ -357,15 +391,19 @@ function getTrendsFaqItems() {
   const data = loadData();
   const fxDate = data.exchangeRateDate || data.lastUpdated || "-";
   const surveyDate = data.lastUpdated || "-";
+  const rounds = D.surveyRounds(data);
+  const recheckNote = rounds.recheckDate
+    ? ` ${rounds.recheckDate}에 공식 출처로 다시 확인한 것은 ${rounds.recheckedCells}개 값뿐이라 국가별 시계열이 되지 못합니다.`
+    : "";
 
   return [
     {
       q: "이 페이지에서 가격 변동 추이를 볼 수 있나요?",
-      a: `아직 볼 수 없습니다. 변동을 보여주려면 같은 국가를 서로 다른 시점에 두 번 이상 조사한 이력이 있어야 하는데, 현재는 요금 조사 1회분(${surveyDate} 기준)만 확보돼 있습니다. 그래서 이 페이지는 시점 간 변동 대신 같은 시점의 국가 간 가격 격차를 보여줍니다. 두 번째 조사가 쌓이면 시점별 비교표가 이 자리에 나타납니다.`,
+      a: `아직 볼 수 없습니다. 변동을 보여주려면 같은 국가를 서로 다른 시점에 두 번 이상 조사한 이력이 있어야 하는데, 현재는 전수 요금 조사 1회분(${surveyDate} 기준)만 확보돼 있습니다.${recheckNote} 그래서 이 페이지는 시점 간 변동 대신 같은 시점의 국가 간 가격 격차를 보여줍니다. 두 번째 조사가 쌓이면 시점별 비교표가 이 자리에 나타납니다.`,
     },
     {
       q: "가격 데이터는 어떻게, 얼마나 자주 수집되나요?",
-      a: `현지 통화 정가는 자동 수집 수단이 없어 사람이 공식 요금 안내를 확인해 반영합니다. 현재 요금 조사일은 ${surveyDate}입니다. 원화 환산에 쓰는 환율만 공개 환율 API에서 자동으로 가져오며 기준일은 ${fxDate}입니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.`,
+      a: `현지 통화 정가는 자동 수집 수단이 없어 사람이 조사해 반영합니다. 현재 요금 조사는 ${getSurveyProvenance()}입니다. 원화 환산에 쓰는 환율만 공개 환율 API에서 자동으로 가져오며 기준일은 ${fxDate}입니다. 실시간·일 단위 가격 시계열은 제공하지 않습니다.`,
     },
     {
       q: "과거 특정 시점의 공식 요금도 확인할 수 있나요?",
@@ -504,7 +542,8 @@ function buildCountryContent(countryCode) {
         : `한국과 거의 동일한 가격입니다.`
     : "";
 
-  const lastUpdated = data.lastUpdated || "";
+  // 국가마다 재확인 범위가 달라서 전역 날짜 하나로 쓰면 재확인 못 한 값까지 새 날짜로 읽힌다
+  const surveyLabel = surveyCountryLabel(row) || `요금 조사 ${data.lastUpdated}`;
   const krwRate = data.krwRate ? `1 USD ≈ ${Math.round(data.krwRate).toLocaleString("ko-KR")}원` : "";
 
   return [
@@ -519,7 +558,7 @@ function buildCountryContent(countryCode) {
         ${countryName}
       </nav>
 
-      <h1 class="${H1}">유튜브 프리미엄 ${countryName} 가격 (요금 조사 ${lastUpdated} 기준)</h1>
+      <h1 class="${H1}">유튜브 프리미엄 ${countryName} 가격 (${surveyLabel})</h1>
 
       <p class="${P}">
         유튜브 프리미엄 <strong>${countryName}</strong>(${continent}) 개인 플랜은
@@ -552,7 +591,7 @@ function buildCountryContent(countryCode) {
 
       <p class="sp-note sp-note--tight">
         ※ ${krwRate} 기준. 환율은 매일 변동하므로 실제 결제 금액은 해당 통화 원가 × 현재 환율로 계산됩니다.
-        요금 조사일: ${lastUpdated} · 환율 기준일: ${data.exchangeRateDate}
+        ${surveyLabel} · 환율 기준일: ${data.exchangeRateDate}
       </p>
 
 `,
@@ -637,7 +676,7 @@ function buildCountryContent(countryCode) {
       </ul>
 
       <p class="sp-note">
-        ※ 본 페이지의 현지 통화 요금은 공개된 출처를 기반으로 ${lastUpdated}에 조사한 자료이고, 원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다. 실제 Google Play/YouTube 공식 가격과 다를 수 있습니다.
+        ※ 본 페이지의 현지 통화 요금은 ${surveyLabel} 기준 자료이고, 원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다. 실제 Google Play/YouTube 공식 가격과 다를 수 있습니다.
         가격 우회 구독은 약관 위반 위험이 있어 권장하지 않습니다. 본 사이트는 Google 또는 YouTube의 공식 제휴 서비스가 아닙니다.
       </p>`,
     },
@@ -755,7 +794,7 @@ function buildLandingDatasetSection() {
   return `      <h2 class="${H2}">이 요금표를 전수로 훑어 나온 것들</h2>
       <p class="${P}">
         아래는 저희가 직접 조사한 ${coverage.countryCount}개국 요금표를 한 칸도 빼지 않고 세어서 얻은 관찰입니다.
-        바깥에서 가져온 통계가 아니라 이 표 자체의 성질이고, 전부 요금 조사일 ${data.lastUpdated} 한 시점의 자료입니다.
+        바깥에서 가져온 통계가 아니라 이 표 자체의 성질입니다. 요금 자료의 시점은 ${getSurveyProvenance()}입니다.
         아래 숫자는 문장에 적어 둔 것이 아니라 빌드할 때 저장소에 커밋된 시드에서 계산합니다 —
         요금표가 갱신되면 이 글의 수치도 같이 바뀝니다.
       </p>
@@ -818,12 +857,13 @@ function buildLandingDatasetSection() {
         그래서 화면과 정적 HTML은 원화 표시 국가에 한해 환산값 대신 현지 정가를 되돌려 씁니다.
       </p>
 
-      <h3 class="${H3}">날짜가 두 개인 이유</h3>
+      <h3 class="${H3}">요금 날짜와 환율 날짜를 따로 적는 이유</h3>
       <p class="${P}">
         요금 조사일 ${data.lastUpdated}과 환율 기준일 ${data.exchangeRateDate}은 ${gapDays}일 떨어져 있습니다.
-        앞의 날짜는 각국 현지 통화 정가를 사람이 확인한 날이고, 뒤의 날짜는 그 정가를 원화로 바꾸는 배수를 가져온 날입니다.
-        성격이 다른 두 관측이라 하나로 묶어 "데이터 기준일"이라고 적으면 둘 중 하나는 반드시 거짓이 됩니다.
-        이 사이트가 두 날짜를 어디서나 따로 표기하는 이유입니다.
+        ${surveyScopeSentence(data)}
+        환율 기준일은 그 정가를 원화로 바꾸는 배수를 가져온 날입니다.
+        성격이 다른 관측이라 하나로 묶어 "데이터 기준일"이라고 적으면 어느 한쪽은 반드시 거짓이 됩니다.
+        이 사이트가 요금 날짜와 환율 날짜를 어디서나 따로 표기하는 이유입니다.
       </p>
 
       <h3 class="${H3}">연 단위 요금은 ${billing.cells}칸이 전부 비어 있습니다</h3>
@@ -981,7 +1021,7 @@ function buildHomeStructureSection() {
   return `      <h2 class="${H2}">${data.prices.length}개국 표를 전수로 계산해 본 결과</h2>
       <p class="${P}">
         아래 수치는 위 가격표를 그대로 계산해 얻은 것입니다.
-        전부 요금 조사일 ${data.lastUpdated} 한 시점의 자료이며, 시점 간 가격 변동은 다루지 않습니다.
+        요금 자료의 시점은 ${getSurveyProvenance()}이며, 시점 간 가격 변동은 다루지 않습니다.
       </p>
 
       <h3 class="${H3}">격차는 ${spread.spread}배지만 가격대가 연속이지는 않습니다</h3>
@@ -1154,7 +1194,11 @@ function buildTrendsFxSection() {
       <div class="${INFO}">
         <strong>가정 시나리오입니다</strong> — 아래는 "환율이 다른 값이었다면 이 표의 순위가 어떻게 달라졌을까"를
         계산한 결과이지, 환율이 실제로 그렇게 움직였다는 관측이 아닙니다.
-        요금 조사는 여전히 1회분(${data.lastUpdated} 기준 ${data.prices.length}개국)뿐이며,
+        전수 요금 조사는 여전히 1회분(${data.lastUpdated} 기준 ${data.prices.length}개국)${
+          D.surveyRounds(data).recheckDate
+            ? `이고 그 뒤 공식 출처 재확인은 ${D.surveyRounds(data).recheckedCells}개 값뿐이며`
+            : "뿐이며"
+        },
         아래 어떤 문장도 특정 국가의 요금이 바뀌었다고 말하지 않습니다.
       </div>
 
@@ -1286,8 +1330,12 @@ function buildTrendsFxSection() {
         한국의 자리만 움직입니다. 시차가 실제로 흔들 수 있는 것은 그 하나입니다.
       </p>
       <p class="${P}">
-        반대로 그 사이 어느 나라의 현지 정가가 바뀌었다면 이 데이터로는 알 수 없습니다.
-        정가 관측이 1회분뿐이라 비교 대상이 없기 때문입니다.
+        반대로 그 사이 어느 나라의 현지 정가가 바뀌었는지는 ${
+          D.surveyRounds(data).recheckDate
+            ? `${D.surveyRounds(data).recheckDate}에 공식 출처로 다시 확인한 ${D.surveyRounds(data).recheckedCells}개 값(그중 ${D.surveyRounds(data).updatedCells}개는 값이 달라 갱신)을 빼면 `
+            : ""
+        }이 데이터로는 알 수 없습니다.
+        나머지 값은 정가 관측이 1회분뿐이라 비교 대상이 없기 때문입니다.
         그래서 이 페이지는 변동률을 싣지 않고, 대신 "지금 순위가 얼마나 견고한가"만 위와 같이 정량화합니다.
       </p>
       <p class="sp-note">
@@ -1368,7 +1416,7 @@ function buildLandingContent() {
         연 단위로만 판매되는 요금제는 월 환산값을 별도로 표기하며, 표시가에 부가가치세가 포함되는지는 국가 제도에 따라 다릅니다.
       </p>
       <ul class="${UL}">
-        <li class="${LI}"><strong>가격 기준일</strong> — ${data.lastUpdated} (요금 자체는 사업자 공지 확인 후 수동 반영)</li>
+        <li class="${LI}"><strong>가격 기준일</strong> — ${getSurveyProvenance()} (요금 자체는 사람이 조사해 수동 반영)</li>
         <li class="${LI}"><strong>환율 기준일</strong> — ${data.exchangeRateDate} (공개 환율 API로 자동 갱신)</li>
         <li class="${LI}"><strong>적용 환율</strong> — 1 ${data.baseCurrency} = ${Math.round(rate).toLocaleString("ko-KR")}원</li>
         <li class="${LI}"><strong>기준 국가</strong> — ${data.baseCountry === "KR" ? "한국" : data.baseCountry} (절약률은 한국 가격 대비로 계산)</li>
@@ -1428,7 +1476,7 @@ ${buildLandingDatasetSection()}
       </div>
 
       <p class="sp-note">
-        ※ 본 서비스는 Google LLC·YouTube 및 각 OTT 사업자의 공식 제휴 서비스가 아닙니다. 가격 기준일: ${data.lastUpdated}.
+        ※ 본 서비스는 Google LLC·YouTube 및 각 OTT 사업자의 공식 제휴 서비스가 아닙니다. 요금 조사: ${getSurveyProvenance()}.
       </p>` }];
 }
 
@@ -1449,7 +1497,9 @@ function buildHomeContent() {
         const savingsPercent = ((krKrw - p.krw) / krKrw * 100).toFixed(1);
         return `<tr>
           <td class="${TD}">${i + 1}위</td>
-          <td class="${TD}"><a href="/ott/youtube-premium/${p.countryCode.toLowerCase()}">${p.country}</a></td>
+          <td class="${TD}"><a href="/ott/youtube-premium/${p.countryCode.toLowerCase()}">${p.country}</a>${
+            surveyCellMark(p, "individual") ? ` <span class="sp-survey-mark">${surveyCellMark(p, "individual").text}</span>` : ""
+          }</td>
           <td class="${TD}">${formatKrw(p.krw)}</td>
           <td class="${TD}"><strong class="sp-down">-${savingsPercent}%</strong></td>
         </tr>`;
@@ -1463,7 +1513,7 @@ function buildHomeContent() {
       id: "home",
       live: true,
       html: `
-      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 비교 (요금 조사 ${data.lastUpdated} 기준)</h1>
+      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 비교 (${surveyHeadline(data)})</h1>
 
       <p class="${P}">
         전 세계 <strong>${prices.length}개 국가</strong>의 유튜브 프리미엄(YouTube Premium) 개인 플랜 가격을 한눈에 비교하는 서비스입니다.
@@ -1490,6 +1540,7 @@ function buildHomeContent() {
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table></div>
+      <p class="sp-note sp-note--tight">요금 조사: ${getSurveyProvenance()} · 환율 기준일: ${data.exchangeRateDate}</p>
 
 `,
     },
@@ -1515,7 +1566,7 @@ function buildHomeContent() {
       <ul class="${UL}">
         <!-- 시점 주장 금지. 정가는 자동 수집 수단이 없어 사람이 조사하므로 "실시간"·"최신"은
              거짓이 된다. 기능은 그대로 두고 근거 날짜(요금 조사일·환율 기준일)에 기댄다. -->
-        <li class="${LI}"><strong>${prices.length}개 국가 요금 한눈에 비교</strong> — 각 국가에서 실제로 제공되는 요금제만 같은 시점(요금 조사일 ${data.lastUpdated}) 기준으로 비교 (개인 ${planCounts.individual}개국 · 패밀리 ${planCounts.family}개국 · 라이트 ${planCounts.lite}개국 · 듀오 ${planCounts.duo}개국)</li>
+        <li class="${LI}"><strong>${prices.length}개 국가 요금 한눈에 비교</strong> — 각 국가에서 실제로 제공되는 요금제만 전수 조사일(${data.lastUpdated}) 값으로 비교하되, 공식 출처로 다시 확인한 칸은 그 값으로 반영(표의 행마다 표시) (개인 ${planCounts.individual}개국 · 패밀리 ${planCounts.family}개국 · 라이트 ${planCounts.lite}개국 · 듀오 ${planCounts.duo}개국)</li>
         <li class="${LI}"><strong>원화 자동 환산</strong> — 환율 기준일 ${data.exchangeRateDate}의 공개 환율로 원화 비용 확인</li>
         <li class="${LI}"><strong>절약률 계산</strong> — 한국 대비 월·연 절약액 자동 계산</li>
         <li class="${LI}"><strong>국가 간 가격 격차</strong> — 환율이 순위를 얼마나 흔드는지까지 (<a href="/ott/youtube-premium/trends">격차 분석 페이지</a>)</li>
@@ -1559,7 +1610,7 @@ function buildHomeContent() {
       </ul>
 
       <p class="sp-note">
-        ※ 본 서비스는 Google LLC 또는 YouTube의 공식 제휴 서비스가 아닙니다. 요금 조사일: ${data.lastUpdated} · 환율 기준일: ${data.exchangeRateDate}.
+        ※ 본 서비스는 Google LLC 또는 YouTube의 공식 제휴 서비스가 아닙니다. 요금 조사: ${getSurveyProvenance()} · 환율 기준일: ${data.exchangeRateDate}.
       </p>`,
     },
   ];
@@ -1647,7 +1698,7 @@ function buildTrendsContent() {
         가격 트렌드
       </nav>
 
-      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 격차 (요금 조사 ${data.lastUpdated} 기준)</h1>
+      <h1 class="${H1}">유튜브 프리미엄 국가별 가격 격차 (${surveyHeadline(data)})</h1>
 ${
   hasObservedHistory
     ? `
@@ -1682,8 +1733,8 @@ ${
       live: false,
       html: `      <p class="${P}">
         이 페이지는 유튜브 프리미엄 개인 플랜의 국가별 가격을 <strong>같은 시점 기준으로 나란히</strong> 비교합니다.
-        현지 통화 정가는 ${data.lastUpdated}에 조사한 ${prices.length}개국 자료이고,
-        원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다. 두 날짜는 성격이 다르므로 따로 표기합니다.
+        현지 통화 정가는 ${getSurveyProvenance()}이고,
+        원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다. 요금 날짜와 환율 날짜는 성격이 다르므로 따로 표기합니다.
       </p>
       <div class="${INFO}">
         <strong>데이터 범위 안내</strong> — 본 페이지는 실시간·일 단위 가격 시계열을 제공하지 않으며,
@@ -1691,7 +1742,15 @@ ${
         ${
           hasObservedHistory
             ? `관측 이력 ${stats.snapshots.length}회(${stats.snapshots.map((s) => s.date).join(", ")})와 최신 가격표(${data.lastUpdated} 기준 ${prices.length}개국)에서 도출할 수 있는 사실만 제공합니다.`
-            : `현재 확보된 요금 조사는 <strong>1회분(${data.lastUpdated} 기준 ${prices.length}개국)</strong>뿐이라, 시점 간 가격 변동은 표시하지 않습니다. 같은 국가를 서로 다른 시점에 두 번 이상 조사해야 변동을 말할 수 있고, 아직 그 조건을 충족하지 못했습니다.`
+            : `현재 확보된 전수 요금 조사는 <strong>1회분(${data.lastUpdated} 기준 ${prices.length}개국)</strong>${
+                D.surveyRounds(data).recheckDate
+                  ? `이고 ${D.surveyRounds(data).recheckDate} 공식 출처 재확인은 ${D.surveyRounds(data).recheckedCells}개 값뿐이라`
+                  : "뿐이라"
+              }, 시점 간 가격 변동은 표시하지 않습니다. 같은 국가를 서로 다른 시점에 두 번 이상 조사해야 변동을 말할 수 있습니다.${
+                D.surveyRounds(data).updatedCells > 0
+                  ? ` 재확인한 값 가운데 전수 조사 값과 달라 갱신한 ${D.surveyRounds(data).updatedCells}개도, 전수 조사 값에 출처 기록이 없어 관측된 변동으로 내세우지 않습니다.`
+                  : ""
+              }`
         }
       </div>
 
@@ -1702,9 +1761,9 @@ ${
       live: false,
       html: `      <h2 class="${H2}">이 페이지가 보여주는 것과 보여주지 않는 것</h2>
       <p class="${P}">
-        <strong>보여주는 것</strong> — 요금 조사일(${data.lastUpdated}) 하나를 기준으로 한
+        <strong>보여주는 것</strong> — 전수 조사일(${data.lastUpdated})을 기준으로 하고 공식 출처로 다시 확인한 칸만 그 값으로 바꾼
         ${prices.length}개국의 개인 플랜 현지 통화 정가와 그 원화 환산값, 그리고 국가 사이의 가격 격차와 순위입니다.
-        같은 시점끼리의 비교이므로 "어느 나라가 더 싼가"에는 그대로 답할 수 있습니다.
+        재확인한 칸을 빼면 같은 시점끼리의 비교이므로 "어느 나라가 더 싼가"에는 그대로 답할 수 있습니다.
       </p>
       <p class="${P}">
         <strong>보여주지 않는 것</strong> — 특정 국가의 요금이 언제 얼마나 올랐거나 내렸는지입니다.
@@ -1712,7 +1771,7 @@ ${
         ${
           hasObservedHistory
             ? `현재 관측 이력은 ${stats.snapshots.length}회입니다.`
-            : `현재 확보된 요금 조사는 1회분뿐입니다. 그래서 변동률 표를 싣지 않습니다.`
+            : `현재 확보된 전수 요금 조사는 1회분뿐입니다. 그래서 변동률 표를 싣지 않습니다.`
         }
       </p>
       <p class="${P}">
@@ -1892,7 +1951,7 @@ ${
       </ul>
 
       <p class="sp-note">
-        ※ 현지 통화 요금은 ${data.lastUpdated}에 조사한 자료이고, 원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다.
+        ※ 현지 통화 요금은 ${getSurveyProvenance()}이고, 원화 환산에 쓴 환율은 ${data.exchangeRateDate} 기준입니다.
         실시간·일 단위 시계열은 제공하지 않으며, 실제 결제 금액은 Google Play·YouTube 공식 페이지에서 최종 확인해야 합니다.
       </p>`,
     },
@@ -1943,11 +2002,12 @@ function buildAboutContent() {
 
       <h2 class="${H2}">3. 데이터 출처 및 검증 방법</h2>
       <p class="${P}">
-        가격 데이터는 공개된 Google/YouTube 공식 페이지와 각 국가의 공식 요금표를 사람이 확인해 반영합니다.
+        가격 데이터는 사람이 조사해 반영합니다.
         자동 수집 수단이 없으므로 상시 최신을 보장하지 않으며, 정해진 갱신 주기도 두고 있지 않습니다.
-        대신 실제로 조사한 날짜를 '요금 조사일'로 표기합니다 — 현재 요금 조사일은 ${data.lastUpdated}입니다.
-        모든 가격은 <a href="https://www.youtube.com/premium" target="_blank" rel="noopener noreferrer">YouTube Premium 공식 페이지</a> 등
-        각국 공식 요금 페이지와 직접 대조해 검증한 뒤 게재하며,
+        대신 실제로 조사한 날짜를 표기합니다 — 현재 요금 조사는 ${getSurveyProvenance()}입니다.
+        ${surveyScopeSentence(data)}
+        재확인한 값은 <a href="https://www.youtube.com/premium" target="_blank" rel="noopener noreferrer">YouTube Premium 공식 페이지</a>·Google 공식 페이지와
+        직접 대조해 출처를 기록했고, 국가별 가격표의 각 행에 재확인 여부를 표시합니다.
         요금제·결제 관련 공식 안내는 <a href="https://support.google.com/youtube" target="_blank" rel="noopener noreferrer">YouTube 고객센터</a>에서 확인할 수 있습니다.
       </p>
       <p class="${P}">
@@ -2018,7 +2078,7 @@ function buildAboutContent() {
       </p>
 
       <p class="sp-note">
-        요금 조사일: ${loadData().lastUpdated} · 환율 기준일: ${loadData().exchangeRateDate}
+        요금 조사: ${getSurveyProvenance()} · 환율 기준일: ${loadData().exchangeRateDate}
       </p>` }];
 }
 
