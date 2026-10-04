@@ -44,6 +44,8 @@ const config: Config = {
 
       // 5단계 폰트 계층 (샤키샤키 동일)
       fontSize: {
+        // v8c(2026-10-04, 사용자 결정 ④): text-xs 12px → 13px. 기본값(0.75rem)을 덮어 함대 하한 13px을 지킨다.
+        xs: ["0.8125rem", { lineHeight: "1.125rem" }],
         // 전 앱 공통 결과 히어로 금액 스케일 (26px/700) — 결과 히어로 문법 수렴 1단계
         display: ["1.625rem", { lineHeight: "1.2", fontWeight: "700" }],
         // 도구 페이지 H1 = 함대 기준 20px/700(GmarketSans는 font-title로 붙인다). 24px로 두면
