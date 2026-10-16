@@ -7,6 +7,8 @@
  * you the scope of the fix, whereas throwing on the first one hides the rest.
  */
 import fs from "node:fs";
+import { validateNoindex } from "./validate-noindex.mjs";
+import { NOINDEX_ROUTES as NOINDEX_ROUTES_FOR_GATE } from "./seo-routes.mjs";
 import { validateBuiltFontSizes } from "./validate-built-font-sizes.mjs";
 import { validateNoTinyTextUtilities } from "./validate-no-tiny-text.mjs";
 import { validateParagraphLength } from "./validate-paragraph-length.mjs";
@@ -278,6 +280,9 @@ const SITEMAP_EXEMPT = new Map([
     "사용자 글 목록 셸이다. 자체 콘텐츠가 없고 개별 글은 X-Robots-Tag noindex라, " +
       "프리렌더는 하되(셸이 뜨면 소프트 404) 크롤러에 광고하지 않는다.",
   ],
+  // 색인 소거(2026-10-16, 사용자 승인): 62일 활성 사용자 8명 미만 — 화면은 유지, noindex + 사이트맵 제외.
+  // 목록은 seo-routes NOINDEX_ROUTES 한 곳이 소유하고 validate-noindex.mjs가 noindex 메타를 확인한다.
+  ...NOINDEX_ROUTES_FOR_GATE.map((route) => [route, "색인 소거 라우트(NOINDEX_ROUTES) — noindex, 사이트맵 제외"]),
 ]);
 
 /**
@@ -391,6 +396,7 @@ function validateRouteSideLists(serves) {
     assert(hinted.has(route), `Sitemap route ${route} has no crawl hint (priority·changefreq) declared`);
   }
   for (const route of hinted) {
+    if (NOINDEX_ROUTES_FOR_GATE.includes(route)) continue; // 색인 소거 라우트는 힌트를 남겨 둔다(복귀 대비)
     assert(
       sitemapRoutes.includes(route),
       `Crawl hint declared for ${route}, which is not in the sitemap — stale entry`
@@ -723,3 +729,7 @@ validateParagraphLength({ distRoot: DIST_DIR });
 // v8c(2026-10-04): 배포되는 CSS·HTML의 글자 크기를 직접 잰다 — 13px 미만은 차트 축 눈금(__scale)·차트 전용 text-[12px]만.
 const builtFontDeclarations = validateBuiltFontSizes({ distRoot: DIST_DIR });
 console.log(`Validated built font sizes — ${builtFontDeclarations} declarations, 0 under 13px outside the chart-axis allowance.`);
+
+// 색인 소거 게이트(2026-10-16): 사이트맵 ⇔ noindex 없음, 사이트맵 밖 self-canonical ⇔ noindex, NOINDEX_ROUTES 전수 확인
+const noindexChecked = validateNoindex({ distRoot: DIST_DIR, siteUrl: "https://shakilabs.com/ott", noindexRoutes: NOINDEX_ROUTES_FOR_GATE });
+console.log(`Validated noindex/sitemap consistency across ${noindexChecked} built pages (${NOINDEX_ROUTES_FOR_GATE.length} noindex routes).`);
