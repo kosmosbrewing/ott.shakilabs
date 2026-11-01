@@ -13,7 +13,7 @@ const items: RelatedServiceItem[] = [
   {
     title: "해외결제 카드 비교",
     description: "해외 구독 결제 시 수수료가 적은 카드를 비교합니다.",
-    href: "/card/overseas-card",
+    href: "/card/overseas-payment",
     icon: CreditCard,
   },
   {

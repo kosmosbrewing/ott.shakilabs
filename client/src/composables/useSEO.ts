@@ -77,7 +77,7 @@ export function useSEO({
         { name: "twitter:title", content: resolvedTitle },
         { name: "twitter:description", content: resolvedDescription },
         ...(currentUrl ? [{ property: "og:url", content: currentUrl }] : []),
-        ...(resolvedNoindex ? [{ name: "robots", content: "noindex,nofollow" }] : []),
+        ...(resolvedNoindex ? [{ name: "robots", content: "noindex,follow" }] : []),
         ...(resolvedOgImage
           ? [
               { property: "og:image", content: resolvedOgImage },

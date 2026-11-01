@@ -187,15 +187,17 @@ watch(
       <!-- 헤더 -->
       <section class="retro-panel overflow-hidden">
         <div class="retro-titlebar">
-          <div class="flex items-center gap-2.5 min-w-0">
+          <!-- 왼쪽(국기·H1)은 줄어들지 않고 오른쪽 배지가 줄바꿈한다. 390px에서 "USD · North America · N위 / 44개국"이
+               shrink-0이면 H1 "미국"의 너비가 0이 돼 화면에서 사라졌다(validate-design-shell 실측). -->
+          <div class="flex items-center gap-2.5 shrink-0">
             <span class="text-[2rem] leading-none shrink-0">{{ flag }}</span>
-            <div class="min-w-0">
+            <div>
               <p class="text-tiny text-muted-foreground/70 leading-none mb-0.5">{{ currentService?.name || serviceSlug }}</p>
               <!-- 도구 H1 공통 20px GmarketSans/700(16px/600 카드 제목 크기였다) -->
               <h1 class="text-h1 font-title leading-snug">{{ countryData.country }}</h1>
             </div>
           </div>
-          <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex flex-wrap items-center justify-end gap-1.5 min-w-0">
             <span class="retro-kbd">{{ countryData.currency }}</span>
             <span class="retro-kbd capitalize">{{ countryData.continent }}</span>
             <span v-if="rank" class="retro-kbd">{{ rank }}위 / {{ priceData.prices.length }}개국</span>
