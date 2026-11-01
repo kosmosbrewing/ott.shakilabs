@@ -63,8 +63,7 @@ export function serviceMeta({ countryCount, surveyDate }) {
 
 export function trendsMeta() {
   return {
-    // 색인 소거(2026-10-16): 62일 사용자 7명 — 화면은 유지, 사이트맵·색인 제외(seo-routes NOINDEX_ROUTES)
-    noindex: true,
+    // 2026-11-01 색인 복귀(seo-routes NOINDEX_ROUTES에서 제거) — 편집형 글이라 사이트맵·색인에 다시 올린다.
     title: toolTitle("유튜브 프리미엄 국가별 가격 격차 · 대륙별 평균·환율 영향"),
     description:
       "유튜브 프리미엄 국가별 구독료를 같은 시점 기준으로 비교합니다. 요금 낮은 순·한국 대비 차이 순위, " +

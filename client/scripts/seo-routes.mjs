@@ -42,10 +42,10 @@ export function getCountryEntries() {
 }
 
 
-// 색인 소거(2026-10-16, 사용자 승인): 62일 활성 사용자 8명 미만 + 네이버 TOP 30 밖인 계산기·가이드.
-// 도구는 그대로 쓰이고(내부 링크 유지) 사이트맵·색인에서만 뺀다. 네이버 클릭이 월 10+ 되면 다시 넣는다.
-// validate-noindex.mjs가 사이트맵 ⇔ noindex 없음 / 사이트맵 밖 self-canonical ⇔ noindex를 빌드마다 대조한다.
-export const NOINDEX_ROUTES = ["/youtube-premium/trends"];
+// 색인 소거 목록. validate-noindex.mjs가 사이트맵 ⇔ noindex 없음 / 사이트맵 밖 self-canonical ⇔ noindex를 빌드마다 대조한다.
+// 2026-11-01 복귀: /youtube-premium/trends는 이 사이트의 유일한 편집형 글(44개국 전수 분석, 자기참조 canonical)이고
+// 10월 조회 18로 소거 기준(월 10)을 넘겼다. 10-16 소거 뒤 서치콘솔 색인은 1페이지(홈)뿐이라 편집형 글을 다시 내놓는다.
+export const NOINDEX_ROUTES = [];
 
 export function getStaticRoutes() {
   return [

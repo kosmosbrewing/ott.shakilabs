@@ -307,7 +307,7 @@ function buildRouteHtml(templateHtml, route, countryMap, seed) {
   html = updateMetaTag(html, 'name="twitter:description"', meta.description);
   html = updateMetaTag(html, 'name="twitter:image"', ogImage);
   if (meta.noindex) {
-    html = updateMetaTag(html, 'name="robots"', "noindex,nofollow");
+    html = updateMetaTag(html, 'name="robots"', "noindex,follow");
   }
   html = injectJsonLd(html, meta.jsonLd);
 
