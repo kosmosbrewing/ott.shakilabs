@@ -48,6 +48,10 @@ const data = normalizeKrwSeed(RAW_SEED);
 
 const TOOL_ROUTES = ["/", "/youtube-premium", "/youtube-premium/trends"];
 const MIN_BODY_CHARS = 5000;
+// 2026-11-02 허브 개편: "/"는 설명 에세이가 아니라 싼 순 10·비싼 순 5 표 + 데이터 관찰 + FAQ인 인덱스다.
+// 5,000자 하한은 옛 에세이형 허브 기준이라 허브만 4,500자(표의 수치·국가명 포함 실측 4,850). 도구 라우트는 그대로.
+const HUB_MIN_BODY_CHARS = 4500;
+const BODY_FLOORS = TOOL_ROUTES.map((route) => [route, route === "/" ? HUB_MIN_BODY_CHARS : MIN_BODY_CHARS]);
 const MAX_PAIR_SIMILARITY = 0.5;
 
 const stripTags = (html) =>
@@ -774,8 +778,8 @@ describe("정직성", () => {
 // 6) 분량과 중복 — 세 페이지가 같은 데이터를 쓰므로 여기가 관건이다
 // =========================================================================
 describe("분량과 중복", () => {
-  it.each(TOOL_ROUTES)("%s 본문이 %d자 이상", (route) => {
-    expect(countChars(route)).toBeGreaterThanOrEqual(MIN_BODY_CHARS);
+  it.each(BODY_FLOORS)("%s 본문이 %d자 이상", (route, floor) => {
+    expect(countChars(route)).toBeGreaterThanOrEqual(floor);
   });
 
   it("세 페이지 전 쌍의 유사도가 마스킹 전후 모두 0.5 미만", () => {
