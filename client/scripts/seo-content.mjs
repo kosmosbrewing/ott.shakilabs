@@ -1357,26 +1357,50 @@ function buildLandingContent() {
   const services = loadServices().services || [];
   const rate = Number(data.krwRate);
 
-  // 비교할 수 있는 서비스만 싣는다. 비활성 서비스를 "준비 중" 행으로 늘어놓으면 허브가
-  // 없는 기능의 목록이 된다(외부 점검 2026-09-27) — 등록부(data/services.json)는 그대로 둔다.
-  const serviceRowsHtml = services
-    .filter((service) => service.active)
-    .map((service) => {
-      const planNames = (service.plans || []).map((plan) => plan.name).join(" · ");
-      const nameCell = `<a href="/ott/${service.slug}">${service.name}</a>`;
-      const coverage = `${stats.countryCount}개국`;
-      const status = '<strong class="sp-down">비교 가능</strong>';
+  // 싼 순 상위 10 — /youtube-premium의 20개국 표와 같은 시드·같은 원화 규칙(KRW는 현지 정가)이지만 10행만, 한국 행은 강조.
+  const landingRanked = data.prices
+    .map((p) => ({
+      country: p.country,
+      code: String(p.countryCode || "").toLowerCase(),
+      krw: String(p.currency || "").toUpperCase() === "KRW" ? p.plans?.individual?.monthly : p.converted?.individual?.krw,
+    }))
+    .filter((p) => Number.isFinite(p.krw) && p.krw > 0)
+    .sort((a, b) => a.krw - b.krw);
+  const landingKrRank = landingRanked.findIndex((p) => p.code === "kr") + 1;
+  const landingTopRowsHtml = landingRanked
+    .slice(0, 10)
+    .map((p, index) => {
+      const vsKr = stats.krKrw ? `${((p.krw / stats.krKrw - 1) * 100).toFixed(1)}%` : "-";
       return `<tr>
-          <td class="${TD}">${nameCell}</td>
-          <td class="${TD}">${status}</td>
-          <td class="${TD}">${coverage}</td>
-          <td class="${TD}">${planNames}</td>
+          <td class="${TD}">${index + 1}위</td>
+          <td class="${TD}"><a href="/ott/youtube-premium/${p.code}">${p.country}</a></td>
+          <td class="${TD}">${formatKrw(p.krw)}</td>
+          <td class="${TD}"><strong class="sp-down">${vsKr}</strong></td>
+        </tr>`;
+    })
+    .join("");
+
+  // 비싼 순 상위 5 — 같은 정렬의 반대쪽 끝. "가장 비싼 나라는 어디인가"는 허브 유입의 두 번째 질문이라 표로 답한다.
+  const landingPriciestRowsHtml = landingRanked
+    .slice(-5)
+    .reverse()
+    .map((p, index) => {
+      const vsKr = stats.krKrw ? `+${((p.krw / stats.krKrw - 1) * 100).toFixed(1)}%` : "-";
+      return `<tr>
+          <td class="${TD}">${index + 1}위</td>
+          <td class="${TD}"><a href="/ott/youtube-premium/${p.code}">${p.country}</a></td>
+          <td class="${TD}">${formatKrw(p.krw)}</td>
+          <td class="${TD}"><strong class="sp-up">${vsKr}</strong></td>
         </tr>`;
     })
     .join("");
 
   const spreadText = stats.spread ? `${stats.spread.toFixed(1)}배` : "-";
 
+  // 허브 개편(11월): "비교할 수 있는 서비스" 한 줄짜리 표, "다루지 않는 것", "환산 방식", "수록 데이터", "용어" 등
+  // 이 페이지가 무엇을 안 하는지 설명하던 1,500자를 뺐다(GA4 28일 허브 조회 40, 이탈률 75%). 허브는 답으로 시작한다 —
+  // 싼 순 상위 10·비싼 순 5와 한국의 자리, 그리고 전체 표로 가는 길. 데이터 파생 관찰·FAQ는 그대로 둔다(고유 본문).
+  // 날짜를 HTML 주석에 쓰지 않는다 — validate-static-output이 본문의 날짜를 시드 출처 날짜와 대조한다.
   return [{ id: "landing", live: false, html: `
       <h1 class="${H1}">OTT 구독료 국가별 가격 비교</h1>
 
@@ -1386,94 +1410,45 @@ function buildLandingContent() {
         같은 OTT 서비스라도 어느 나라 계정으로 결제하느냐에 따라 청구되는 금액이 크게 달라집니다.
       </p>
 
-      <h2 class="${H2}">비교할 수 있는 서비스</h2>
+      <h2 class="${H2}">싼 순 상위 10개국과 한국의 자리</h2>
       <div class="sp-table-scroll"><table class="${TABLE}">
         <thead>
           <tr>
-            <th class="${TH}">서비스</th>
-            <th class="${TH}">상태</th>
-            <th class="${TH}">수록 국가</th>
-            <th class="${TH}">요금제 구성</th>
+            <th class="${TH}">순위</th>
+            <th class="${TH}">국가</th>
+            <th class="${TH}">개인 플랜(원화)</th>
+            <th class="${TH}">한국 대비</th>
           </tr>
         </thead>
-        <tbody>${serviceRowsHtml}</tbody>
+        <tbody>${landingTopRowsHtml}</tbody>
       </table></div>
-
       <p class="${P}">
-        이곳은 그 차이를 <strong>같은 기준으로 환산해</strong> 확인할 수 있도록 만든 비교 서비스의 시작 페이지입니다.
-        어떤 서비스를 비교할 수 있는지, 가격을 어떤 방식으로 환산하는지, 어느 페이지부터 보면 되는지를 안내합니다.
+        한국(${stats.krKrw != null ? formatKrw(stats.krKrw) : "-"})은 ${stats.pricedCount}개국 중 싼 순 <strong>${landingKrRank}위</strong>,
+        가장 비싼 ${stats.priciest ? `${stats.priciest.country} ${formatKrw(stats.priciest.krw)}` : "-"}과는 ${spreadText} 차이입니다.
+        <a href="/ott/youtube-premium">${stats.pricedCount}개국 전체 순위표</a>에서 요금제별 정렬·국가 상세로 이어집니다.
       </p>
-
-      <p class="${P}">
-        나라별 요금표 자체가 필요하다면 곧바로 <a href="/ott/youtube-premium">유튜브 프리미엄 전체 가격 비교</a>로 이동하세요.
-        이 페이지는 <em>비교 기준과 데이터 출처</em>를 설명하는 안내 페이지이며, 순위표는 각 서비스 페이지에 있습니다.
-      </p>
-
-      <h2 class="${H2}">이 비교가 다루지 않는 것</h2>
-      <ul class="${UL}">
-        <li class="${LI}"><strong>다른 구독 서비스</strong> — ${services.filter((service) => !service.active).map((service) => service.name).join("·")}는 서비스 등록부에는 있지만
-          광고형·연간 결제·학생 요금처럼 요금제 구성이 서비스와 나라마다 달라 "개인 플랜"끼리 한 줄에 세울 수 없습니다. 그래서 순위표에 싣지 않습니다.</li>
-        <li class="${LI}"><strong>실시간 가격</strong> — 요금은 조사일(${data.lastUpdated}) 기준 정가입니다. 그 뒤 바뀐 요금은 다음 조사 전까지 반영되지 않고,
-          환율만 기준일(${data.exchangeRateDate})에 맞춰 갱신합니다.</li>
-        <li class="${LI}"><strong>해외 요금으로 가입하는 방법</strong> — 요금은 결제 수단 발행 국가와 계정 청구 국가로 정해지고,
-          대부분의 약관은 실제 거주 국가의 요금을 요구합니다. 다른 나라 요금으로 가입하는 방법은 안내하지 않습니다.</li>
-      </ul>
-
-      <h2 class="${H2}">가격을 환산하는 방식</h2>
-      <p class="${P}">
-        모든 순위는 <strong>개인(프리미엄) 플랜의 월 요금</strong>을 기준으로 계산합니다.
-        현지 통화 표시가를 먼저 수집하고, 기준 통화인 ${data.baseCurrency}로 환산한 뒤 다시 원화로 환산해 한 줄에 나란히 놓습니다.
-        연 단위로만 판매되는 요금제는 월 환산값을 별도로 표기하며, 표시가에 부가가치세가 포함되는지는 국가 제도에 따라 다릅니다.
-      </p>
-      <ul class="${UL}">
-        <li class="${LI}"><strong>가격 기준일</strong> — ${getSurveyProvenance()} (요금 자체는 사람이 조사해 수동 반영)</li>
-        <li class="${LI}"><strong>환율 기준일</strong> — ${data.exchangeRateDate} (공개 환율 API로 자동 갱신)</li>
-        <li class="${LI}"><strong>적용 환율</strong> — 1 ${data.baseCurrency} = ${Math.round(rate).toLocaleString("ko-KR")}원</li>
-        <li class="${LI}"><strong>기준 국가</strong> — ${data.baseCountry === "KR" ? "한국" : data.baseCountry} (절약률은 한국 가격 대비로 계산)</li>
-      </ul>
-
-      <h2 class="${H2}">현재 수록된 데이터</h2>
+      <h3 class="${H3}">비싼 순 상위 5개국</h3>
       <div class="sp-table-scroll"><table class="${TABLE}">
-        <tbody>
+        <thead>
           <tr>
-            <th class="${TH}">수록 국가</th>
-            <td class="${TD}">${stats.countryCount}개국 (${stats.continentCount}개 대륙)</td>
+            <th class="${TH}">순위</th>
+            <th class="${TH}">국가</th>
+            <th class="${TH}">개인 플랜(원화)</th>
+            <th class="${TH}">한국 대비</th>
           </tr>
-          <tr>
-            <th class="${TH}">한국 개인 플랜</th>
-            <td class="${TD}">${stats.krKrw != null ? formatKrw(stats.krKrw) : "-"}</td>
-          </tr>
-          <tr>
-            <th class="${TH}">가장 저렴한 국가</th>
-            <td class="${TD}">${stats.cheapest ? `${stats.cheapest.country} — ${formatKrw(stats.cheapest.krw)}` : "-"}</td>
-          </tr>
-          <tr>
-            <th class="${TH}">가장 비싼 국가</th>
-            <td class="${TD}">${stats.priciest ? `${stats.priciest.country} — ${formatKrw(stats.priciest.krw)}` : "-"}</td>
-          </tr>
-          <tr>
-            <th class="${TH}">최저-최고 격차</th>
-            <td class="${TD}">${spreadText}</td>
-          </tr>
-        </tbody>
+        </thead>
+        <tbody>${landingPriciestRowsHtml}</tbody>
       </table></div>
-
-      <h2 class="${H2}">요금제와 용어</h2>
       <ul class="${UL}">
-        <li class="${LI}"><strong>개인(프리미엄)</strong> — 1인 사용 기본 플랜. 모든 순위·절약률의 기준값입니다.</li>
-        <li class="${LI}"><strong>패밀리</strong> — 같은 가구 구성원이 함께 쓰는 플랜. 인원 한도는 서비스 약관을 따릅니다.</li>
-        <li class="${LI}"><strong>듀오</strong> — 2인용 플랜. 제공 국가가 제한적이라 빈칸인 국가가 많습니다.</li>
-        <li class="${LI}"><strong>라이트</strong> — 음악 서비스가 빠진 저가 플랜. 제공 국가에서만 표기됩니다.</li>
-        <li class="${LI}"><strong>청구 국가</strong> — 결제 수단 발행 국가와 계정 청구 주소로 정해지는 값. 접속 위치가 아니라 이 값이 가격을 결정합니다.</li>
+        <li class="${LI}">기준: 개인(프리미엄) 플랜 월 요금. 요금 조사 ${getSurveyProvenance()}, 환율 ${data.exchangeRateDate} 기준 1 ${data.baseCurrency} = ${Math.round(rate).toLocaleString("ko-KR")}원.</li>
+        <li class="${LI}">요금은 결제 수단 발행 국가와 계정 청구 국가로 정해지며, 약관은 실제 거주 국가의 요금을 요구합니다. 다른 나라 요금으로 가입하는 방법은 안내하지 않습니다.</li>
       </ul>
 
 ${buildLandingDatasetSection()}
-      <h2 class="${H2}">어디부터 보면 되나요</h2>
+      <h2 class="${H2}">이어서 보기</h2>
       <ul class="${UL}">
-        <li class="${LI}"><a href="/ott/youtube-premium">전체 국가 가격 비교</a> — ${stats.pricedCount}개국 순위표와 정렬·필터</li>
-        <li class="${LI}"><a href="/ott/youtube-premium/trends">국가 간 가격 격차</a> — 환율이 순위를 얼마나 흔드는지까지</li>
-        <li class="${LI}"><a href="/ott/youtube-premium/kr">한국 가격 상세</a> — 기준 국가의 요금제별 표시가</li>
-        <li class="${LI}"><a href="/ott/about">서비스 소개와 데이터 출처</a> — 수집·검증 절차</li>
+        <li class="${LI}"><a href="/ott/youtube-premium/trends">국가 간 가격 격차</a> — 환율이 순위를 얼마나 흔드는지</li>
+        <li class="${LI}"><a href="/ott/youtube-premium/kr">한국 가격 상세</a> — 요금제별 표시가</li>
       </ul>
 
       <h2 class="${H2}">자주 묻는 질문 (FAQ)</h2>
