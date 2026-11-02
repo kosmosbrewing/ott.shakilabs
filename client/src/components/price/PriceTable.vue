@@ -23,8 +23,10 @@ const baseKrw = computed<number | null>(() => {
 
 <template>
   <div>
+    <!-- 640px 미만은 현지 가격·달러 열이 이미 숨어 3열(국가·원화·절약률)이라 하한 없이 들어간다.
+         620px 하한이 390px에서 +303px 가로 스크롤을 만들었다(2026-11 UI 감사). -->
     <Table
-      class="min-w-[620px]"
+      class="sm:min-w-[620px]"
       wrapper-class="max-h-[82vh] overflow-auto"
       aria-label="국가별 구독 가격 비교"
       tabindex="0"
